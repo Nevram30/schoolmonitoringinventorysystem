@@ -19,18 +19,23 @@ enum Role {
     admin
     faculty
     staff
+    student
 
     @@map("user_role")
 }
 
 model User {
-    id       Int    @id @default(autoincrement())
-    name     String @db.VarChar(50)
-    username String @unique @db.VarChar(50)
-    password String @db.VarChar(255)
-    role     Role   @default(admin)
+    id        Int     @id @default(autoincrement())
+    name      String  @db.VarChar(50)
+    username  String  @unique @db.VarChar(50)
+    password  String  @db.VarChar(255)
+    /// School e-mail address. Nullable because accounts created before this column exists have none.
+    email     String? @unique @db.VarChar(100)
+    /// School ID number of the faculty / staff / admin the account belongs to.
+    id_number String? @unique @db.VarChar(50)
+    role      Role    @default(admin)
     /// 1=active, 2=inactive
-    status   Int    @default(1)
+    status    Int     @default(1)
 
     @@map("user")
 }

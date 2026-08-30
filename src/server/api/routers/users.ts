@@ -6,7 +6,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 const insensitive = { mode: "insensitive" } as const;
 
 // Map type number to role string
-const getRole = (type: number): "admin" | "faculty" | "staff" => {
+const getRole = (type: number): "admin" | "faculty" | "staff" | "student" => {
   switch (type) {
     case 1:
       return "admin";
@@ -14,6 +14,8 @@ const getRole = (type: number): "admin" | "faculty" | "staff" => {
       return "faculty";
     case 3:
       return "staff";
+    case 4:
+      return "student";
     default:
       return "staff";
   }
@@ -39,6 +41,8 @@ export const usersRouter = createTRPCRouter({
               OR: [
                 { name: { contains: search, ...insensitive } },
                 { username: { contains: search, ...insensitive } },
+                { email: { contains: search, ...insensitive } },
+                { id_number: { contains: search, ...insensitive } },
               ],
             }
           : {};
@@ -51,6 +55,8 @@ export const usersRouter = createTRPCRouter({
               id: true,
               name: true,
               username: true,
+              email: true,
+              id_number: true,
               role: true,
               status: true,
             },
@@ -93,7 +99,10 @@ export const usersRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         username: z.string(),
-        password: z.string(),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        email: z.string().email(),
+        id_number: z.string().min(1),
+        role: z.enum(["admin", "faculty", "staff", "student"]).optional(),
         type: z.union([z.string(), z.number()]).nullish(),
       })
     )
@@ -108,9 +117,28 @@ export const usersRouter = createTRPCRouter({
           return { success: false as const, error: "Username already exists" };
         }
 
+        // E-mail and ID number are unique too, so report those clearly rather
+        // than letting the insert fail with a constraint error.
+        const existingEmail = await ctx.db.user.findUnique({
+          where: { email: input.email },
+        });
+
+        if (existingEmail) {
+          return { success: false as const, error: "Email address already exists" };
+        }
+
+        const existingIdNumber = await ctx.db.user.findUnique({
+          where: { id_number: input.id_number },
+        });
+
+        if (existingIdNumber) {
+          return { success: false as const, error: "ID number already exists" };
+        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(input.password, 10);
 
+        // Callers send `role` directly; `type` is the older numeric form.
         const userType = parseInt(String(input.type)) || 3; // Default to staff (3)
 
         const newUser = await ctx.db.user.create({
@@ -118,7 +146,9 @@ export const usersRouter = createTRPCRouter({
             name: input.name,
             username: input.username,
             password: hashedPassword,
-            role: getRole(userType),
+            email: input.email,
+            id_number: input.id_number,
+            role: input.role ?? getRole(userType),
             status: 1, // Active by default
           },
         });
@@ -143,6 +173,83 @@ export const usersRouter = createTRPCRouter({
             error instanceof Error ? error.message : "Unknown error"
           }`,
         };
+      }
+    }),
+
+  // PATCH /api/users/[id]
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+        username: z.string(),
+        email: z.string().email(),
+        id_number: z.string().min(1),
+        role: z.enum(["admin", "faculty", "staff", "student"]),
+        status: z.number(),
+        // Omitted (or empty) leaves the existing password alone.
+        password: z
+          .string()
+          .min(8, "Password must be at least 8 characters")
+          .optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const user = await ctx.db.user.findUnique({ where: { id: input.id } });
+
+        if (!user) {
+          return { success: false as const, error: "User not found" };
+        }
+
+        // The three unique columns, each ignoring the row being edited.
+        const clash = await ctx.db.user.findFirst({
+          where: {
+            id: { not: input.id },
+            OR: [
+              { username: input.username },
+              { email: input.email },
+              { id_number: input.id_number },
+            ],
+          },
+        });
+
+        if (clash) {
+          const field =
+            clash.username === input.username
+              ? "Username"
+              : clash.email === input.email
+                ? "Email address"
+                : "ID number";
+          return { success: false as const, error: `${field} already exists` };
+        }
+
+        const updated = await ctx.db.user.update({
+          where: { id: input.id },
+          data: {
+            name: input.name,
+            username: input.username,
+            email: input.email,
+            id_number: input.id_number,
+            role: input.role,
+            status: input.status,
+            ...(input.password
+              ? { password: await bcrypt.hash(input.password, 10) }
+              : {}),
+          },
+        });
+
+        // Return user without password
+        const { password, ...userResponse } = updated;
+
+        return {
+          success: true as const,
+          data: userResponse,
+          message: "User updated successfully",
+        };
+      } catch (error) {
+        console.error("Update user error:", error);
+        return { success: false as const, error: "Failed to update user" };
       }
     }),
 

@@ -8,7 +8,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { useCallback, useState, useEffect, ComponentType } from 'react'
 import FullScreenLoader from '@/components/ui-components/loader.screen'
 
-type UserRole = 'admin' | 'faculty' | 'staff'
+type UserRole = 'admin' | 'faculty' | 'staff' | 'student'
 
 interface UseAuthOptions {
   role?: UserRole

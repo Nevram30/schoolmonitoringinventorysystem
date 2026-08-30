@@ -16,7 +16,13 @@ export default function HomePage() {
     // Already signed in — send the user straight to their own dashboard.
     const role = session?.user?.role;
     const page =
-      role === 'admin' ? 'admin' : role === 'faculty' ? 'faculty' : 'staff';
+      role === 'admin'
+        ? 'admin'
+        : role === 'faculty'
+          ? 'faculty'
+          : role === 'student'
+            ? 'student'
+            : 'staff';
 
     router.push(`/${page}/dashboard`);
   }, [session, status, router]);

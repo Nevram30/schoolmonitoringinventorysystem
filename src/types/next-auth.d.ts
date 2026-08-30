@@ -6,7 +6,7 @@ declare module "next-auth" {
       id: number
       name: string
       username: string
-      role: 'admin' | 'faculty' | 'staff'
+      role: 'admin' | 'faculty' | 'staff' | 'student'
       status: number
     }
   }
@@ -15,7 +15,7 @@ declare module "next-auth" {
     id: number
     name: string
     username: string
-    role: 'admin' | 'faculty' | 'staff'
+    role: 'admin' | 'faculty' | 'staff' | 'student'
     status: number
     accessToken: string
   }
@@ -27,7 +27,7 @@ declare module "next-auth/jwt" {
       id: number
       name: string
       username: string
-      role: 'admin' | 'faculty' | 'staff'
+      role: 'admin' | 'faculty' | 'staff' | 'student'
       status: number
     }
   }

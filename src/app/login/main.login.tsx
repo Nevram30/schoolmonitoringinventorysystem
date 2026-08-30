@@ -23,7 +23,13 @@ const MainContent: React.FC<MainContentProps> = ({
   }
 
   const page =
-    role === 'admin' ? 'admin' : role === 'faculty' ? 'faculty' : 'staff'
+    role === 'admin'
+      ? 'admin'
+      : role === 'faculty'
+        ? 'faculty'
+        : role === 'student'
+          ? 'student'
+          : 'staff'
 
   if (status === 'authenticated') {
     redirect(`/${page}/dashboard`)
