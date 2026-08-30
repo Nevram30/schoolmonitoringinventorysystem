@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
 import { trpcClient } from '@/trpc/client';
 
@@ -71,7 +71,7 @@ export default function UsersPage() {
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [deleting, setDeleting] = useState<number | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     limit: 10,
@@ -276,27 +276,36 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async (userId: number, userName: string) => {
-    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+  const isSelf = (user: User) => Number(session?.user?.id) === user.id;
+
+  /** Accounts are deactivated rather than deleted, so their history survives. */
+  const handleToggleStatus = async (user: User) => {
+    const nextStatus = user.status === 1 ? 2 : 1;
+    const action = nextStatus === 2 ? 'deactivate' : 'activate';
+
+    if (!confirm(`Are you sure you want to ${action} user "${user.name}"?`)) {
       return;
     }
 
-    setDeleting(userId);
+    setUpdatingStatus(user.id);
 
     try {
-      const data = await trpcClient.users.delete.mutate({ id: userId });
+      const data = await trpcClient.users.setStatus.mutate({
+        id: user.id,
+        status: nextStatus
+      });
 
       if (data.success) {
         fetchUsers(); // Refresh the list
-        alert('User deleted successfully!');
+        alert(data.message);
       } else {
-        alert('Error deleting user: ' + data.error);
+        alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      console.error('Error deleting user:', error);
-      alert('Error deleting user');
+      console.error('Error updating user status:', error);
+      alert('Error updating user status');
     } finally {
-      setDeleting(null);
+      setUpdatingStatus(null);
     }
   };
 
@@ -436,17 +445,23 @@ export default function UsersPage() {
                           <span className="ml-1">Edit</span>
                         </button>
                         <button
-                          onClick={() => handleDelete(user.id, user.name)}
-                          disabled={deleting === user.id || parseInt(session?.user?.role || '') === user.id}
-                          className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleToggleStatus(user)}
+                          disabled={updatingStatus === user.id || isSelf(user)}
+                          title={isSelf(user) ? 'You cannot deactivate your own account' : undefined}
+                          className={`inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${user.status === 1
+                            ? 'text-red-700 bg-red-100 hover:bg-red-200 focus:ring-red-500'
+                            : 'text-green-700 bg-green-100 hover:bg-green-200 focus:ring-green-500'
+                            }`}
                         >
-                          {deleting === user.id ? (
-                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-red-600"></div>
+                          {updatingStatus === user.id ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></div>
+                          ) : user.status === 1 ? (
+                            <NoSymbolIcon className="h-3 w-3" />
                           ) : (
-                            <TrashIcon className="h-3 w-3" />
+                            <CheckCircleIcon className="h-3 w-3" />
                           )}
                           <span className="ml-1">
-                            {parseInt(session?.user?.role || '') === user.id ? 'You' : 'Delete'}
+                            {isSelf(user) ? 'You' : user.status === 1 ? 'Deactivate' : 'Activate'}
                           </span>
                         </button>
                       </td>

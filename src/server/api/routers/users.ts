@@ -253,6 +253,44 @@ export const usersRouter = createTRPCRouter({
       }
     }),
 
+  // Deactivate / reactivate an account. Used by the Actions column in place of
+  // deleting, so borrow and return history stays intact.
+  setStatus: protectedProcedure
+    .input(z.object({ id: z.number(), status: z.union([z.literal(1), z.literal(2)]) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Deactivating your own account would lock you out on the next load.
+        if (input.status === 2 && Number(ctx.session.user?.id) === input.id) {
+          return {
+            success: false as const,
+            error: "You cannot deactivate your own account",
+          };
+        }
+
+        const user = await ctx.db.user.findUnique({ where: { id: input.id } });
+
+        if (!user) {
+          return { success: false as const, error: "User not found" };
+        }
+
+        await ctx.db.user.update({
+          where: { id: input.id },
+          data: { status: input.status },
+        });
+
+        return {
+          success: true as const,
+          message:
+            input.status === 1
+              ? "User activated successfully"
+              : "User deactivated successfully",
+        };
+      } catch (error) {
+        console.error("Set user status error:", error);
+        return { success: false as const, error: "Failed to update user status" };
+      }
+    }),
+
   // DELETE /api/users?id=
   //
   // NOTE: carried over verbatim from the Sequelize route, including the admin check below.
