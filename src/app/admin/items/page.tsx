@@ -67,8 +67,9 @@ export default function ItemsPage() {
     total: 0,
     totalPages: 0
   });
+  // Preview of the device ID the server will assign to the next item.
+  const [nextDeviceId, setNextDeviceId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    i_deviceID: '',
     i_model: '',
     i_category: '',
     i_brand: '',
@@ -154,6 +155,20 @@ export default function ItemsPage() {
     });
   };
 
+
+  /** The server assigns the real ID on create; this is only what to show meanwhile. */
+  const openAddModal = async () => {
+    setNextDeviceId(null);
+    setShowAddModal(true);
+
+    try {
+      const result = await trpcClient.items.nextDeviceID.query();
+      setNextDeviceId(result.success ? result.data : 'Unavailable');
+    } catch (error) {
+      console.error('Error generating device ID:', error);
+      setNextDeviceId('Unavailable');
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,7 +264,6 @@ export default function ItemsPage() {
       if (data.success) {
         setShowAddModal(false);
         setFormData({
-          i_deviceID: '',
           i_model: '',
           i_category: '',
           i_brand: '',
@@ -563,7 +577,7 @@ export default function ItemsPage() {
           <div className="mt-4 sm:mt-0">
             <button
               type="button"
-              onClick={() => setShowAddModal(true)}
+              onClick={openAddModal}
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
@@ -831,12 +845,13 @@ export default function ItemsPage() {
                       <label className="block text-sm font-medium text-gray-700">Device ID</label>
                       <input
                         type="text"
-                        name="i_deviceID"
-                        value={formData.i_deviceID}
-                        onChange={handleInputChange}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        value={nextDeviceId ?? 'Generating...'}
+                        readOnly
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-gray-500 focus:outline-none"
                       />
+                      <p className="mt-1 text-xs text-gray-500">
+                        Assigned automatically (000001-999999).
+                      </p>
                     </div>
 
                     <div>

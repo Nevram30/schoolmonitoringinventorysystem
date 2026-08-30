@@ -9,6 +9,34 @@ import { serialize } from "@/server/api/serialize";
 
 const insensitive = { mode: "insensitive" } as const;
 
+/** Device IDs are system-generated as zero-padded numbers in this range. */
+const DEVICE_ID_MAX = 999999;
+const DEVICE_ID_PATTERN = /^\d{6}$/;
+
+/**
+ * The next free device ID, or null once the range is exhausted. Rows created
+ * before IDs were generated may hold any string, so only strictly numeric
+ * 000001-999999 values count towards the sequence.
+ */
+const computeNextDeviceId = (existing: string[]) => {
+  let highest = 0;
+  for (const id of existing) {
+    if (!DEVICE_ID_PATTERN.test(id)) continue;
+    const value = Number(id);
+    if (value > highest) highest = value;
+  }
+
+  const next = highest + 1;
+  return next > DEVICE_ID_MAX ? null : String(next).padStart(6, "0");
+};
+
+/** Prisma reports a broken unique constraint (a device ID race) as P2002. */
+const isUniqueViolation = (error: unknown) =>
+  typeof error === "object" &&
+  error !== null &&
+  "code" in error &&
+  (error as { code?: unknown }).code === "P2002";
+
 export const itemsRouter = createTRPCRouter({
   // GET /api/items
   //
@@ -98,11 +126,27 @@ export const itemsRouter = createTRPCRouter({
       }
     }),
 
+  // The device ID the next created item will get, for previewing in the UI.
+  nextDeviceID: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const rows = await ctx.db.item.findMany({ select: { i_deviceID: true } });
+      const deviceId = computeNextDeviceId(rows.map((row) => row.i_deviceID));
+
+      if (!deviceId) {
+        return { success: false as const, error: "Device ID range exhausted" };
+      }
+
+      return { success: true as const, data: deviceId };
+    } catch (error) {
+      console.error("Next device ID error:", error);
+      return { success: false as const, error: "Failed to generate a device ID" };
+    }
+  }),
+
   // POST /api/items
   create: protectedProcedure
     .input(
       z.object({
-        i_deviceID: z.string(),
         i_model: z.string(),
         i_category: z.string(),
         i_brand: z.string(),
@@ -116,32 +160,55 @@ export const itemsRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      try {
-        const newItem = await ctx.db.item.create({
-          data: {
-            i_deviceID: input.i_deviceID,
-            i_model: input.i_model,
-            i_category: input.i_category,
-            i_brand: input.i_brand,
-            i_description: input.i_description,
-            i_type: input.i_type,
-            item_rawstock: input.item_rawstock,
-            i_status: input.i_status,
-            i_mr: input.i_mr,
-            i_price: input.i_price,
-            i_photo: input.i_photo || "default.jpg",
-          },
-        });
+      // Two admins adding at once can compute the same next ID; the unique
+      // constraint rejects the loser, so recompute and try again.
+      for (let attempt = 0; attempt < 5; attempt++) {
+        try {
+          const rows = await ctx.db.item.findMany({
+            select: { i_deviceID: true },
+          });
+          const deviceId = computeNextDeviceId(rows.map((row) => row.i_deviceID));
 
-        return {
-          success: true as const,
-          data: serialize(newItem),
-          message: "Item created successfully",
-        };
-      } catch (error) {
-        console.error("Create item error:", error);
-        return { success: false as const, error: "Failed to create item" };
+          if (!deviceId) {
+            return {
+              success: false as const,
+              error: "Device ID range exhausted (000001-999999)",
+            };
+          }
+
+          const newItem = await ctx.db.item.create({
+            data: {
+              i_deviceID: deviceId,
+              i_model: input.i_model,
+              i_category: input.i_category,
+              i_brand: input.i_brand,
+              i_description: input.i_description,
+              i_type: input.i_type,
+              item_rawstock: input.item_rawstock,
+              i_status: input.i_status,
+              i_mr: input.i_mr,
+              i_price: input.i_price,
+              i_photo: input.i_photo || "default.jpg",
+            },
+          });
+
+          return {
+            success: true as const,
+            data: serialize(newItem),
+            message: "Item created successfully",
+          };
+        } catch (error) {
+          if (isUniqueViolation(error)) continue;
+
+          console.error("Create item error:", error);
+          return { success: false as const, error: "Failed to create item" };
+        }
       }
+
+      return {
+        success: false as const,
+        error: "Failed to assign a device ID. Please try again.",
+      };
     }),
 
   // PATCH /api/items/[id]
