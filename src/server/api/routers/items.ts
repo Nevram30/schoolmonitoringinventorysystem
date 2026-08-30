@@ -20,24 +20,29 @@ export const itemsRouter = createTRPCRouter({
         page: z.number().default(1),
         limit: z.number().default(10),
         search: z.string().default(""),
+        // Exact `i_category` match; "" means "every category".
+        category: z.string().default(""),
       })
     )
     .query(async ({ ctx, input }) => {
       try {
-        const { page, limit, search } = input;
+        const { page, limit, search, category } = input;
         const offset = (page - 1) * limit;
 
-        // Add search filter if provided
-        const where = search
-          ? {
-              OR: [
-                { i_model: { contains: search, ...insensitive } },
-                { i_category: { contains: search, ...insensitive } },
-                { i_brand: { contains: search, ...insensitive } },
-                { i_description: { contains: search, ...insensitive } },
-              ],
-            }
-          : {};
+        // Add search / category filters if provided
+        const where = {
+          ...(search
+            ? {
+                OR: [
+                  { i_model: { contains: search, ...insensitive } },
+                  { i_category: { contains: search, ...insensitive } },
+                  { i_brand: { contains: search, ...insensitive } },
+                  { i_description: { contains: search, ...insensitive } },
+                ],
+              }
+            : {}),
+          ...(category ? { i_category: { equals: category, ...insensitive } } : {}),
+        };
 
         const [rows, count] = await ctx.db.$transaction([
           ctx.db.item.findMany({

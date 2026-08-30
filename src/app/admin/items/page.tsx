@@ -39,10 +39,15 @@ interface Pagination {
   totalPages: number;
 }
 
+/** The categories an item can be filed under; stored as-is in `i_category`. */
+const ITEM_CATEGORIES = ['School Supplies', 'Electronic Devices'];
+
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  // '' = all categories.
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState<{
@@ -113,6 +118,7 @@ export default function ItemsPage() {
         page: pagination.page,
         limit: pagination.limit,
         search,
+        category: categoryFilter,
       });
 
       if (data.success) {
@@ -124,7 +130,7 @@ export default function ItemsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search]);
+  }, [pagination.page, pagination.limit, search, categoryFilter]);
 
   useEffect(() => {
     fetchItems();
@@ -584,6 +590,22 @@ export default function ItemsPage() {
                   />
                 </div>
               </div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => {
+                  setCategoryFilter(e.target.value);
+                  setPagination(prev => ({ ...prev, page: 1 }));
+                }}
+                className="block py-2 pl-3 pr-8 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                aria-label="Filter by category"
+              >
+                <option value="">All Categories</option>
+                {ITEM_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
               <button
                 type="submit"
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -639,9 +661,6 @@ export default function ItemsPage() {
                         Category
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Brand
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Stock
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -678,9 +697,6 @@ export default function ItemsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {item.i_category}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.i_brand}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {item.item_rawstock}
@@ -837,26 +853,20 @@ export default function ItemsPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Category</label>
-                      <input
-                        type="text"
+                      <select
                         name="i_category"
                         value={formData.i_category}
                         onChange={handleInputChange}
                         required
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Brand</label>
-                      <input
-                        type="text"
-                        name="i_brand"
-                        value={formData.i_brand}
-                        onChange={handleInputChange}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
+                      >
+                        <option value="">Select a category</option>
+                        {ITEM_CATEGORIES.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
@@ -880,17 +890,6 @@ export default function ItemsPage() {
                         onChange={handleInputChange}
                         required
                         min="0"
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">MR Number</label>
-                      <input
-                        type="text"
-                        name="i_mr"
-                        value={formData.i_mr}
-                        onChange={handleInputChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -948,7 +947,7 @@ export default function ItemsPage() {
                         />
                         <p className="mt-1 text-xs text-gray-500">
                           PNG, JPG, GIF up to 4MB. If you don&apos;t upload one, the item shows a
-                          letter avatar taken from the brand name.
+                          letter avatar taken from the model name.
                         </p>
                       </div>
                       <div className="flex-shrink-0">
@@ -961,8 +960,8 @@ export default function ItemsPage() {
                           />
                         ) : (
                           <ItemAvatar
-                            brand={formData.i_brand}
-                            alt={formData.i_brand || 'No photo'}
+                            brand={formData.i_model}
+                            alt={formData.i_model || 'No photo'}
                           />
                         )}
                       </div>
@@ -1032,11 +1031,6 @@ export default function ItemsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Brand</label>
-                      <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{selectedItem.i_brand}</p>
-                    </div>
-
-                    <div>
                       <label className="block text-sm font-medium text-gray-700">Type</label>
                       <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{selectedItem.i_type}</p>
                     </div>
@@ -1044,11 +1038,6 @@ export default function ItemsPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Stock Quantity</label>
                       <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{selectedItem.item_rawstock}</p>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">MR Number</label>
-                      <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{selectedItem.i_mr || 'N/A'}</p>
                     </div>
 
                     <div>
@@ -1163,19 +1152,25 @@ export default function ItemsPage() {
 
         {/* Edit Item Modal */}
         {showEditModal && selectedItem && (
-          <div className="fixed inset-0 bg-gray-600/25 bg-opacity-20 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Edit Item</h3>
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <XMarkIcon className="h-6 w-6" />
-                  </button>
-                </div>
+          <div className="fixed inset-0 z-50 flex justify-end">
+            {/* Backdrop: clicking outside the panel closes it. */}
+            <div
+              className="absolute inset-0 bg-gray-600/25"
+              onClick={() => setShowEditModal(false)}
+            />
+            {/* Slide-over panel anchored to the right edge. */}
+            <div className="relative flex h-full w-full max-w-xl flex-col bg-white shadow-xl">
+              <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                <h3 className="text-lg font-medium text-gray-900">Edit Item</h3>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
 
+              <div className="flex-1 overflow-y-auto px-6 py-4">
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -1204,26 +1199,20 @@ export default function ItemsPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Category</label>
-                      <input
-                        type="text"
+                      <select
                         name="i_category"
                         value={editFormData.i_category}
                         onChange={handleEditInputChange}
                         required
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Brand</label>
-                      <input
-                        type="text"
-                        name="i_brand"
-                        value={editFormData.i_brand}
-                        onChange={handleEditInputChange}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
+                      >
+                        <option value="">Select a category</option>
+                        {ITEM_CATEGORIES.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
@@ -1247,17 +1236,6 @@ export default function ItemsPage() {
                         onChange={handleEditInputChange}
                         required
                         min="0"
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">MR Number</label>
-                      <input
-                        type="text"
-                        name="i_mr"
-                        value={editFormData.i_mr}
-                        onChange={handleEditInputChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -1302,21 +1280,22 @@ export default function ItemsPage() {
                     />
                   </div>
 
-                  <div className="flex justify-end space-x-3 pt-4">
-                    <button
-                      onClick={() => setShowEditModal(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleEditItem}
-                      className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                      Update Item
-                    </button>
-                  </div>
                 </div>
+              </div>
+
+              <div className="flex justify-end space-x-3 border-t border-gray-200 px-6 py-4">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEditItem}
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Update Item
+                </button>
               </div>
             </div>
           </div>
