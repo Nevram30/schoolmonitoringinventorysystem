@@ -56,6 +56,8 @@ export const returnsRouter = createTRPCRouter({
                   i_deviceID: true,
                   i_brand: true,
                   i_photo: true,
+                  // Needed to price a lost item when the fee policy charges at item price.
+                  i_price: true,
                 },
               },
               Member: {

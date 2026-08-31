@@ -39,6 +39,13 @@ export type Room = $Result.DefaultSelection<Prisma.$RoomPayload>
  */
 export type Borrow = $Result.DefaultSelection<Prisma.$BorrowPayload>
 /**
+ * Model FeeSetting
+ * Single-row table holding the school's fee policy. The admin edits it on /admin/settings and
+ * the returned-items screen uses it to suggest what a borrower owes. Always read/written with
+ * `id = 1` — `getFees` falls back to the defaults below when the row does not exist yet.
+ */
+export type FeeSetting = $Result.DefaultSelection<Prisma.$FeeSettingPayload>
+/**
  * Model Return
  * 
  */
@@ -230,6 +237,16 @@ export class PrismaClient<
     * ```
     */
   get borrow(): Prisma.BorrowDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.feeSetting`: Exposes CRUD operations for the **FeeSetting** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FeeSettings
+    * const feeSettings = await prisma.feeSetting.findMany()
+    * ```
+    */
+  get feeSetting(): Prisma.FeeSettingDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.return`: Exposes CRUD operations for the **Return** model.
@@ -686,6 +703,7 @@ export namespace Prisma {
     Item: 'Item',
     Room: 'Room',
     Borrow: 'Borrow',
+    FeeSetting: 'FeeSetting',
     Return: 'Return'
   };
 
@@ -705,7 +723,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "borrower" | "item" | "room" | "borrow" | "return"
+      modelProps: "user" | "borrower" | "item" | "room" | "borrow" | "feeSetting" | "return"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1079,6 +1097,80 @@ export namespace Prisma {
           }
         }
       }
+      FeeSetting: {
+        payload: Prisma.$FeeSettingPayload<ExtArgs>
+        fields: Prisma.FeeSettingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FeeSettingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FeeSettingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>
+          }
+          findFirst: {
+            args: Prisma.FeeSettingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FeeSettingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>
+          }
+          findMany: {
+            args: Prisma.FeeSettingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>[]
+          }
+          create: {
+            args: Prisma.FeeSettingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>
+          }
+          createMany: {
+            args: Prisma.FeeSettingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FeeSettingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>[]
+          }
+          delete: {
+            args: Prisma.FeeSettingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>
+          }
+          update: {
+            args: Prisma.FeeSettingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>
+          }
+          deleteMany: {
+            args: Prisma.FeeSettingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FeeSettingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.FeeSettingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>[]
+          }
+          upsert: {
+            args: Prisma.FeeSettingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FeeSettingPayload>
+          }
+          aggregate: {
+            args: Prisma.FeeSettingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFeeSetting>
+          }
+          groupBy: {
+            args: Prisma.FeeSettingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FeeSettingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FeeSettingCountArgs<ExtArgs>
+            result: $Utils.Optional<FeeSettingCountAggregateOutputType> | number
+          }
+        }
+      }
       Return: {
         payload: Prisma.$ReturnPayload<ExtArgs>
         fields: Prisma.ReturnFieldRefs
@@ -1254,6 +1346,7 @@ export namespace Prisma {
     item?: ItemOmit
     room?: RoomOmit
     borrow?: BorrowOmit
+    feeSetting?: FeeSettingOmit
     return?: ReturnOmit
   }
 
@@ -7431,6 +7524,1126 @@ export namespace Prisma {
 
 
   /**
+   * Model FeeSetting
+   */
+
+  export type AggregateFeeSetting = {
+    _count: FeeSettingCountAggregateOutputType | null
+    _avg: FeeSettingAvgAggregateOutputType | null
+    _sum: FeeSettingSumAggregateOutputType | null
+    _min: FeeSettingMinAggregateOutputType | null
+    _max: FeeSettingMaxAggregateOutputType | null
+  }
+
+  export type FeeSettingAvgAggregateOutputType = {
+    id: number | null
+    f_overdue_fee_per_day: Decimal | null
+    f_overdue_grace_days: number | null
+    f_overdue_max_fee: Decimal | null
+    f_damage_fee_fair: Decimal | null
+    f_damage_fee_damaged: Decimal | null
+    f_damage_fee_lost: Decimal | null
+  }
+
+  export type FeeSettingSumAggregateOutputType = {
+    id: number | null
+    f_overdue_fee_per_day: Decimal | null
+    f_overdue_grace_days: number | null
+    f_overdue_max_fee: Decimal | null
+    f_damage_fee_fair: Decimal | null
+    f_damage_fee_damaged: Decimal | null
+    f_damage_fee_lost: Decimal | null
+  }
+
+  export type FeeSettingMinAggregateOutputType = {
+    id: number | null
+    f_overdue_fee_per_day: Decimal | null
+    f_overdue_grace_days: number | null
+    f_overdue_max_fee: Decimal | null
+    f_damage_fee_fair: Decimal | null
+    f_damage_fee_damaged: Decimal | null
+    f_damage_fee_lost: Decimal | null
+    f_lost_charge_item_price: boolean | null
+    updatedAt: Date | null
+  }
+
+  export type FeeSettingMaxAggregateOutputType = {
+    id: number | null
+    f_overdue_fee_per_day: Decimal | null
+    f_overdue_grace_days: number | null
+    f_overdue_max_fee: Decimal | null
+    f_damage_fee_fair: Decimal | null
+    f_damage_fee_damaged: Decimal | null
+    f_damage_fee_lost: Decimal | null
+    f_lost_charge_item_price: boolean | null
+    updatedAt: Date | null
+  }
+
+  export type FeeSettingCountAggregateOutputType = {
+    id: number
+    f_overdue_fee_per_day: number
+    f_overdue_grace_days: number
+    f_overdue_max_fee: number
+    f_damage_fee_fair: number
+    f_damage_fee_damaged: number
+    f_damage_fee_lost: number
+    f_lost_charge_item_price: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FeeSettingAvgAggregateInputType = {
+    id?: true
+    f_overdue_fee_per_day?: true
+    f_overdue_grace_days?: true
+    f_overdue_max_fee?: true
+    f_damage_fee_fair?: true
+    f_damage_fee_damaged?: true
+    f_damage_fee_lost?: true
+  }
+
+  export type FeeSettingSumAggregateInputType = {
+    id?: true
+    f_overdue_fee_per_day?: true
+    f_overdue_grace_days?: true
+    f_overdue_max_fee?: true
+    f_damage_fee_fair?: true
+    f_damage_fee_damaged?: true
+    f_damage_fee_lost?: true
+  }
+
+  export type FeeSettingMinAggregateInputType = {
+    id?: true
+    f_overdue_fee_per_day?: true
+    f_overdue_grace_days?: true
+    f_overdue_max_fee?: true
+    f_damage_fee_fair?: true
+    f_damage_fee_damaged?: true
+    f_damage_fee_lost?: true
+    f_lost_charge_item_price?: true
+    updatedAt?: true
+  }
+
+  export type FeeSettingMaxAggregateInputType = {
+    id?: true
+    f_overdue_fee_per_day?: true
+    f_overdue_grace_days?: true
+    f_overdue_max_fee?: true
+    f_damage_fee_fair?: true
+    f_damage_fee_damaged?: true
+    f_damage_fee_lost?: true
+    f_lost_charge_item_price?: true
+    updatedAt?: true
+  }
+
+  export type FeeSettingCountAggregateInputType = {
+    id?: true
+    f_overdue_fee_per_day?: true
+    f_overdue_grace_days?: true
+    f_overdue_max_fee?: true
+    f_damage_fee_fair?: true
+    f_damage_fee_damaged?: true
+    f_damage_fee_lost?: true
+    f_lost_charge_item_price?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FeeSettingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FeeSetting to aggregate.
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FeeSettings to fetch.
+     */
+    orderBy?: FeeSettingOrderByWithRelationInput | FeeSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FeeSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FeeSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FeeSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FeeSettings
+    **/
+    _count?: true | FeeSettingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FeeSettingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FeeSettingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FeeSettingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FeeSettingMaxAggregateInputType
+  }
+
+  export type GetFeeSettingAggregateType<T extends FeeSettingAggregateArgs> = {
+        [P in keyof T & keyof AggregateFeeSetting]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFeeSetting[P]>
+      : GetScalarType<T[P], AggregateFeeSetting[P]>
+  }
+
+
+
+
+  export type FeeSettingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FeeSettingWhereInput
+    orderBy?: FeeSettingOrderByWithAggregationInput | FeeSettingOrderByWithAggregationInput[]
+    by: FeeSettingScalarFieldEnum[] | FeeSettingScalarFieldEnum
+    having?: FeeSettingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FeeSettingCountAggregateInputType | true
+    _avg?: FeeSettingAvgAggregateInputType
+    _sum?: FeeSettingSumAggregateInputType
+    _min?: FeeSettingMinAggregateInputType
+    _max?: FeeSettingMaxAggregateInputType
+  }
+
+  export type FeeSettingGroupByOutputType = {
+    id: number
+    f_overdue_fee_per_day: Decimal
+    f_overdue_grace_days: number
+    f_overdue_max_fee: Decimal
+    f_damage_fee_fair: Decimal
+    f_damage_fee_damaged: Decimal
+    f_damage_fee_lost: Decimal
+    f_lost_charge_item_price: boolean
+    updatedAt: Date
+    _count: FeeSettingCountAggregateOutputType | null
+    _avg: FeeSettingAvgAggregateOutputType | null
+    _sum: FeeSettingSumAggregateOutputType | null
+    _min: FeeSettingMinAggregateOutputType | null
+    _max: FeeSettingMaxAggregateOutputType | null
+  }
+
+  type GetFeeSettingGroupByPayload<T extends FeeSettingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FeeSettingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FeeSettingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FeeSettingGroupByOutputType[P]>
+            : GetScalarType<T[P], FeeSettingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FeeSettingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    f_overdue_fee_per_day?: boolean
+    f_overdue_grace_days?: boolean
+    f_overdue_max_fee?: boolean
+    f_damage_fee_fair?: boolean
+    f_damage_fee_damaged?: boolean
+    f_damage_fee_lost?: boolean
+    f_lost_charge_item_price?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["feeSetting"]>
+
+  export type FeeSettingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    f_overdue_fee_per_day?: boolean
+    f_overdue_grace_days?: boolean
+    f_overdue_max_fee?: boolean
+    f_damage_fee_fair?: boolean
+    f_damage_fee_damaged?: boolean
+    f_damage_fee_lost?: boolean
+    f_lost_charge_item_price?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["feeSetting"]>
+
+  export type FeeSettingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    f_overdue_fee_per_day?: boolean
+    f_overdue_grace_days?: boolean
+    f_overdue_max_fee?: boolean
+    f_damage_fee_fair?: boolean
+    f_damage_fee_damaged?: boolean
+    f_damage_fee_lost?: boolean
+    f_lost_charge_item_price?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["feeSetting"]>
+
+  export type FeeSettingSelectScalar = {
+    id?: boolean
+    f_overdue_fee_per_day?: boolean
+    f_overdue_grace_days?: boolean
+    f_overdue_max_fee?: boolean
+    f_damage_fee_fair?: boolean
+    f_damage_fee_damaged?: boolean
+    f_damage_fee_lost?: boolean
+    f_lost_charge_item_price?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FeeSettingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "f_overdue_fee_per_day" | "f_overdue_grace_days" | "f_overdue_max_fee" | "f_damage_fee_fair" | "f_damage_fee_damaged" | "f_damage_fee_lost" | "f_lost_charge_item_price" | "updatedAt", ExtArgs["result"]["feeSetting"]>
+
+  export type $FeeSettingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FeeSetting"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      /**
+       * Amount charged for each day an item is returned past its due date.
+       */
+      f_overdue_fee_per_day: Prisma.Decimal
+      /**
+       * Days past the due date that are not charged at all.
+       */
+      f_overdue_grace_days: number
+      /**
+       * Ceiling on the total late fee. 0 means no ceiling.
+       */
+      f_overdue_max_fee: Prisma.Decimal
+      /**
+       * Damage fee suggested for each return condition offered on the return form.
+       */
+      f_damage_fee_fair: Prisma.Decimal
+      f_damage_fee_damaged: Prisma.Decimal
+      f_damage_fee_lost: Prisma.Decimal
+      /**
+       * When true, a lost item is charged at the item's own price instead of `f_damage_fee_lost`.
+       */
+      f_lost_charge_item_price: boolean
+      updatedAt: Date
+    }, ExtArgs["result"]["feeSetting"]>
+    composites: {}
+  }
+
+  type FeeSettingGetPayload<S extends boolean | null | undefined | FeeSettingDefaultArgs> = $Result.GetResult<Prisma.$FeeSettingPayload, S>
+
+  type FeeSettingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<FeeSettingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: FeeSettingCountAggregateInputType | true
+    }
+
+  export interface FeeSettingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FeeSetting'], meta: { name: 'FeeSetting' } }
+    /**
+     * Find zero or one FeeSetting that matches the filter.
+     * @param {FeeSettingFindUniqueArgs} args - Arguments to find a FeeSetting
+     * @example
+     * // Get one FeeSetting
+     * const feeSetting = await prisma.feeSetting.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FeeSettingFindUniqueArgs>(args: SelectSubset<T, FeeSettingFindUniqueArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one FeeSetting that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {FeeSettingFindUniqueOrThrowArgs} args - Arguments to find a FeeSetting
+     * @example
+     * // Get one FeeSetting
+     * const feeSetting = await prisma.feeSetting.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FeeSettingFindUniqueOrThrowArgs>(args: SelectSubset<T, FeeSettingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FeeSetting that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingFindFirstArgs} args - Arguments to find a FeeSetting
+     * @example
+     * // Get one FeeSetting
+     * const feeSetting = await prisma.feeSetting.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FeeSettingFindFirstArgs>(args?: SelectSubset<T, FeeSettingFindFirstArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first FeeSetting that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingFindFirstOrThrowArgs} args - Arguments to find a FeeSetting
+     * @example
+     * // Get one FeeSetting
+     * const feeSetting = await prisma.feeSetting.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FeeSettingFindFirstOrThrowArgs>(args?: SelectSubset<T, FeeSettingFindFirstOrThrowArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more FeeSettings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FeeSettings
+     * const feeSettings = await prisma.feeSetting.findMany()
+     * 
+     * // Get first 10 FeeSettings
+     * const feeSettings = await prisma.feeSetting.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const feeSettingWithIdOnly = await prisma.feeSetting.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FeeSettingFindManyArgs>(args?: SelectSubset<T, FeeSettingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a FeeSetting.
+     * @param {FeeSettingCreateArgs} args - Arguments to create a FeeSetting.
+     * @example
+     * // Create one FeeSetting
+     * const FeeSetting = await prisma.feeSetting.create({
+     *   data: {
+     *     // ... data to create a FeeSetting
+     *   }
+     * })
+     * 
+     */
+    create<T extends FeeSettingCreateArgs>(args: SelectSubset<T, FeeSettingCreateArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many FeeSettings.
+     * @param {FeeSettingCreateManyArgs} args - Arguments to create many FeeSettings.
+     * @example
+     * // Create many FeeSettings
+     * const feeSetting = await prisma.feeSetting.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FeeSettingCreateManyArgs>(args?: SelectSubset<T, FeeSettingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FeeSettings and returns the data saved in the database.
+     * @param {FeeSettingCreateManyAndReturnArgs} args - Arguments to create many FeeSettings.
+     * @example
+     * // Create many FeeSettings
+     * const feeSetting = await prisma.feeSetting.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FeeSettings and only return the `id`
+     * const feeSettingWithIdOnly = await prisma.feeSetting.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FeeSettingCreateManyAndReturnArgs>(args?: SelectSubset<T, FeeSettingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a FeeSetting.
+     * @param {FeeSettingDeleteArgs} args - Arguments to delete one FeeSetting.
+     * @example
+     * // Delete one FeeSetting
+     * const FeeSetting = await prisma.feeSetting.delete({
+     *   where: {
+     *     // ... filter to delete one FeeSetting
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FeeSettingDeleteArgs>(args: SelectSubset<T, FeeSettingDeleteArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one FeeSetting.
+     * @param {FeeSettingUpdateArgs} args - Arguments to update one FeeSetting.
+     * @example
+     * // Update one FeeSetting
+     * const feeSetting = await prisma.feeSetting.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FeeSettingUpdateArgs>(args: SelectSubset<T, FeeSettingUpdateArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more FeeSettings.
+     * @param {FeeSettingDeleteManyArgs} args - Arguments to filter FeeSettings to delete.
+     * @example
+     * // Delete a few FeeSettings
+     * const { count } = await prisma.feeSetting.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FeeSettingDeleteManyArgs>(args?: SelectSubset<T, FeeSettingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FeeSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FeeSettings
+     * const feeSetting = await prisma.feeSetting.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FeeSettingUpdateManyArgs>(args: SelectSubset<T, FeeSettingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FeeSettings and returns the data updated in the database.
+     * @param {FeeSettingUpdateManyAndReturnArgs} args - Arguments to update many FeeSettings.
+     * @example
+     * // Update many FeeSettings
+     * const feeSetting = await prisma.feeSetting.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more FeeSettings and only return the `id`
+     * const feeSettingWithIdOnly = await prisma.feeSetting.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends FeeSettingUpdateManyAndReturnArgs>(args: SelectSubset<T, FeeSettingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one FeeSetting.
+     * @param {FeeSettingUpsertArgs} args - Arguments to update or create a FeeSetting.
+     * @example
+     * // Update or create a FeeSetting
+     * const feeSetting = await prisma.feeSetting.upsert({
+     *   create: {
+     *     // ... data to create a FeeSetting
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FeeSetting we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FeeSettingUpsertArgs>(args: SelectSubset<T, FeeSettingUpsertArgs<ExtArgs>>): Prisma__FeeSettingClient<$Result.GetResult<Prisma.$FeeSettingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of FeeSettings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingCountArgs} args - Arguments to filter FeeSettings to count.
+     * @example
+     * // Count the number of FeeSettings
+     * const count = await prisma.feeSetting.count({
+     *   where: {
+     *     // ... the filter for the FeeSettings we want to count
+     *   }
+     * })
+    **/
+    count<T extends FeeSettingCountArgs>(
+      args?: Subset<T, FeeSettingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FeeSettingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FeeSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FeeSettingAggregateArgs>(args: Subset<T, FeeSettingAggregateArgs>): Prisma.PrismaPromise<GetFeeSettingAggregateType<T>>
+
+    /**
+     * Group by FeeSetting.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FeeSettingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FeeSettingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FeeSettingGroupByArgs['orderBy'] }
+        : { orderBy?: FeeSettingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FeeSettingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFeeSettingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FeeSetting model
+   */
+  readonly fields: FeeSettingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FeeSetting.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FeeSettingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FeeSetting model
+   */
+  interface FeeSettingFieldRefs {
+    readonly id: FieldRef<"FeeSetting", 'Int'>
+    readonly f_overdue_fee_per_day: FieldRef<"FeeSetting", 'Decimal'>
+    readonly f_overdue_grace_days: FieldRef<"FeeSetting", 'Int'>
+    readonly f_overdue_max_fee: FieldRef<"FeeSetting", 'Decimal'>
+    readonly f_damage_fee_fair: FieldRef<"FeeSetting", 'Decimal'>
+    readonly f_damage_fee_damaged: FieldRef<"FeeSetting", 'Decimal'>
+    readonly f_damage_fee_lost: FieldRef<"FeeSetting", 'Decimal'>
+    readonly f_lost_charge_item_price: FieldRef<"FeeSetting", 'Boolean'>
+    readonly updatedAt: FieldRef<"FeeSetting", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FeeSetting findUnique
+   */
+  export type FeeSettingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which FeeSetting to fetch.
+     */
+    where: FeeSettingWhereUniqueInput
+  }
+
+  /**
+   * FeeSetting findUniqueOrThrow
+   */
+  export type FeeSettingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which FeeSetting to fetch.
+     */
+    where: FeeSettingWhereUniqueInput
+  }
+
+  /**
+   * FeeSetting findFirst
+   */
+  export type FeeSettingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which FeeSetting to fetch.
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FeeSettings to fetch.
+     */
+    orderBy?: FeeSettingOrderByWithRelationInput | FeeSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FeeSettings.
+     */
+    cursor?: FeeSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FeeSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FeeSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FeeSettings.
+     */
+    distinct?: FeeSettingScalarFieldEnum | FeeSettingScalarFieldEnum[]
+  }
+
+  /**
+   * FeeSetting findFirstOrThrow
+   */
+  export type FeeSettingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which FeeSetting to fetch.
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FeeSettings to fetch.
+     */
+    orderBy?: FeeSettingOrderByWithRelationInput | FeeSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FeeSettings.
+     */
+    cursor?: FeeSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FeeSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FeeSettings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FeeSettings.
+     */
+    distinct?: FeeSettingScalarFieldEnum | FeeSettingScalarFieldEnum[]
+  }
+
+  /**
+   * FeeSetting findMany
+   */
+  export type FeeSettingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * Filter, which FeeSettings to fetch.
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FeeSettings to fetch.
+     */
+    orderBy?: FeeSettingOrderByWithRelationInput | FeeSettingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FeeSettings.
+     */
+    cursor?: FeeSettingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FeeSettings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FeeSettings.
+     */
+    skip?: number
+    distinct?: FeeSettingScalarFieldEnum | FeeSettingScalarFieldEnum[]
+  }
+
+  /**
+   * FeeSetting create
+   */
+  export type FeeSettingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to create a FeeSetting.
+     */
+    data?: XOR<FeeSettingCreateInput, FeeSettingUncheckedCreateInput>
+  }
+
+  /**
+   * FeeSetting createMany
+   */
+  export type FeeSettingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FeeSettings.
+     */
+    data: FeeSettingCreateManyInput | FeeSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FeeSetting createManyAndReturn
+   */
+  export type FeeSettingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * The data used to create many FeeSettings.
+     */
+    data: FeeSettingCreateManyInput | FeeSettingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * FeeSetting update
+   */
+  export type FeeSettingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * The data needed to update a FeeSetting.
+     */
+    data: XOR<FeeSettingUpdateInput, FeeSettingUncheckedUpdateInput>
+    /**
+     * Choose, which FeeSetting to update.
+     */
+    where: FeeSettingWhereUniqueInput
+  }
+
+  /**
+   * FeeSetting updateMany
+   */
+  export type FeeSettingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FeeSettings.
+     */
+    data: XOR<FeeSettingUpdateManyMutationInput, FeeSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which FeeSettings to update
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * Limit how many FeeSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FeeSetting updateManyAndReturn
+   */
+  export type FeeSettingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * The data used to update FeeSettings.
+     */
+    data: XOR<FeeSettingUpdateManyMutationInput, FeeSettingUncheckedUpdateManyInput>
+    /**
+     * Filter which FeeSettings to update
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * Limit how many FeeSettings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * FeeSetting upsert
+   */
+  export type FeeSettingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * The filter to search for the FeeSetting to update in case it exists.
+     */
+    where: FeeSettingWhereUniqueInput
+    /**
+     * In case the FeeSetting found by the `where` argument doesn't exist, create a new FeeSetting with this data.
+     */
+    create: XOR<FeeSettingCreateInput, FeeSettingUncheckedCreateInput>
+    /**
+     * In case the FeeSetting was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FeeSettingUpdateInput, FeeSettingUncheckedUpdateInput>
+  }
+
+  /**
+   * FeeSetting delete
+   */
+  export type FeeSettingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+    /**
+     * Filter which FeeSetting to delete.
+     */
+    where: FeeSettingWhereUniqueInput
+  }
+
+  /**
+   * FeeSetting deleteMany
+   */
+  export type FeeSettingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FeeSettings to delete
+     */
+    where?: FeeSettingWhereInput
+    /**
+     * Limit how many FeeSettings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * FeeSetting without action
+   */
+  export type FeeSettingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FeeSetting
+     */
+    select?: FeeSettingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the FeeSetting
+     */
+    omit?: FeeSettingOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model Return
    */
 
@@ -8803,6 +10016,21 @@ export namespace Prisma {
   export type BorrowScalarFieldEnum = (typeof BorrowScalarFieldEnum)[keyof typeof BorrowScalarFieldEnum]
 
 
+  export const FeeSettingScalarFieldEnum: {
+    id: 'id',
+    f_overdue_fee_per_day: 'f_overdue_fee_per_day',
+    f_overdue_grace_days: 'f_overdue_grace_days',
+    f_overdue_max_fee: 'f_overdue_max_fee',
+    f_damage_fee_fair: 'f_damage_fee_fair',
+    f_damage_fee_damaged: 'f_damage_fee_damaged',
+    f_damage_fee_lost: 'f_damage_fee_lost',
+    f_lost_charge_item_price: 'f_lost_charge_item_price',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FeeSettingScalarFieldEnum = (typeof FeeSettingScalarFieldEnum)[keyof typeof FeeSettingScalarFieldEnum]
+
+
   export const ReturnScalarFieldEnum: {
     id: 'id',
     borrow_id: 'borrow_id',
@@ -8918,6 +10146,13 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -9361,6 +10596,80 @@ export namespace Prisma {
     b_status?: IntWithAggregatesFilter<"Borrow"> | number
     b_purpose?: StringNullableWithAggregatesFilter<"Borrow"> | string | null
     b_notes?: StringNullableWithAggregatesFilter<"Borrow"> | string | null
+  }
+
+  export type FeeSettingWhereInput = {
+    AND?: FeeSettingWhereInput | FeeSettingWhereInput[]
+    OR?: FeeSettingWhereInput[]
+    NOT?: FeeSettingWhereInput | FeeSettingWhereInput[]
+    id?: IntFilter<"FeeSetting"> | number
+    f_overdue_fee_per_day?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntFilter<"FeeSetting"> | number
+    f_overdue_max_fee?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolFilter<"FeeSetting"> | boolean
+    updatedAt?: DateTimeFilter<"FeeSetting"> | Date | string
+  }
+
+  export type FeeSettingOrderByWithRelationInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+    f_lost_charge_item_price?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FeeSettingWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: FeeSettingWhereInput | FeeSettingWhereInput[]
+    OR?: FeeSettingWhereInput[]
+    NOT?: FeeSettingWhereInput | FeeSettingWhereInput[]
+    f_overdue_fee_per_day?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntFilter<"FeeSetting"> | number
+    f_overdue_max_fee?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolFilter<"FeeSetting"> | boolean
+    updatedAt?: DateTimeFilter<"FeeSetting"> | Date | string
+  }, "id">
+
+  export type FeeSettingOrderByWithAggregationInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+    f_lost_charge_item_price?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FeeSettingCountOrderByAggregateInput
+    _avg?: FeeSettingAvgOrderByAggregateInput
+    _max?: FeeSettingMaxOrderByAggregateInput
+    _min?: FeeSettingMinOrderByAggregateInput
+    _sum?: FeeSettingSumOrderByAggregateInput
+  }
+
+  export type FeeSettingScalarWhereWithAggregatesInput = {
+    AND?: FeeSettingScalarWhereWithAggregatesInput | FeeSettingScalarWhereWithAggregatesInput[]
+    OR?: FeeSettingScalarWhereWithAggregatesInput[]
+    NOT?: FeeSettingScalarWhereWithAggregatesInput | FeeSettingScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"FeeSetting"> | number
+    f_overdue_fee_per_day?: DecimalWithAggregatesFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntWithAggregatesFilter<"FeeSetting"> | number
+    f_overdue_max_fee?: DecimalWithAggregatesFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalWithAggregatesFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalWithAggregatesFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalWithAggregatesFilter<"FeeSetting"> | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolWithAggregatesFilter<"FeeSetting"> | boolean
+    updatedAt?: DateTimeWithAggregatesFilter<"FeeSetting"> | Date | string
   }
 
   export type ReturnWhereInput = {
@@ -9932,6 +11241,90 @@ export namespace Prisma {
     b_status?: IntFieldUpdateOperationsInput | number
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type FeeSettingCreateInput = {
+    id?: number
+    f_overdue_fee_per_day?: Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: number
+    f_overdue_max_fee?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type FeeSettingUncheckedCreateInput = {
+    id?: number
+    f_overdue_fee_per_day?: Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: number
+    f_overdue_max_fee?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type FeeSettingUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    f_overdue_fee_per_day?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntFieldUpdateOperationsInput | number
+    f_overdue_max_fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FeeSettingUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    f_overdue_fee_per_day?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntFieldUpdateOperationsInput | number
+    f_overdue_max_fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FeeSettingCreateManyInput = {
+    id?: number
+    f_overdue_fee_per_day?: Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: number
+    f_overdue_max_fee?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: boolean
+    updatedAt?: Date | string
+  }
+
+  export type FeeSettingUpdateManyMutationInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    f_overdue_fee_per_day?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntFieldUpdateOperationsInput | number
+    f_overdue_max_fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FeeSettingUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    f_overdue_fee_per_day?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_overdue_grace_days?: IntFieldUpdateOperationsInput | number
+    f_overdue_max_fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_fair?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_damaged?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_damage_fee_lost?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    f_lost_charge_item_price?: BoolFieldUpdateOperationsInput | boolean
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ReturnCreateInput = {
@@ -10559,6 +11952,75 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type FeeSettingCountOrderByAggregateInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+    f_lost_charge_item_price?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FeeSettingAvgOrderByAggregateInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+  }
+
+  export type FeeSettingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+    f_lost_charge_item_price?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FeeSettingMinOrderByAggregateInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+    f_lost_charge_item_price?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FeeSettingSumOrderByAggregateInput = {
+    id?: SortOrder
+    f_overdue_fee_per_day?: SortOrder
+    f_overdue_grace_days?: SortOrder
+    f_overdue_max_fee?: SortOrder
+    f_damage_fee_fair?: SortOrder
+    f_damage_fee_damaged?: SortOrder
+    f_damage_fee_lost?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type BorrowScalarRelationFilter = {
     is?: BorrowWhereInput
     isNot?: BorrowWhereInput
@@ -11006,6 +12468,10 @@ export namespace Prisma {
     update?: XOR<XOR<ReturnUpdateToOneWithWhereWithoutBorrowInput, ReturnUpdateWithoutBorrowInput>, ReturnUncheckedUpdateWithoutBorrowInput>
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type BorrowCreateNestedOneWithoutReturnInput = {
     create?: XOR<BorrowCreateWithoutReturnInput, BorrowUncheckedCreateWithoutReturnInput>
     connectOrCreate?: BorrowCreateOrConnectWithoutReturnInput
@@ -11294,6 +12760,19 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type BorrowCreateWithoutMemberInput = {

@@ -1,13 +1,25 @@
 import { z } from "zod";
 
 import {
+  adminProcedure,
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
+import { loadFeeSettings } from "@/server/api/fee-settings";
+import { calculateOverdueFee, DEFAULT_FEE_SETTINGS } from "@/lib/fees";
 
 const insensitive = { mode: "insensitive" } as const;
+
+/**
+ * Midnight today. Overdue is counted in whole days, so an item due today is not late until
+ * tomorrow — comparing against `new Date()` would flag anything due earlier this morning.
+ */
+const startOfToday = () => {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+};
 
 export const borrowsRouter = createTRPCRouter({
   // GET /api/borrows
@@ -107,6 +119,150 @@ export const borrowsRouter = createTRPCRouter({
             total: 0,
             totalPages: 0,
           },
+        };
+      }
+    }),
+
+  // GET /api/borrows/unreturned
+  //
+  // Items that are still out. Each row carries the late fee accrued so far, worked out from the
+  // admin's fee policy against today's date — no damage fee, because the item is not back yet and
+  // its condition is unknown until it is returned.
+  //
+  // Admin-only: it exposes what every borrower currently owes.
+  unreturned: adminProcedure
+    .input(
+      z.object({
+        page: z.number().default(1),
+        limit: z.number().default(10),
+        search: z.string().default(""),
+        /** "overdue" = past the due date, "pending" = still within it. */
+        filter: z.enum(["all", "overdue", "pending"]).default("overdue"),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const emptyResult = {
+        data: [] as never[],
+        pagination: {
+          page: input.page,
+          limit: input.limit,
+          total: 0,
+          totalPages: 0,
+        },
+        summary: { unreturned: 0, overdue: 0, totalFees: 0 },
+        policy: DEFAULT_FEE_SETTINGS,
+        asOf: new Date(),
+      };
+
+      try {
+        const { page, limit, search, filter } = input;
+        const offset = (page - 1) * limit;
+        const today = startOfToday();
+
+        // Never returned, whatever b_status says — the status column is set by hand in places
+        // and a missing return date is the fact that actually matters here.
+        const base: any = { b_date_returned: null };
+
+        if (search) {
+          base.OR = [
+            { Item: { i_model: { contains: search, ...insensitive } } },
+            { Item: { i_deviceID: { contains: search, ...insensitive } } },
+            { Member: { m_fname: { contains: search, ...insensitive } } },
+            { Member: { m_lname: { contains: search, ...insensitive } } },
+            { Member: { m_school_id: { contains: search, ...insensitive } } },
+            { Room: { r_name: { contains: search, ...insensitive } } },
+          ];
+        }
+
+        const where = { ...base };
+        if (filter === "overdue") {
+          where.b_due_date = { lt: today };
+        } else if (filter === "pending") {
+          where.b_due_date = { gte: today };
+        }
+
+        const settings = await loadFeeSettings(ctx.db);
+
+        const [rows, count, unreturnedCount, overdueRows] =
+          await ctx.db.$transaction([
+            ctx.db.borrow.findMany({
+              where,
+              include: {
+                Item: {
+                  select: {
+                    i_model: true,
+                    i_deviceID: true,
+                    i_photo: true,
+                    i_brand: true,
+                  },
+                },
+                Member: {
+                  select: {
+                    m_fname: true,
+                    m_lname: true,
+                    m_school_id: true,
+                    m_contact: true,
+                    m_department: true,
+                  },
+                },
+                Room: { select: { r_name: true } },
+              },
+              take: limit,
+              skip: offset,
+              // Most overdue first: the borrower who has held an item longest needs chasing.
+              orderBy: { b_due_date: "asc" },
+            }),
+            ctx.db.borrow.count({ where }),
+            ctx.db.borrow.count({ where: base }),
+            // Due dates of everything overdue, so the running total covers all pages, not just
+            // the one on screen.
+            ctx.db.borrow.findMany({
+              where: { ...base, b_due_date: { lt: today } },
+              select: { b_due_date: true },
+            }),
+          ]);
+
+        const totalFees = overdueRows.reduce(
+          (sum, row) =>
+            sum + calculateOverdueFee(settings, row.b_due_date, today).fee,
+          0
+        );
+
+        return {
+          success: true as const,
+          data: rows.map((row) => {
+            const overdue = calculateOverdueFee(settings, row.b_due_date, today);
+            return {
+              ...serialize(row),
+              daysOverdue: overdue.daysLate,
+              chargeableDays: overdue.chargeableDays,
+              lateFee: overdue.fee,
+              lateFeeCapped: overdue.capped,
+            };
+          }),
+          pagination: {
+            page,
+            limit,
+            total: count,
+            totalPages: Math.ceil(count / limit),
+          },
+          summary: {
+            unreturned: unreturnedCount,
+            overdue: overdueRows.length,
+            totalFees: Math.round(totalFees * 100) / 100,
+          },
+          // The policy the amounts above were worked out from, so the screen can explain a fee of
+          // 0.00 — a grace period longer than the delay is the usual reason.
+          policy: settings,
+          // The fees are accurate as of this moment; the UI shows it so a stale tab is obvious.
+          asOf: new Date(),
+        };
+      } catch (error) {
+        console.error("Get unreturned borrows error:", error);
+        return {
+          success: false as const,
+          error: "Failed to fetch unreturned items",
+          ...emptyResult,
         };
       }
     }),

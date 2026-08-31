@@ -121,6 +121,32 @@ model Borrow {
     @@map("borrow")
 }
 
+/// Single-row table holding the school's fee policy. The admin edits it on /admin/settings and
+/// the returned-items screen uses it to suggest what a borrower owes. Always read/written with
+/// `id = 1` — `getFees` falls back to the defaults below when the row does not exist yet.
+model FeeSetting {
+    id Int @id @default(1)
+
+    /// Amount charged for each day an item is returned past its due date.
+    f_overdue_fee_per_day Decimal @default(0.00) @db.Decimal(10, 2)
+    /// Days past the due date that are not charged at all.
+    f_overdue_grace_days  Int     @default(0)
+    /// Ceiling on the total late fee. 0 means no ceiling.
+    f_overdue_max_fee     Decimal @default(0.00) @db.Decimal(10, 2)
+
+    /// Damage fee suggested for each return condition offered on the return form.
+    f_damage_fee_fair    Decimal @default(0.00) @db.Decimal(10, 2)
+    f_damage_fee_damaged Decimal @default(0.00) @db.Decimal(10, 2)
+    f_damage_fee_lost    Decimal @default(0.00) @db.Decimal(10, 2)
+
+    /// When true, a lost item is charged at the item's own price instead of `f_damage_fee_lost`.
+    f_lost_charge_item_price Boolean @default(false)
+
+    updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+    @@map("fee_setting")
+}
+
 model Return {
     id              Int      @id @default(autoincrement())
     borrow_id       Int      @unique

@@ -4,6 +4,7 @@ import { itemsRouter } from "~/server/api/routers/items";
 import { reportsRouter } from "~/server/api/routers/reports";
 import { returnsRouter } from "~/server/api/routers/returns";
 import { roomsRouter } from "~/server/api/routers/rooms";
+import { settingsRouter } from "~/server/api/routers/settings";
 import { usersRouter } from "~/server/api/routers/users";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
   reports: reportsRouter,
   returns: returnsRouter,
   rooms: roomsRouter,
+  settings: settingsRouter,
   users: usersRouter,
 });
 

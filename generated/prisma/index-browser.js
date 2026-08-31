@@ -186,6 +186,18 @@ exports.Prisma.BorrowScalarFieldEnum = {
   b_notes: 'b_notes'
 };
 
+exports.Prisma.FeeSettingScalarFieldEnum = {
+  id: 'id',
+  f_overdue_fee_per_day: 'f_overdue_fee_per_day',
+  f_overdue_grace_days: 'f_overdue_grace_days',
+  f_overdue_max_fee: 'f_overdue_max_fee',
+  f_damage_fee_fair: 'f_damage_fee_fair',
+  f_damage_fee_damaged: 'f_damage_fee_damaged',
+  f_damage_fee_lost: 'f_damage_fee_lost',
+  f_lost_charge_item_price: 'f_lost_charge_item_price',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.ReturnScalarFieldEnum = {
   id: 'id',
   borrow_id: 'borrow_id',
@@ -229,6 +241,7 @@ exports.Prisma.ModelName = {
   Item: 'Item',
   Room: 'Room',
   Borrow: 'Borrow',
+  FeeSetting: 'FeeSetting',
   Return: 'Return'
 };
 

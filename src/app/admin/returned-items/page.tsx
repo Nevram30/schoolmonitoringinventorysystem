@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { MagnifyingGlassIcon, PencilSquareIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { Cog6ToothIcon, MagnifyingGlassIcon, PencilSquareIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 import Layout from '../Layout';
 import ItemAvatar from '@/components/ui-components/item.avatar';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
+import { DEFAULT_FEE_SETTINGS, suggestFees, type FeeSettings } from '@/lib/fees';
 
 interface ReturnedItem {
     id: number;
@@ -17,11 +19,15 @@ interface ReturnedItem {
     r_notes: string | null;
     r_late_fee: number;
     r_damage_fee: number;
+    Borrow: {
+        b_due_date: Date;
+    } | null;
     Item: {
         i_model: string;
         i_deviceID: string;
         i_brand?: string | null;
         i_photo?: string | null;
+        i_price?: number | null;
     };
     Member: {
         m_fname: string;
@@ -54,6 +60,7 @@ export default function AdminReturnedItemsPage() {
     const [showFeesModal, setShowFeesModal] = useState(false);
     const [saving, setSaving] = useState(false);
     const [feeForm, setFeeForm] = useState({ lateFee: '0', damageFee: '0' });
+    const [feeSettings, setFeeSettings] = useState<FeeSettings>(DEFAULT_FEE_SETTINGS);
     const [pagination, setPagination] = useState<Pagination>({
         page: 1,
         limit: 10,
@@ -86,6 +93,16 @@ export default function AdminReturnedItemsPage() {
         fetchReturnedItems();
     }, [fetchReturnedItems]);
 
+    // The fee policy set on /admin/settings; used to suggest what each return should be charged.
+    useEffect(() => {
+        trpcClient.settings.getFees
+            .query()
+            .then((data) => {
+                if (data.success) setFeeSettings(data.data);
+            })
+            .catch((error) => console.error('Error fetching fee settings:', error));
+    }, []);
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setPagination(prev => ({ ...prev, page: 1 }));
@@ -96,11 +113,27 @@ export default function AdminReturnedItemsPage() {
         setPagination(prev => ({ ...prev, page: newPage }));
     };
 
+    /** What the saved fee policy says this return should cost. */
+    const suggestionFor = (item: ReturnedItem) =>
+        suggestFees(feeSettings, {
+            dueDate: item.Borrow?.b_due_date ?? null,
+            returnedAt: item.r_date_returned,
+            condition: item.r_condition,
+            quantity: item.r_quantity,
+            itemPrice: item.Item.i_price
+        });
+
     const handleEditFees = (item: ReturnedItem) => {
         setSelectedItem(item);
+
+        // A return that has never been assessed opens on the policy's suggestion; one that already
+        // carries fees opens on those, so an admin's earlier decision is not silently overwritten.
+        const assessed = Number(item.r_late_fee) > 0 || Number(item.r_damage_fee) > 0;
+        const suggested = suggestionFor(item);
+
         setFeeForm({
-            lateFee: formatFee(item.r_late_fee),
-            damageFee: formatFee(item.r_damage_fee)
+            lateFee: formatFee(assessed ? item.r_late_fee : suggested.lateFee),
+            damageFee: formatFee(assessed ? item.r_damage_fee : suggested.damageFee)
         });
         setShowFeesModal(true);
     };
@@ -155,6 +188,15 @@ export default function AdminReturnedItemsPage() {
                         <p className="mt-2 text-sm text-gray-700">
                             Review returned property and assess late and damage fees.
                         </p>
+                    </div>
+                    <div className="mt-4 sm:mt-0 sm:ml-4">
+                        <Link
+                            href="/admin/settings"
+                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            <Cog6ToothIcon className="mr-1.5 h-4 w-4" />
+                            Fee Settings
+                        </Link>
                     </div>
                 </div>
 
@@ -346,6 +388,48 @@ export default function AdminReturnedItemsPage() {
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* What the fee policy on /admin/settings suggests for this return. */}
+                                {(() => {
+                                    const suggested = suggestionFor(selectedItem);
+                                    const total = suggested.lateFee + suggested.damageFee;
+
+                                    return (
+                                        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+                                            <div className="flex flex-wrap items-start justify-between gap-3">
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-gray-900">
+                                                        Suggested by the fee policy
+                                                    </h4>
+                                                    <p className="mt-1 text-sm text-gray-600">
+                                                        Late {formatFee(suggested.lateFee)} + Damage{' '}
+                                                        {formatFee(suggested.damageFee)} ={' '}
+                                                        <strong>{formatFee(total)}</strong>
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-gray-500">
+                                                        {selectedItem.Borrow
+                                                            ? suggested.daysLate > 0
+                                                                ? `${suggested.daysLate} day(s) past the due date, ${suggested.chargeableDays} charged${suggested.lateFeeCapped ? ', trimmed by the maximum' : ''}.`
+                                                                : 'Returned on or before the due date.'
+                                                            : 'No due date on record for this borrow.'}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setFeeForm({
+                                                            lateFee: formatFee(suggested.lateFee),
+                                                            damageFee: formatFee(suggested.damageFee)
+                                                        })
+                                                    }
+                                                    className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                >
+                                                    Apply suggested
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
                                 <form onSubmit={handleSaveFees} className="space-y-4 mt-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

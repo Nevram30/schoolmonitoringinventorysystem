@@ -33,6 +33,11 @@ export default function AdminAsidecomponent() {
             icon: '📋'
         },
         {
+            href: '/admin/overdue-items',
+            label: 'Overdue Items',
+            icon: '⏰'
+        },
+        {
             href: '/admin/returned-items',
             label: 'Returned Items',
             icon: '✅'
