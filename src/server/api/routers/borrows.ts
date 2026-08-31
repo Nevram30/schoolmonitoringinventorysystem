@@ -276,6 +276,7 @@ export const borrowsRouter = createTRPCRouter({
         stock_id: z.number(),
         room_assigned: z.number().nullish(),
         time_limit: z.string(),
+        purpose: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -303,7 +304,7 @@ export const borrowsRouter = createTRPCRouter({
             b_due_date: new Date(input.time_limit),
             b_quantity: input.stock_id,
             b_status: 1, // 1 = borrowed
-            b_purpose: null,
+            b_purpose: input.purpose?.trim() || null,
             b_notes: null,
           },
         });

@@ -186,6 +186,42 @@ exports.Prisma.BorrowScalarFieldEnum = {
   b_notes: 'b_notes'
 };
 
+exports.Prisma.ItemReceiptScalarFieldEnum = {
+  id: 'id',
+  borrow_id: 'borrow_id',
+  rc_receiver_name: 'rc_receiver_name',
+  rc_receiver_id: 'rc_receiver_id',
+  rc_contact: 'rc_contact',
+  rc_relationship: 'rc_relationship',
+  rc_id_presented: 'rc_id_presented',
+  rc_receiver_photo: 'rc_receiver_photo',
+  rc_quantity: 'rc_quantity',
+  rc_condition: 'rc_condition',
+  rc_notes: 'rc_notes',
+  rc_received_at: 'rc_received_at',
+  released_by: 'released_by',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BorrowRequestScalarFieldEnum = {
+  id: 'id',
+  member_id: 'member_id',
+  item_id: 'item_id',
+  room_id: 'room_id',
+  br_quantity: 'br_quantity',
+  br_due_date: 'br_due_date',
+  br_status: 'br_status',
+  br_purpose: 'br_purpose',
+  requested_by: 'requested_by',
+  reviewed_by: 'reviewed_by',
+  br_reviewed_at: 'br_reviewed_at',
+  br_review_note: 'br_review_note',
+  borrow_id: 'borrow_id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.FeeSettingScalarFieldEnum = {
   id: 'id',
   f_overdue_fee_per_day: 'f_overdue_fee_per_day',
@@ -241,6 +277,8 @@ exports.Prisma.ModelName = {
   Item: 'Item',
   Room: 'Room',
   Borrow: 'Borrow',
+  ItemReceipt: 'ItemReceipt',
+  BorrowRequest: 'BorrowRequest',
   FeeSetting: 'FeeSetting',
   Return: 'Return'
 };

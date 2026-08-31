@@ -37,6 +37,10 @@ model User {
   /// 1=active, 2=inactive
   status    Int     @default(1)
 
+  requestedBorrows BorrowRequest[] @relation("BorrowRequestRequester")
+  reviewedBorrows  BorrowRequest[] @relation("BorrowRequestReviewer")
+  releasedItems    ItemReceipt[]   @relation("ItemReceiptReleaser")
+
   @@map("user")
 }
 
@@ -55,8 +59,9 @@ model Borrower {
   /// 1=active, 2=inactive
   m_status       Int    @default(1)
 
-  borrows Borrow[]
-  returns Return[]
+  borrows        Borrow[]
+  returns        Return[]
+  borrowRequests BorrowRequest[]
 
   @@map("borrower")
 }
@@ -78,8 +83,9 @@ model Item {
   no_of_items   Int?
   remarks       String? @db.Text
 
-  borrows Borrow[]
-  returns Return[]
+  borrows        Borrow[]
+  returns        Return[]
+  borrowRequests BorrowRequest[]
 
   @@map("item")
 }
@@ -93,8 +99,9 @@ model Room {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
 
-  borrows Borrow[]
-  returns Return[]
+  borrows        Borrow[]
+  returns        Return[]
+  borrowRequests BorrowRequest[]
 
   @@map("room")
 }
@@ -113,12 +120,105 @@ model Borrow {
   b_purpose       String?   @db.Text
   b_notes         String?   @db.Text
 
-  Member Borrower @relation(fields: [member_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  Item   Item     @relation(fields: [item_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  Room   Room?    @relation(fields: [room_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
-  return Return?
+  Member  Borrower       @relation(fields: [member_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Item    Item           @relation(fields: [item_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Room    Room?          @relation(fields: [room_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  return  Return?
+  /// Set when this row was created by an admin approving a borrow request.
+  request BorrowRequest?
+  /// Set once the item was physically handed over and the admin logged who took it.
+  receipt ItemReceipt?
 
   @@map("borrow")
+}
+
+/// Proof of hand-over: approving a request creates the `Borrow`, but the item is still on the
+/// shelf until someone collects it. This records who actually walked away with it — with a photo
+/// taken at the counter — so a disputed loan can be traced to a person rather than to an account.
+///
+/// One row per borrow; a borrow with no row here has been approved but not yet collected.
+model ItemReceipt {
+  id        Int @id @default(autoincrement())
+  borrow_id Int @unique
+
+  /// Name of the person who physically took the item. Usually the borrower, but a colleague or
+  /// classmate may collect on their behalf — hence `rc_relationship`.
+  rc_receiver_name  String  @db.VarChar(150)
+  /// School / employee ID number the receiver presented.
+  rc_receiver_id    String? @db.VarChar(50)
+  /// Contact number taken at the counter, for chasing an item that is not returned.
+  rc_contact        String? @db.VarChar(20)
+  /// "self" when the borrower collected it, otherwise how the receiver relates to the borrower.
+  rc_relationship   String  @default("self") @db.VarChar(50)
+  /// Kind of ID shown at the counter (School ID, Driver's License, ...).
+  rc_id_presented   String? @db.VarChar(50)
+  /// UploadThing URL of the photo taken as the item was handed over. Nullable because a receipt
+  /// with the details filled in is still better than no record when the camera is unavailable.
+  rc_receiver_photo String? @db.VarChar(255)
+
+  /// Units actually handed over, which can be fewer than the borrow asked for.
+  rc_quantity    Int      @default(1)
+  /// Condition of the item at the moment it left, so damage on return can be attributed.
+  rc_condition   String   @default("Good") @db.VarChar(50)
+  rc_notes       String?  @db.Text
+  rc_received_at DateTime @default(now())
+
+  /// `user.id` of the admin who released the item. Nullable so a deleted account does not take
+  /// the hand-over record with it.
+  released_by Int?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  Borrow   Borrow @relation(fields: [borrow_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Releaser User?  @relation("ItemReceiptReleaser", fields: [released_by], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  // The list is newest-first, and the "awaiting hand-over" tab asks which borrows have no row here.
+  @@index([rc_received_at])
+  @@map("item_receipt")
+}
+
+/// A borrow the faculty / staff / student pages ask for but cannot grant themselves. It holds no
+/// stock — the item is only decremented when an admin approves and the matching `Borrow` row is
+/// created — so a pile of pending requests never looks like items that are out on loan.
+model BorrowRequest {
+  id          Int      @id @default(autoincrement())
+  member_id   Int
+  item_id     Int
+  room_id     Int?
+  br_quantity Int      @default(1)
+  /// Return date the requester is asking for; copied to `Borrow.b_due_date` on approval.
+  br_due_date DateTime
+  /// 1=pending, 2=approved, 3=rejected
+  br_status   Int      @default(1)
+  br_purpose  String?  @db.Text
+
+  /// `user.id` of the account that sent the request. Nullable so a deleted account does not
+  /// take the request history with it.
+  requested_by   Int?
+  /// `user.id` of the admin who approved or rejected it.
+  reviewed_by    Int?
+  br_reviewed_at DateTime?
+  /// Admin's note — the reason shown to the requester when a request is rejected.
+  br_review_note String?   @db.Text
+
+  /// The `borrow` row this request became, once approved.
+  borrow_id Int? @unique
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  Member    Borrower @relation(fields: [member_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Item      Item     @relation(fields: [item_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Room      Room?    @relation(fields: [room_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  Borrow    Borrow?  @relation(fields: [borrow_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  Requester User?    @relation("BorrowRequestRequester", fields: [requested_by], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  Reviewer  User?    @relation("BorrowRequestReviewer", fields: [reviewed_by], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  // The admin bell counts pending requests on every poll, and the list is newest-first.
+  @@index([br_status])
+  @@index([createdAt])
+  @@map("borrow_request")
 }
 
 /// Single-row table holding the school's fee policy. The admin edits it on /admin/settings and

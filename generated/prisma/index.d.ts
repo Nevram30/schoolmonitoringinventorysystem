@@ -39,6 +39,22 @@ export type Room = $Result.DefaultSelection<Prisma.$RoomPayload>
  */
 export type Borrow = $Result.DefaultSelection<Prisma.$BorrowPayload>
 /**
+ * Model ItemReceipt
+ * Proof of hand-over: approving a request creates the `Borrow`, but the item is still on the
+ * shelf until someone collects it. This records who actually walked away with it — with a photo
+ * taken at the counter — so a disputed loan can be traced to a person rather than to an account.
+ * 
+ * One row per borrow; a borrow with no row here has been approved but not yet collected.
+ */
+export type ItemReceipt = $Result.DefaultSelection<Prisma.$ItemReceiptPayload>
+/**
+ * Model BorrowRequest
+ * A borrow the faculty / staff / student pages ask for but cannot grant themselves. It holds no
+ * stock — the item is only decremented when an admin approves and the matching `Borrow` row is
+ * created — so a pile of pending requests never looks like items that are out on loan.
+ */
+export type BorrowRequest = $Result.DefaultSelection<Prisma.$BorrowRequestPayload>
+/**
  * Model FeeSetting
  * Single-row table holding the school's fee policy. The admin edits it on /admin/settings and
  * the returned-items screen uses it to suggest what a borrower owes. Always read/written with
@@ -237,6 +253,26 @@ export class PrismaClient<
     * ```
     */
   get borrow(): Prisma.BorrowDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.itemReceipt`: Exposes CRUD operations for the **ItemReceipt** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ItemReceipts
+    * const itemReceipts = await prisma.itemReceipt.findMany()
+    * ```
+    */
+  get itemReceipt(): Prisma.ItemReceiptDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.borrowRequest`: Exposes CRUD operations for the **BorrowRequest** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BorrowRequests
+    * const borrowRequests = await prisma.borrowRequest.findMany()
+    * ```
+    */
+  get borrowRequest(): Prisma.BorrowRequestDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.feeSetting`: Exposes CRUD operations for the **FeeSetting** model.
@@ -703,6 +739,8 @@ export namespace Prisma {
     Item: 'Item',
     Room: 'Room',
     Borrow: 'Borrow',
+    ItemReceipt: 'ItemReceipt',
+    BorrowRequest: 'BorrowRequest',
     FeeSetting: 'FeeSetting',
     Return: 'Return'
   };
@@ -723,7 +761,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "borrower" | "item" | "room" | "borrow" | "feeSetting" | "return"
+      modelProps: "user" | "borrower" | "item" | "room" | "borrow" | "itemReceipt" | "borrowRequest" | "feeSetting" | "return"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1097,6 +1135,154 @@ export namespace Prisma {
           }
         }
       }
+      ItemReceipt: {
+        payload: Prisma.$ItemReceiptPayload<ExtArgs>
+        fields: Prisma.ItemReceiptFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ItemReceiptFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ItemReceiptFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>
+          }
+          findFirst: {
+            args: Prisma.ItemReceiptFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ItemReceiptFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>
+          }
+          findMany: {
+            args: Prisma.ItemReceiptFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>[]
+          }
+          create: {
+            args: Prisma.ItemReceiptCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>
+          }
+          createMany: {
+            args: Prisma.ItemReceiptCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ItemReceiptCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>[]
+          }
+          delete: {
+            args: Prisma.ItemReceiptDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>
+          }
+          update: {
+            args: Prisma.ItemReceiptUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>
+          }
+          deleteMany: {
+            args: Prisma.ItemReceiptDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ItemReceiptUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ItemReceiptUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>[]
+          }
+          upsert: {
+            args: Prisma.ItemReceiptUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemReceiptPayload>
+          }
+          aggregate: {
+            args: Prisma.ItemReceiptAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateItemReceipt>
+          }
+          groupBy: {
+            args: Prisma.ItemReceiptGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ItemReceiptGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ItemReceiptCountArgs<ExtArgs>
+            result: $Utils.Optional<ItemReceiptCountAggregateOutputType> | number
+          }
+        }
+      }
+      BorrowRequest: {
+        payload: Prisma.$BorrowRequestPayload<ExtArgs>
+        fields: Prisma.BorrowRequestFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BorrowRequestFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BorrowRequestFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>
+          }
+          findFirst: {
+            args: Prisma.BorrowRequestFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BorrowRequestFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>
+          }
+          findMany: {
+            args: Prisma.BorrowRequestFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>[]
+          }
+          create: {
+            args: Prisma.BorrowRequestCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>
+          }
+          createMany: {
+            args: Prisma.BorrowRequestCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BorrowRequestCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>[]
+          }
+          delete: {
+            args: Prisma.BorrowRequestDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>
+          }
+          update: {
+            args: Prisma.BorrowRequestUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>
+          }
+          deleteMany: {
+            args: Prisma.BorrowRequestDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BorrowRequestUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BorrowRequestUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>[]
+          }
+          upsert: {
+            args: Prisma.BorrowRequestUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BorrowRequestPayload>
+          }
+          aggregate: {
+            args: Prisma.BorrowRequestAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBorrowRequest>
+          }
+          groupBy: {
+            args: Prisma.BorrowRequestGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BorrowRequestGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BorrowRequestCountArgs<ExtArgs>
+            result: $Utils.Optional<BorrowRequestCountAggregateOutputType> | number
+          }
+        }
+      }
       FeeSetting: {
         payload: Prisma.$FeeSettingPayload<ExtArgs>
         fields: Prisma.FeeSettingFieldRefs
@@ -1346,6 +1532,8 @@ export namespace Prisma {
     item?: ItemOmit
     room?: RoomOmit
     borrow?: BorrowOmit
+    itemReceipt?: ItemReceiptOmit
+    borrowRequest?: BorrowRequestOmit
     feeSetting?: FeeSettingOmit
     return?: ReturnOmit
   }
@@ -1424,17 +1612,68 @@ export namespace Prisma {
 
 
   /**
+   * Count Type UserCountOutputType
+   */
+
+  export type UserCountOutputType = {
+    requestedBorrows: number
+    reviewedBorrows: number
+    releasedItems: number
+  }
+
+  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    requestedBorrows?: boolean | UserCountOutputTypeCountRequestedBorrowsArgs
+    reviewedBorrows?: boolean | UserCountOutputTypeCountReviewedBorrowsArgs
+    releasedItems?: boolean | UserCountOutputTypeCountReleasedItemsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserCountOutputType
+     */
+    select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountRequestedBorrowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BorrowRequestWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountReviewedBorrowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BorrowRequestWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountReleasedItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ItemReceiptWhereInput
+  }
+
+
+  /**
    * Count Type BorrowerCountOutputType
    */
 
   export type BorrowerCountOutputType = {
     borrows: number
     returns: number
+    borrowRequests: number
   }
 
   export type BorrowerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | BorrowerCountOutputTypeCountBorrowsArgs
     returns?: boolean | BorrowerCountOutputTypeCountReturnsArgs
+    borrowRequests?: boolean | BorrowerCountOutputTypeCountBorrowRequestsArgs
   }
 
   // Custom InputTypes
@@ -1462,6 +1701,13 @@ export namespace Prisma {
     where?: ReturnWhereInput
   }
 
+  /**
+   * BorrowerCountOutputType without action
+   */
+  export type BorrowerCountOutputTypeCountBorrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BorrowRequestWhereInput
+  }
+
 
   /**
    * Count Type ItemCountOutputType
@@ -1470,11 +1716,13 @@ export namespace Prisma {
   export type ItemCountOutputType = {
     borrows: number
     returns: number
+    borrowRequests: number
   }
 
   export type ItemCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | ItemCountOutputTypeCountBorrowsArgs
     returns?: boolean | ItemCountOutputTypeCountReturnsArgs
+    borrowRequests?: boolean | ItemCountOutputTypeCountBorrowRequestsArgs
   }
 
   // Custom InputTypes
@@ -1502,6 +1750,13 @@ export namespace Prisma {
     where?: ReturnWhereInput
   }
 
+  /**
+   * ItemCountOutputType without action
+   */
+  export type ItemCountOutputTypeCountBorrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BorrowRequestWhereInput
+  }
+
 
   /**
    * Count Type RoomCountOutputType
@@ -1510,11 +1765,13 @@ export namespace Prisma {
   export type RoomCountOutputType = {
     borrows: number
     returns: number
+    borrowRequests: number
   }
 
   export type RoomCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | RoomCountOutputTypeCountBorrowsArgs
     returns?: boolean | RoomCountOutputTypeCountReturnsArgs
+    borrowRequests?: boolean | RoomCountOutputTypeCountBorrowRequestsArgs
   }
 
   // Custom InputTypes
@@ -1540,6 +1797,13 @@ export namespace Prisma {
    */
   export type RoomCountOutputTypeCountReturnsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ReturnWhereInput
+  }
+
+  /**
+   * RoomCountOutputType without action
+   */
+  export type RoomCountOutputTypeCountBorrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BorrowRequestWhereInput
   }
 
 
@@ -1773,6 +2037,10 @@ export namespace Prisma {
     id_number?: boolean
     role?: boolean
     status?: boolean
+    requestedBorrows?: boolean | User$requestedBorrowsArgs<ExtArgs>
+    reviewedBorrows?: boolean | User$reviewedBorrowsArgs<ExtArgs>
+    releasedItems?: boolean | User$releasedItemsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1809,10 +2077,22 @@ export namespace Prisma {
   }
 
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "username" | "password" | "email" | "id_number" | "role" | "status", ExtArgs["result"]["user"]>
+  export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    requestedBorrows?: boolean | User$requestedBorrowsArgs<ExtArgs>
+    reviewedBorrows?: boolean | User$reviewedBorrowsArgs<ExtArgs>
+    releasedItems?: boolean | User$releasedItemsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
-    objects: {}
+    objects: {
+      requestedBorrows: Prisma.$BorrowRequestPayload<ExtArgs>[]
+      reviewedBorrows: Prisma.$BorrowRequestPayload<ExtArgs>[]
+      releasedItems: Prisma.$ItemReceiptPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
@@ -2225,6 +2505,9 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    requestedBorrows<T extends User$requestedBorrowsArgs<ExtArgs> = {}>(args?: Subset<T, User$requestedBorrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    reviewedBorrows<T extends User$reviewedBorrowsArgs<ExtArgs> = {}>(args?: Subset<T, User$reviewedBorrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    releasedItems<T extends User$releasedItemsArgs<ExtArgs> = {}>(args?: Subset<T, User$releasedItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2279,6 +2562,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where: UserWhereUniqueInput
@@ -2297,6 +2584,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where: UserWhereUniqueInput
@@ -2314,6 +2605,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * Filter, which User to fetch.
      */
@@ -2363,6 +2658,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where?: UserWhereInput
@@ -2411,6 +2710,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which Users to fetch.
      */
     where?: UserWhereInput
@@ -2453,6 +2756,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * The data needed to create a User.
      */
@@ -2501,6 +2808,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * The data needed to update a User.
      */
@@ -2568,6 +2879,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * The filter to search for the User to update in case it exists.
      */
     where: UserWhereUniqueInput
@@ -2594,6 +2909,10 @@ export namespace Prisma {
      */
     omit?: UserOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter which User to delete.
      */
     where: UserWhereUniqueInput
@@ -2614,6 +2933,78 @@ export namespace Prisma {
   }
 
   /**
+   * User.requestedBorrows
+   */
+  export type User$requestedBorrowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    where?: BorrowRequestWhereInput
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    cursor?: BorrowRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
+   * User.reviewedBorrows
+   */
+  export type User$reviewedBorrowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    where?: BorrowRequestWhereInput
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    cursor?: BorrowRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
+   * User.releasedItems
+   */
+  export type User$releasedItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    where?: ItemReceiptWhereInput
+    orderBy?: ItemReceiptOrderByWithRelationInput | ItemReceiptOrderByWithRelationInput[]
+    cursor?: ItemReceiptWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ItemReceiptScalarFieldEnum | ItemReceiptScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2625,6 +3016,10 @@ export namespace Prisma {
      * Omit specific fields from the User
      */
     omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
   }
 
 
@@ -2884,6 +3279,7 @@ export namespace Prisma {
     m_status?: boolean
     borrows?: boolean | Borrower$borrowsArgs<ExtArgs>
     returns?: boolean | Borrower$returnsArgs<ExtArgs>
+    borrowRequests?: boolean | Borrower$borrowRequestsArgs<ExtArgs>
     _count?: boolean | BorrowerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["borrower"]>
 
@@ -2933,6 +3329,7 @@ export namespace Prisma {
   export type BorrowerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | Borrower$borrowsArgs<ExtArgs>
     returns?: boolean | Borrower$returnsArgs<ExtArgs>
+    borrowRequests?: boolean | Borrower$borrowRequestsArgs<ExtArgs>
     _count?: boolean | BorrowerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BorrowerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2943,6 +3340,7 @@ export namespace Prisma {
     objects: {
       borrows: Prisma.$BorrowPayload<ExtArgs>[]
       returns: Prisma.$ReturnPayload<ExtArgs>[]
+      borrowRequests: Prisma.$BorrowRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -3358,6 +3756,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     borrows<T extends Borrower$borrowsArgs<ExtArgs> = {}>(args?: Subset<T, Borrower$borrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     returns<T extends Borrower$returnsArgs<ExtArgs> = {}>(args?: Subset<T, Borrower$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    borrowRequests<T extends Borrower$borrowRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Borrower$borrowRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3834,6 +4233,30 @@ export namespace Prisma {
   }
 
   /**
+   * Borrower.borrowRequests
+   */
+  export type Borrower$borrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    where?: BorrowRequestWhereInput
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    cursor?: BorrowRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
    * Borrower without action
    */
   export type BorrowerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4140,6 +4563,7 @@ export namespace Prisma {
     remarks?: boolean
     borrows?: boolean | Item$borrowsArgs<ExtArgs>
     returns?: boolean | Item$returnsArgs<ExtArgs>
+    borrowRequests?: boolean | Item$borrowRequestsArgs<ExtArgs>
     _count?: boolean | ItemCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["item"]>
 
@@ -4198,6 +4622,7 @@ export namespace Prisma {
   export type ItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | Item$borrowsArgs<ExtArgs>
     returns?: boolean | Item$returnsArgs<ExtArgs>
+    borrowRequests?: boolean | Item$borrowRequestsArgs<ExtArgs>
     _count?: boolean | ItemCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -4208,6 +4633,7 @@ export namespace Prisma {
     objects: {
       borrows: Prisma.$BorrowPayload<ExtArgs>[]
       returns: Prisma.$ReturnPayload<ExtArgs>[]
+      borrowRequests: Prisma.$BorrowRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -4623,6 +5049,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     borrows<T extends Item$borrowsArgs<ExtArgs> = {}>(args?: Subset<T, Item$borrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     returns<T extends Item$returnsArgs<ExtArgs> = {}>(args?: Subset<T, Item$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    borrowRequests<T extends Item$borrowRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Item$borrowRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5102,6 +5529,30 @@ export namespace Prisma {
   }
 
   /**
+   * Item.borrowRequests
+   */
+  export type Item$borrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    where?: BorrowRequestWhereInput
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    cursor?: BorrowRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
    * Item without action
    */
   export type ItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5332,6 +5783,7 @@ export namespace Prisma {
     updatedAt?: boolean
     borrows?: boolean | Room$borrowsArgs<ExtArgs>
     returns?: boolean | Room$returnsArgs<ExtArgs>
+    borrowRequests?: boolean | Room$borrowRequestsArgs<ExtArgs>
     _count?: boolean | RoomCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
 
@@ -5366,6 +5818,7 @@ export namespace Prisma {
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | Room$borrowsArgs<ExtArgs>
     returns?: boolean | Room$returnsArgs<ExtArgs>
+    borrowRequests?: boolean | Room$borrowRequestsArgs<ExtArgs>
     _count?: boolean | RoomCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type RoomIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -5376,6 +5829,7 @@ export namespace Prisma {
     objects: {
       borrows: Prisma.$BorrowPayload<ExtArgs>[]
       returns: Prisma.$ReturnPayload<ExtArgs>[]
+      borrowRequests: Prisma.$BorrowRequestPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5783,6 +6237,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     borrows<T extends Room$borrowsArgs<ExtArgs> = {}>(args?: Subset<T, Room$borrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     returns<T extends Room$returnsArgs<ExtArgs> = {}>(args?: Subset<T, Room$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    borrowRequests<T extends Room$borrowRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Room$borrowRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6254,6 +6709,30 @@ export namespace Prisma {
   }
 
   /**
+   * Room.borrowRequests
+   */
+  export type Room$borrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    where?: BorrowRequestWhereInput
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    cursor?: BorrowRequestWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
    * Room without action
    */
   export type RoomDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6542,6 +7021,8 @@ export namespace Prisma {
     Item?: boolean | ItemDefaultArgs<ExtArgs>
     Room?: boolean | Borrow$RoomArgs<ExtArgs>
     return?: boolean | Borrow$returnArgs<ExtArgs>
+    request?: boolean | Borrow$requestArgs<ExtArgs>
+    receipt?: boolean | Borrow$receiptArgs<ExtArgs>
   }, ExtArgs["result"]["borrow"]>
 
   export type BorrowSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -6598,6 +7079,8 @@ export namespace Prisma {
     Item?: boolean | ItemDefaultArgs<ExtArgs>
     Room?: boolean | Borrow$RoomArgs<ExtArgs>
     return?: boolean | Borrow$returnArgs<ExtArgs>
+    request?: boolean | Borrow$requestArgs<ExtArgs>
+    receipt?: boolean | Borrow$receiptArgs<ExtArgs>
   }
   export type BorrowIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     Member?: boolean | BorrowerDefaultArgs<ExtArgs>
@@ -6617,6 +7100,14 @@ export namespace Prisma {
       Item: Prisma.$ItemPayload<ExtArgs>
       Room: Prisma.$RoomPayload<ExtArgs> | null
       return: Prisma.$ReturnPayload<ExtArgs> | null
+      /**
+       * Set when this row was created by an admin approving a borrow request.
+       */
+      request: Prisma.$BorrowRequestPayload<ExtArgs> | null
+      /**
+       * Set once the item was physically handed over and the admin logged who took it.
+       */
+      receipt: Prisma.$ItemReceiptPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -7031,6 +7522,8 @@ export namespace Prisma {
     Item<T extends ItemDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ItemDefaultArgs<ExtArgs>>): Prisma__ItemClient<$Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     Room<T extends Borrow$RoomArgs<ExtArgs> = {}>(args?: Subset<T, Borrow$RoomArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     return<T extends Borrow$returnArgs<ExtArgs> = {}>(args?: Subset<T, Borrow$returnArgs<ExtArgs>>): Prisma__ReturnClient<$Result.GetResult<Prisma.$ReturnPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    request<T extends Borrow$requestArgs<ExtArgs> = {}>(args?: Subset<T, Borrow$requestArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    receipt<T extends Borrow$receiptArgs<ExtArgs> = {}>(args?: Subset<T, Borrow$receiptArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7505,6 +7998,44 @@ export namespace Prisma {
   }
 
   /**
+   * Borrow.request
+   */
+  export type Borrow$requestArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    where?: BorrowRequestWhereInput
+  }
+
+  /**
+   * Borrow.receipt
+   */
+  export type Borrow$receiptArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    where?: ItemReceiptWhereInput
+  }
+
+  /**
    * Borrow without action
    */
   export type BorrowDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7520,6 +8051,2686 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: BorrowInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ItemReceipt
+   */
+
+  export type AggregateItemReceipt = {
+    _count: ItemReceiptCountAggregateOutputType | null
+    _avg: ItemReceiptAvgAggregateOutputType | null
+    _sum: ItemReceiptSumAggregateOutputType | null
+    _min: ItemReceiptMinAggregateOutputType | null
+    _max: ItemReceiptMaxAggregateOutputType | null
+  }
+
+  export type ItemReceiptAvgAggregateOutputType = {
+    id: number | null
+    borrow_id: number | null
+    rc_quantity: number | null
+    released_by: number | null
+  }
+
+  export type ItemReceiptSumAggregateOutputType = {
+    id: number | null
+    borrow_id: number | null
+    rc_quantity: number | null
+    released_by: number | null
+  }
+
+  export type ItemReceiptMinAggregateOutputType = {
+    id: number | null
+    borrow_id: number | null
+    rc_receiver_name: string | null
+    rc_receiver_id: string | null
+    rc_contact: string | null
+    rc_relationship: string | null
+    rc_id_presented: string | null
+    rc_receiver_photo: string | null
+    rc_quantity: number | null
+    rc_condition: string | null
+    rc_notes: string | null
+    rc_received_at: Date | null
+    released_by: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ItemReceiptMaxAggregateOutputType = {
+    id: number | null
+    borrow_id: number | null
+    rc_receiver_name: string | null
+    rc_receiver_id: string | null
+    rc_contact: string | null
+    rc_relationship: string | null
+    rc_id_presented: string | null
+    rc_receiver_photo: string | null
+    rc_quantity: number | null
+    rc_condition: string | null
+    rc_notes: string | null
+    rc_received_at: Date | null
+    released_by: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ItemReceiptCountAggregateOutputType = {
+    id: number
+    borrow_id: number
+    rc_receiver_name: number
+    rc_receiver_id: number
+    rc_contact: number
+    rc_relationship: number
+    rc_id_presented: number
+    rc_receiver_photo: number
+    rc_quantity: number
+    rc_condition: number
+    rc_notes: number
+    rc_received_at: number
+    released_by: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ItemReceiptAvgAggregateInputType = {
+    id?: true
+    borrow_id?: true
+    rc_quantity?: true
+    released_by?: true
+  }
+
+  export type ItemReceiptSumAggregateInputType = {
+    id?: true
+    borrow_id?: true
+    rc_quantity?: true
+    released_by?: true
+  }
+
+  export type ItemReceiptMinAggregateInputType = {
+    id?: true
+    borrow_id?: true
+    rc_receiver_name?: true
+    rc_receiver_id?: true
+    rc_contact?: true
+    rc_relationship?: true
+    rc_id_presented?: true
+    rc_receiver_photo?: true
+    rc_quantity?: true
+    rc_condition?: true
+    rc_notes?: true
+    rc_received_at?: true
+    released_by?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ItemReceiptMaxAggregateInputType = {
+    id?: true
+    borrow_id?: true
+    rc_receiver_name?: true
+    rc_receiver_id?: true
+    rc_contact?: true
+    rc_relationship?: true
+    rc_id_presented?: true
+    rc_receiver_photo?: true
+    rc_quantity?: true
+    rc_condition?: true
+    rc_notes?: true
+    rc_received_at?: true
+    released_by?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ItemReceiptCountAggregateInputType = {
+    id?: true
+    borrow_id?: true
+    rc_receiver_name?: true
+    rc_receiver_id?: true
+    rc_contact?: true
+    rc_relationship?: true
+    rc_id_presented?: true
+    rc_receiver_photo?: true
+    rc_quantity?: true
+    rc_condition?: true
+    rc_notes?: true
+    rc_received_at?: true
+    released_by?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ItemReceiptAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ItemReceipt to aggregate.
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ItemReceipts to fetch.
+     */
+    orderBy?: ItemReceiptOrderByWithRelationInput | ItemReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ItemReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ItemReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ItemReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ItemReceipts
+    **/
+    _count?: true | ItemReceiptCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: ItemReceiptAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: ItemReceiptSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ItemReceiptMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ItemReceiptMaxAggregateInputType
+  }
+
+  export type GetItemReceiptAggregateType<T extends ItemReceiptAggregateArgs> = {
+        [P in keyof T & keyof AggregateItemReceipt]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateItemReceipt[P]>
+      : GetScalarType<T[P], AggregateItemReceipt[P]>
+  }
+
+
+
+
+  export type ItemReceiptGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ItemReceiptWhereInput
+    orderBy?: ItemReceiptOrderByWithAggregationInput | ItemReceiptOrderByWithAggregationInput[]
+    by: ItemReceiptScalarFieldEnum[] | ItemReceiptScalarFieldEnum
+    having?: ItemReceiptScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ItemReceiptCountAggregateInputType | true
+    _avg?: ItemReceiptAvgAggregateInputType
+    _sum?: ItemReceiptSumAggregateInputType
+    _min?: ItemReceiptMinAggregateInputType
+    _max?: ItemReceiptMaxAggregateInputType
+  }
+
+  export type ItemReceiptGroupByOutputType = {
+    id: number
+    borrow_id: number
+    rc_receiver_name: string
+    rc_receiver_id: string | null
+    rc_contact: string | null
+    rc_relationship: string
+    rc_id_presented: string | null
+    rc_receiver_photo: string | null
+    rc_quantity: number
+    rc_condition: string
+    rc_notes: string | null
+    rc_received_at: Date
+    released_by: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ItemReceiptCountAggregateOutputType | null
+    _avg: ItemReceiptAvgAggregateOutputType | null
+    _sum: ItemReceiptSumAggregateOutputType | null
+    _min: ItemReceiptMinAggregateOutputType | null
+    _max: ItemReceiptMaxAggregateOutputType | null
+  }
+
+  type GetItemReceiptGroupByPayload<T extends ItemReceiptGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ItemReceiptGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ItemReceiptGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ItemReceiptGroupByOutputType[P]>
+            : GetScalarType<T[P], ItemReceiptGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ItemReceiptSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    borrow_id?: boolean
+    rc_receiver_name?: boolean
+    rc_receiver_id?: boolean
+    rc_contact?: boolean
+    rc_relationship?: boolean
+    rc_id_presented?: boolean
+    rc_receiver_photo?: boolean
+    rc_quantity?: boolean
+    rc_condition?: boolean
+    rc_notes?: boolean
+    rc_received_at?: boolean
+    released_by?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    Borrow?: boolean | BorrowDefaultArgs<ExtArgs>
+    Releaser?: boolean | ItemReceipt$ReleaserArgs<ExtArgs>
+  }, ExtArgs["result"]["itemReceipt"]>
+
+  export type ItemReceiptSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    borrow_id?: boolean
+    rc_receiver_name?: boolean
+    rc_receiver_id?: boolean
+    rc_contact?: boolean
+    rc_relationship?: boolean
+    rc_id_presented?: boolean
+    rc_receiver_photo?: boolean
+    rc_quantity?: boolean
+    rc_condition?: boolean
+    rc_notes?: boolean
+    rc_received_at?: boolean
+    released_by?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    Borrow?: boolean | BorrowDefaultArgs<ExtArgs>
+    Releaser?: boolean | ItemReceipt$ReleaserArgs<ExtArgs>
+  }, ExtArgs["result"]["itemReceipt"]>
+
+  export type ItemReceiptSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    borrow_id?: boolean
+    rc_receiver_name?: boolean
+    rc_receiver_id?: boolean
+    rc_contact?: boolean
+    rc_relationship?: boolean
+    rc_id_presented?: boolean
+    rc_receiver_photo?: boolean
+    rc_quantity?: boolean
+    rc_condition?: boolean
+    rc_notes?: boolean
+    rc_received_at?: boolean
+    released_by?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    Borrow?: boolean | BorrowDefaultArgs<ExtArgs>
+    Releaser?: boolean | ItemReceipt$ReleaserArgs<ExtArgs>
+  }, ExtArgs["result"]["itemReceipt"]>
+
+  export type ItemReceiptSelectScalar = {
+    id?: boolean
+    borrow_id?: boolean
+    rc_receiver_name?: boolean
+    rc_receiver_id?: boolean
+    rc_contact?: boolean
+    rc_relationship?: boolean
+    rc_id_presented?: boolean
+    rc_receiver_photo?: boolean
+    rc_quantity?: boolean
+    rc_condition?: boolean
+    rc_notes?: boolean
+    rc_received_at?: boolean
+    released_by?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ItemReceiptOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "borrow_id" | "rc_receiver_name" | "rc_receiver_id" | "rc_contact" | "rc_relationship" | "rc_id_presented" | "rc_receiver_photo" | "rc_quantity" | "rc_condition" | "rc_notes" | "rc_received_at" | "released_by" | "createdAt" | "updatedAt", ExtArgs["result"]["itemReceipt"]>
+  export type ItemReceiptInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Borrow?: boolean | BorrowDefaultArgs<ExtArgs>
+    Releaser?: boolean | ItemReceipt$ReleaserArgs<ExtArgs>
+  }
+  export type ItemReceiptIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Borrow?: boolean | BorrowDefaultArgs<ExtArgs>
+    Releaser?: boolean | ItemReceipt$ReleaserArgs<ExtArgs>
+  }
+  export type ItemReceiptIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Borrow?: boolean | BorrowDefaultArgs<ExtArgs>
+    Releaser?: boolean | ItemReceipt$ReleaserArgs<ExtArgs>
+  }
+
+  export type $ItemReceiptPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ItemReceipt"
+    objects: {
+      Borrow: Prisma.$BorrowPayload<ExtArgs>
+      Releaser: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      borrow_id: number
+      /**
+       * Name of the person who physically took the item. Usually the borrower, but a colleague or
+       * classmate may collect on their behalf — hence `rc_relationship`.
+       */
+      rc_receiver_name: string
+      /**
+       * School / employee ID number the receiver presented.
+       */
+      rc_receiver_id: string | null
+      /**
+       * Contact number taken at the counter, for chasing an item that is not returned.
+       */
+      rc_contact: string | null
+      /**
+       * "self" when the borrower collected it, otherwise how the receiver relates to the borrower.
+       */
+      rc_relationship: string
+      /**
+       * Kind of ID shown at the counter (School ID, Driver's License, ...).
+       */
+      rc_id_presented: string | null
+      /**
+       * UploadThing URL of the photo taken as the item was handed over. Nullable because a receipt
+       * with the details filled in is still better than no record when the camera is unavailable.
+       */
+      rc_receiver_photo: string | null
+      /**
+       * Units actually handed over, which can be fewer than the borrow asked for.
+       */
+      rc_quantity: number
+      /**
+       * Condition of the item at the moment it left, so damage on return can be attributed.
+       */
+      rc_condition: string
+      rc_notes: string | null
+      rc_received_at: Date
+      /**
+       * `user.id` of the admin who released the item. Nullable so a deleted account does not take
+       * the hand-over record with it.
+       */
+      released_by: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["itemReceipt"]>
+    composites: {}
+  }
+
+  type ItemReceiptGetPayload<S extends boolean | null | undefined | ItemReceiptDefaultArgs> = $Result.GetResult<Prisma.$ItemReceiptPayload, S>
+
+  type ItemReceiptCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ItemReceiptFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ItemReceiptCountAggregateInputType | true
+    }
+
+  export interface ItemReceiptDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ItemReceipt'], meta: { name: 'ItemReceipt' } }
+    /**
+     * Find zero or one ItemReceipt that matches the filter.
+     * @param {ItemReceiptFindUniqueArgs} args - Arguments to find a ItemReceipt
+     * @example
+     * // Get one ItemReceipt
+     * const itemReceipt = await prisma.itemReceipt.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ItemReceiptFindUniqueArgs>(args: SelectSubset<T, ItemReceiptFindUniqueArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ItemReceipt that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ItemReceiptFindUniqueOrThrowArgs} args - Arguments to find a ItemReceipt
+     * @example
+     * // Get one ItemReceipt
+     * const itemReceipt = await prisma.itemReceipt.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ItemReceiptFindUniqueOrThrowArgs>(args: SelectSubset<T, ItemReceiptFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ItemReceipt that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptFindFirstArgs} args - Arguments to find a ItemReceipt
+     * @example
+     * // Get one ItemReceipt
+     * const itemReceipt = await prisma.itemReceipt.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ItemReceiptFindFirstArgs>(args?: SelectSubset<T, ItemReceiptFindFirstArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ItemReceipt that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptFindFirstOrThrowArgs} args - Arguments to find a ItemReceipt
+     * @example
+     * // Get one ItemReceipt
+     * const itemReceipt = await prisma.itemReceipt.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ItemReceiptFindFirstOrThrowArgs>(args?: SelectSubset<T, ItemReceiptFindFirstOrThrowArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ItemReceipts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ItemReceipts
+     * const itemReceipts = await prisma.itemReceipt.findMany()
+     * 
+     * // Get first 10 ItemReceipts
+     * const itemReceipts = await prisma.itemReceipt.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const itemReceiptWithIdOnly = await prisma.itemReceipt.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ItemReceiptFindManyArgs>(args?: SelectSubset<T, ItemReceiptFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ItemReceipt.
+     * @param {ItemReceiptCreateArgs} args - Arguments to create a ItemReceipt.
+     * @example
+     * // Create one ItemReceipt
+     * const ItemReceipt = await prisma.itemReceipt.create({
+     *   data: {
+     *     // ... data to create a ItemReceipt
+     *   }
+     * })
+     * 
+     */
+    create<T extends ItemReceiptCreateArgs>(args: SelectSubset<T, ItemReceiptCreateArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ItemReceipts.
+     * @param {ItemReceiptCreateManyArgs} args - Arguments to create many ItemReceipts.
+     * @example
+     * // Create many ItemReceipts
+     * const itemReceipt = await prisma.itemReceipt.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ItemReceiptCreateManyArgs>(args?: SelectSubset<T, ItemReceiptCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ItemReceipts and returns the data saved in the database.
+     * @param {ItemReceiptCreateManyAndReturnArgs} args - Arguments to create many ItemReceipts.
+     * @example
+     * // Create many ItemReceipts
+     * const itemReceipt = await prisma.itemReceipt.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ItemReceipts and only return the `id`
+     * const itemReceiptWithIdOnly = await prisma.itemReceipt.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ItemReceiptCreateManyAndReturnArgs>(args?: SelectSubset<T, ItemReceiptCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ItemReceipt.
+     * @param {ItemReceiptDeleteArgs} args - Arguments to delete one ItemReceipt.
+     * @example
+     * // Delete one ItemReceipt
+     * const ItemReceipt = await prisma.itemReceipt.delete({
+     *   where: {
+     *     // ... filter to delete one ItemReceipt
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ItemReceiptDeleteArgs>(args: SelectSubset<T, ItemReceiptDeleteArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ItemReceipt.
+     * @param {ItemReceiptUpdateArgs} args - Arguments to update one ItemReceipt.
+     * @example
+     * // Update one ItemReceipt
+     * const itemReceipt = await prisma.itemReceipt.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ItemReceiptUpdateArgs>(args: SelectSubset<T, ItemReceiptUpdateArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ItemReceipts.
+     * @param {ItemReceiptDeleteManyArgs} args - Arguments to filter ItemReceipts to delete.
+     * @example
+     * // Delete a few ItemReceipts
+     * const { count } = await prisma.itemReceipt.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ItemReceiptDeleteManyArgs>(args?: SelectSubset<T, ItemReceiptDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ItemReceipts
+     * const itemReceipt = await prisma.itemReceipt.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ItemReceiptUpdateManyArgs>(args: SelectSubset<T, ItemReceiptUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemReceipts and returns the data updated in the database.
+     * @param {ItemReceiptUpdateManyAndReturnArgs} args - Arguments to update many ItemReceipts.
+     * @example
+     * // Update many ItemReceipts
+     * const itemReceipt = await prisma.itemReceipt.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemReceipts and only return the `id`
+     * const itemReceiptWithIdOnly = await prisma.itemReceipt.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemReceiptUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemReceiptUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ItemReceipt.
+     * @param {ItemReceiptUpsertArgs} args - Arguments to update or create a ItemReceipt.
+     * @example
+     * // Update or create a ItemReceipt
+     * const itemReceipt = await prisma.itemReceipt.upsert({
+     *   create: {
+     *     // ... data to create a ItemReceipt
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ItemReceipt we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ItemReceiptUpsertArgs>(args: SelectSubset<T, ItemReceiptUpsertArgs<ExtArgs>>): Prisma__ItemReceiptClient<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ItemReceipts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptCountArgs} args - Arguments to filter ItemReceipts to count.
+     * @example
+     * // Count the number of ItemReceipts
+     * const count = await prisma.itemReceipt.count({
+     *   where: {
+     *     // ... the filter for the ItemReceipts we want to count
+     *   }
+     * })
+    **/
+    count<T extends ItemReceiptCountArgs>(
+      args?: Subset<T, ItemReceiptCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ItemReceiptCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ItemReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ItemReceiptAggregateArgs>(args: Subset<T, ItemReceiptAggregateArgs>): Prisma.PrismaPromise<GetItemReceiptAggregateType<T>>
+
+    /**
+     * Group by ItemReceipt.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ItemReceiptGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ItemReceiptGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ItemReceiptGroupByArgs['orderBy'] }
+        : { orderBy?: ItemReceiptGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ItemReceiptGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetItemReceiptGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ItemReceipt model
+   */
+  readonly fields: ItemReceiptFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ItemReceipt.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ItemReceiptClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    Borrow<T extends BorrowDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BorrowDefaultArgs<ExtArgs>>): Prisma__BorrowClient<$Result.GetResult<Prisma.$BorrowPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    Releaser<T extends ItemReceipt$ReleaserArgs<ExtArgs> = {}>(args?: Subset<T, ItemReceipt$ReleaserArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ItemReceipt model
+   */
+  interface ItemReceiptFieldRefs {
+    readonly id: FieldRef<"ItemReceipt", 'Int'>
+    readonly borrow_id: FieldRef<"ItemReceipt", 'Int'>
+    readonly rc_receiver_name: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_receiver_id: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_contact: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_relationship: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_id_presented: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_receiver_photo: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_quantity: FieldRef<"ItemReceipt", 'Int'>
+    readonly rc_condition: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_notes: FieldRef<"ItemReceipt", 'String'>
+    readonly rc_received_at: FieldRef<"ItemReceipt", 'DateTime'>
+    readonly released_by: FieldRef<"ItemReceipt", 'Int'>
+    readonly createdAt: FieldRef<"ItemReceipt", 'DateTime'>
+    readonly updatedAt: FieldRef<"ItemReceipt", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ItemReceipt findUnique
+   */
+  export type ItemReceiptFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ItemReceipt to fetch.
+     */
+    where: ItemReceiptWhereUniqueInput
+  }
+
+  /**
+   * ItemReceipt findUniqueOrThrow
+   */
+  export type ItemReceiptFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ItemReceipt to fetch.
+     */
+    where: ItemReceiptWhereUniqueInput
+  }
+
+  /**
+   * ItemReceipt findFirst
+   */
+  export type ItemReceiptFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ItemReceipt to fetch.
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ItemReceipts to fetch.
+     */
+    orderBy?: ItemReceiptOrderByWithRelationInput | ItemReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ItemReceipts.
+     */
+    cursor?: ItemReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ItemReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ItemReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ItemReceipts.
+     */
+    distinct?: ItemReceiptScalarFieldEnum | ItemReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * ItemReceipt findFirstOrThrow
+   */
+  export type ItemReceiptFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ItemReceipt to fetch.
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ItemReceipts to fetch.
+     */
+    orderBy?: ItemReceiptOrderByWithRelationInput | ItemReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ItemReceipts.
+     */
+    cursor?: ItemReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ItemReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ItemReceipts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ItemReceipts.
+     */
+    distinct?: ItemReceiptScalarFieldEnum | ItemReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * ItemReceipt findMany
+   */
+  export type ItemReceiptFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * Filter, which ItemReceipts to fetch.
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ItemReceipts to fetch.
+     */
+    orderBy?: ItemReceiptOrderByWithRelationInput | ItemReceiptOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ItemReceipts.
+     */
+    cursor?: ItemReceiptWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ItemReceipts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ItemReceipts.
+     */
+    skip?: number
+    distinct?: ItemReceiptScalarFieldEnum | ItemReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * ItemReceipt create
+   */
+  export type ItemReceiptCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ItemReceipt.
+     */
+    data: XOR<ItemReceiptCreateInput, ItemReceiptUncheckedCreateInput>
+  }
+
+  /**
+   * ItemReceipt createMany
+   */
+  export type ItemReceiptCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ItemReceipts.
+     */
+    data: ItemReceiptCreateManyInput | ItemReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ItemReceipt createManyAndReturn
+   */
+  export type ItemReceiptCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to create many ItemReceipts.
+     */
+    data: ItemReceiptCreateManyInput | ItemReceiptCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ItemReceipt update
+   */
+  export type ItemReceiptUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ItemReceipt.
+     */
+    data: XOR<ItemReceiptUpdateInput, ItemReceiptUncheckedUpdateInput>
+    /**
+     * Choose, which ItemReceipt to update.
+     */
+    where: ItemReceiptWhereUniqueInput
+  }
+
+  /**
+   * ItemReceipt updateMany
+   */
+  export type ItemReceiptUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ItemReceipts.
+     */
+    data: XOR<ItemReceiptUpdateManyMutationInput, ItemReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemReceipts to update
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * Limit how many ItemReceipts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemReceipt updateManyAndReturn
+   */
+  export type ItemReceiptUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemReceipts.
+     */
+    data: XOR<ItemReceiptUpdateManyMutationInput, ItemReceiptUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemReceipts to update
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * Limit how many ItemReceipts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ItemReceipt upsert
+   */
+  export type ItemReceiptUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ItemReceipt to update in case it exists.
+     */
+    where: ItemReceiptWhereUniqueInput
+    /**
+     * In case the ItemReceipt found by the `where` argument doesn't exist, create a new ItemReceipt with this data.
+     */
+    create: XOR<ItemReceiptCreateInput, ItemReceiptUncheckedCreateInput>
+    /**
+     * In case the ItemReceipt was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ItemReceiptUpdateInput, ItemReceiptUncheckedUpdateInput>
+  }
+
+  /**
+   * ItemReceipt delete
+   */
+  export type ItemReceiptDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+    /**
+     * Filter which ItemReceipt to delete.
+     */
+    where: ItemReceiptWhereUniqueInput
+  }
+
+  /**
+   * ItemReceipt deleteMany
+   */
+  export type ItemReceiptDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ItemReceipts to delete
+     */
+    where?: ItemReceiptWhereInput
+    /**
+     * Limit how many ItemReceipts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemReceipt.Releaser
+   */
+  export type ItemReceipt$ReleaserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * ItemReceipt without action
+   */
+  export type ItemReceiptDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemReceipt
+     */
+    select?: ItemReceiptSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemReceipt
+     */
+    omit?: ItemReceiptOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemReceiptInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BorrowRequest
+   */
+
+  export type AggregateBorrowRequest = {
+    _count: BorrowRequestCountAggregateOutputType | null
+    _avg: BorrowRequestAvgAggregateOutputType | null
+    _sum: BorrowRequestSumAggregateOutputType | null
+    _min: BorrowRequestMinAggregateOutputType | null
+    _max: BorrowRequestMaxAggregateOutputType | null
+  }
+
+  export type BorrowRequestAvgAggregateOutputType = {
+    id: number | null
+    member_id: number | null
+    item_id: number | null
+    room_id: number | null
+    br_quantity: number | null
+    br_status: number | null
+    requested_by: number | null
+    reviewed_by: number | null
+    borrow_id: number | null
+  }
+
+  export type BorrowRequestSumAggregateOutputType = {
+    id: number | null
+    member_id: number | null
+    item_id: number | null
+    room_id: number | null
+    br_quantity: number | null
+    br_status: number | null
+    requested_by: number | null
+    reviewed_by: number | null
+    borrow_id: number | null
+  }
+
+  export type BorrowRequestMinAggregateOutputType = {
+    id: number | null
+    member_id: number | null
+    item_id: number | null
+    room_id: number | null
+    br_quantity: number | null
+    br_due_date: Date | null
+    br_status: number | null
+    br_purpose: string | null
+    requested_by: number | null
+    reviewed_by: number | null
+    br_reviewed_at: Date | null
+    br_review_note: string | null
+    borrow_id: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BorrowRequestMaxAggregateOutputType = {
+    id: number | null
+    member_id: number | null
+    item_id: number | null
+    room_id: number | null
+    br_quantity: number | null
+    br_due_date: Date | null
+    br_status: number | null
+    br_purpose: string | null
+    requested_by: number | null
+    reviewed_by: number | null
+    br_reviewed_at: Date | null
+    br_review_note: string | null
+    borrow_id: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type BorrowRequestCountAggregateOutputType = {
+    id: number
+    member_id: number
+    item_id: number
+    room_id: number
+    br_quantity: number
+    br_due_date: number
+    br_status: number
+    br_purpose: number
+    requested_by: number
+    reviewed_by: number
+    br_reviewed_at: number
+    br_review_note: number
+    borrow_id: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type BorrowRequestAvgAggregateInputType = {
+    id?: true
+    member_id?: true
+    item_id?: true
+    room_id?: true
+    br_quantity?: true
+    br_status?: true
+    requested_by?: true
+    reviewed_by?: true
+    borrow_id?: true
+  }
+
+  export type BorrowRequestSumAggregateInputType = {
+    id?: true
+    member_id?: true
+    item_id?: true
+    room_id?: true
+    br_quantity?: true
+    br_status?: true
+    requested_by?: true
+    reviewed_by?: true
+    borrow_id?: true
+  }
+
+  export type BorrowRequestMinAggregateInputType = {
+    id?: true
+    member_id?: true
+    item_id?: true
+    room_id?: true
+    br_quantity?: true
+    br_due_date?: true
+    br_status?: true
+    br_purpose?: true
+    requested_by?: true
+    reviewed_by?: true
+    br_reviewed_at?: true
+    br_review_note?: true
+    borrow_id?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BorrowRequestMaxAggregateInputType = {
+    id?: true
+    member_id?: true
+    item_id?: true
+    room_id?: true
+    br_quantity?: true
+    br_due_date?: true
+    br_status?: true
+    br_purpose?: true
+    requested_by?: true
+    reviewed_by?: true
+    br_reviewed_at?: true
+    br_review_note?: true
+    borrow_id?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type BorrowRequestCountAggregateInputType = {
+    id?: true
+    member_id?: true
+    item_id?: true
+    room_id?: true
+    br_quantity?: true
+    br_due_date?: true
+    br_status?: true
+    br_purpose?: true
+    requested_by?: true
+    reviewed_by?: true
+    br_reviewed_at?: true
+    br_review_note?: true
+    borrow_id?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type BorrowRequestAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BorrowRequest to aggregate.
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BorrowRequests to fetch.
+     */
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BorrowRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BorrowRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BorrowRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BorrowRequests
+    **/
+    _count?: true | BorrowRequestCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BorrowRequestAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BorrowRequestSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BorrowRequestMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BorrowRequestMaxAggregateInputType
+  }
+
+  export type GetBorrowRequestAggregateType<T extends BorrowRequestAggregateArgs> = {
+        [P in keyof T & keyof AggregateBorrowRequest]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBorrowRequest[P]>
+      : GetScalarType<T[P], AggregateBorrowRequest[P]>
+  }
+
+
+
+
+  export type BorrowRequestGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BorrowRequestWhereInput
+    orderBy?: BorrowRequestOrderByWithAggregationInput | BorrowRequestOrderByWithAggregationInput[]
+    by: BorrowRequestScalarFieldEnum[] | BorrowRequestScalarFieldEnum
+    having?: BorrowRequestScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BorrowRequestCountAggregateInputType | true
+    _avg?: BorrowRequestAvgAggregateInputType
+    _sum?: BorrowRequestSumAggregateInputType
+    _min?: BorrowRequestMinAggregateInputType
+    _max?: BorrowRequestMaxAggregateInputType
+  }
+
+  export type BorrowRequestGroupByOutputType = {
+    id: number
+    member_id: number
+    item_id: number
+    room_id: number | null
+    br_quantity: number
+    br_due_date: Date
+    br_status: number
+    br_purpose: string | null
+    requested_by: number | null
+    reviewed_by: number | null
+    br_reviewed_at: Date | null
+    br_review_note: string | null
+    borrow_id: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: BorrowRequestCountAggregateOutputType | null
+    _avg: BorrowRequestAvgAggregateOutputType | null
+    _sum: BorrowRequestSumAggregateOutputType | null
+    _min: BorrowRequestMinAggregateOutputType | null
+    _max: BorrowRequestMaxAggregateOutputType | null
+  }
+
+  type GetBorrowRequestGroupByPayload<T extends BorrowRequestGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BorrowRequestGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BorrowRequestGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BorrowRequestGroupByOutputType[P]>
+            : GetScalarType<T[P], BorrowRequestGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BorrowRequestSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    member_id?: boolean
+    item_id?: boolean
+    room_id?: boolean
+    br_quantity?: boolean
+    br_due_date?: boolean
+    br_status?: boolean
+    br_purpose?: boolean
+    requested_by?: boolean
+    reviewed_by?: boolean
+    br_reviewed_at?: boolean
+    br_review_note?: boolean
+    borrow_id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    Member?: boolean | BorrowerDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+    Room?: boolean | BorrowRequest$RoomArgs<ExtArgs>
+    Borrow?: boolean | BorrowRequest$BorrowArgs<ExtArgs>
+    Requester?: boolean | BorrowRequest$RequesterArgs<ExtArgs>
+    Reviewer?: boolean | BorrowRequest$ReviewerArgs<ExtArgs>
+  }, ExtArgs["result"]["borrowRequest"]>
+
+  export type BorrowRequestSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    member_id?: boolean
+    item_id?: boolean
+    room_id?: boolean
+    br_quantity?: boolean
+    br_due_date?: boolean
+    br_status?: boolean
+    br_purpose?: boolean
+    requested_by?: boolean
+    reviewed_by?: boolean
+    br_reviewed_at?: boolean
+    br_review_note?: boolean
+    borrow_id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    Member?: boolean | BorrowerDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+    Room?: boolean | BorrowRequest$RoomArgs<ExtArgs>
+    Borrow?: boolean | BorrowRequest$BorrowArgs<ExtArgs>
+    Requester?: boolean | BorrowRequest$RequesterArgs<ExtArgs>
+    Reviewer?: boolean | BorrowRequest$ReviewerArgs<ExtArgs>
+  }, ExtArgs["result"]["borrowRequest"]>
+
+  export type BorrowRequestSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    member_id?: boolean
+    item_id?: boolean
+    room_id?: boolean
+    br_quantity?: boolean
+    br_due_date?: boolean
+    br_status?: boolean
+    br_purpose?: boolean
+    requested_by?: boolean
+    reviewed_by?: boolean
+    br_reviewed_at?: boolean
+    br_review_note?: boolean
+    borrow_id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    Member?: boolean | BorrowerDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+    Room?: boolean | BorrowRequest$RoomArgs<ExtArgs>
+    Borrow?: boolean | BorrowRequest$BorrowArgs<ExtArgs>
+    Requester?: boolean | BorrowRequest$RequesterArgs<ExtArgs>
+    Reviewer?: boolean | BorrowRequest$ReviewerArgs<ExtArgs>
+  }, ExtArgs["result"]["borrowRequest"]>
+
+  export type BorrowRequestSelectScalar = {
+    id?: boolean
+    member_id?: boolean
+    item_id?: boolean
+    room_id?: boolean
+    br_quantity?: boolean
+    br_due_date?: boolean
+    br_status?: boolean
+    br_purpose?: boolean
+    requested_by?: boolean
+    reviewed_by?: boolean
+    br_reviewed_at?: boolean
+    br_review_note?: boolean
+    borrow_id?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type BorrowRequestOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "member_id" | "item_id" | "room_id" | "br_quantity" | "br_due_date" | "br_status" | "br_purpose" | "requested_by" | "reviewed_by" | "br_reviewed_at" | "br_review_note" | "borrow_id" | "createdAt" | "updatedAt", ExtArgs["result"]["borrowRequest"]>
+  export type BorrowRequestInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Member?: boolean | BorrowerDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+    Room?: boolean | BorrowRequest$RoomArgs<ExtArgs>
+    Borrow?: boolean | BorrowRequest$BorrowArgs<ExtArgs>
+    Requester?: boolean | BorrowRequest$RequesterArgs<ExtArgs>
+    Reviewer?: boolean | BorrowRequest$ReviewerArgs<ExtArgs>
+  }
+  export type BorrowRequestIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Member?: boolean | BorrowerDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+    Room?: boolean | BorrowRequest$RoomArgs<ExtArgs>
+    Borrow?: boolean | BorrowRequest$BorrowArgs<ExtArgs>
+    Requester?: boolean | BorrowRequest$RequesterArgs<ExtArgs>
+    Reviewer?: boolean | BorrowRequest$ReviewerArgs<ExtArgs>
+  }
+  export type BorrowRequestIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    Member?: boolean | BorrowerDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+    Room?: boolean | BorrowRequest$RoomArgs<ExtArgs>
+    Borrow?: boolean | BorrowRequest$BorrowArgs<ExtArgs>
+    Requester?: boolean | BorrowRequest$RequesterArgs<ExtArgs>
+    Reviewer?: boolean | BorrowRequest$ReviewerArgs<ExtArgs>
+  }
+
+  export type $BorrowRequestPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BorrowRequest"
+    objects: {
+      Member: Prisma.$BorrowerPayload<ExtArgs>
+      Item: Prisma.$ItemPayload<ExtArgs>
+      Room: Prisma.$RoomPayload<ExtArgs> | null
+      Borrow: Prisma.$BorrowPayload<ExtArgs> | null
+      Requester: Prisma.$UserPayload<ExtArgs> | null
+      Reviewer: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      member_id: number
+      item_id: number
+      room_id: number | null
+      br_quantity: number
+      /**
+       * Return date the requester is asking for; copied to `Borrow.b_due_date` on approval.
+       */
+      br_due_date: Date
+      /**
+       * 1=pending, 2=approved, 3=rejected
+       */
+      br_status: number
+      br_purpose: string | null
+      /**
+       * `user.id` of the account that sent the request. Nullable so a deleted account does not
+       * take the request history with it.
+       */
+      requested_by: number | null
+      /**
+       * `user.id` of the admin who approved or rejected it.
+       */
+      reviewed_by: number | null
+      br_reviewed_at: Date | null
+      /**
+       * Admin's note — the reason shown to the requester when a request is rejected.
+       */
+      br_review_note: string | null
+      /**
+       * The `borrow` row this request became, once approved.
+       */
+      borrow_id: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["borrowRequest"]>
+    composites: {}
+  }
+
+  type BorrowRequestGetPayload<S extends boolean | null | undefined | BorrowRequestDefaultArgs> = $Result.GetResult<Prisma.$BorrowRequestPayload, S>
+
+  type BorrowRequestCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BorrowRequestFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BorrowRequestCountAggregateInputType | true
+    }
+
+  export interface BorrowRequestDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BorrowRequest'], meta: { name: 'BorrowRequest' } }
+    /**
+     * Find zero or one BorrowRequest that matches the filter.
+     * @param {BorrowRequestFindUniqueArgs} args - Arguments to find a BorrowRequest
+     * @example
+     * // Get one BorrowRequest
+     * const borrowRequest = await prisma.borrowRequest.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BorrowRequestFindUniqueArgs>(args: SelectSubset<T, BorrowRequestFindUniqueArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BorrowRequest that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BorrowRequestFindUniqueOrThrowArgs} args - Arguments to find a BorrowRequest
+     * @example
+     * // Get one BorrowRequest
+     * const borrowRequest = await prisma.borrowRequest.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BorrowRequestFindUniqueOrThrowArgs>(args: SelectSubset<T, BorrowRequestFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BorrowRequest that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestFindFirstArgs} args - Arguments to find a BorrowRequest
+     * @example
+     * // Get one BorrowRequest
+     * const borrowRequest = await prisma.borrowRequest.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BorrowRequestFindFirstArgs>(args?: SelectSubset<T, BorrowRequestFindFirstArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BorrowRequest that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestFindFirstOrThrowArgs} args - Arguments to find a BorrowRequest
+     * @example
+     * // Get one BorrowRequest
+     * const borrowRequest = await prisma.borrowRequest.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BorrowRequestFindFirstOrThrowArgs>(args?: SelectSubset<T, BorrowRequestFindFirstOrThrowArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BorrowRequests that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BorrowRequests
+     * const borrowRequests = await prisma.borrowRequest.findMany()
+     * 
+     * // Get first 10 BorrowRequests
+     * const borrowRequests = await prisma.borrowRequest.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const borrowRequestWithIdOnly = await prisma.borrowRequest.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends BorrowRequestFindManyArgs>(args?: SelectSubset<T, BorrowRequestFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BorrowRequest.
+     * @param {BorrowRequestCreateArgs} args - Arguments to create a BorrowRequest.
+     * @example
+     * // Create one BorrowRequest
+     * const BorrowRequest = await prisma.borrowRequest.create({
+     *   data: {
+     *     // ... data to create a BorrowRequest
+     *   }
+     * })
+     * 
+     */
+    create<T extends BorrowRequestCreateArgs>(args: SelectSubset<T, BorrowRequestCreateArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BorrowRequests.
+     * @param {BorrowRequestCreateManyArgs} args - Arguments to create many BorrowRequests.
+     * @example
+     * // Create many BorrowRequests
+     * const borrowRequest = await prisma.borrowRequest.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BorrowRequestCreateManyArgs>(args?: SelectSubset<T, BorrowRequestCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BorrowRequests and returns the data saved in the database.
+     * @param {BorrowRequestCreateManyAndReturnArgs} args - Arguments to create many BorrowRequests.
+     * @example
+     * // Create many BorrowRequests
+     * const borrowRequest = await prisma.borrowRequest.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BorrowRequests and only return the `id`
+     * const borrowRequestWithIdOnly = await prisma.borrowRequest.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BorrowRequestCreateManyAndReturnArgs>(args?: SelectSubset<T, BorrowRequestCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BorrowRequest.
+     * @param {BorrowRequestDeleteArgs} args - Arguments to delete one BorrowRequest.
+     * @example
+     * // Delete one BorrowRequest
+     * const BorrowRequest = await prisma.borrowRequest.delete({
+     *   where: {
+     *     // ... filter to delete one BorrowRequest
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BorrowRequestDeleteArgs>(args: SelectSubset<T, BorrowRequestDeleteArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BorrowRequest.
+     * @param {BorrowRequestUpdateArgs} args - Arguments to update one BorrowRequest.
+     * @example
+     * // Update one BorrowRequest
+     * const borrowRequest = await prisma.borrowRequest.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BorrowRequestUpdateArgs>(args: SelectSubset<T, BorrowRequestUpdateArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BorrowRequests.
+     * @param {BorrowRequestDeleteManyArgs} args - Arguments to filter BorrowRequests to delete.
+     * @example
+     * // Delete a few BorrowRequests
+     * const { count } = await prisma.borrowRequest.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BorrowRequestDeleteManyArgs>(args?: SelectSubset<T, BorrowRequestDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BorrowRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BorrowRequests
+     * const borrowRequest = await prisma.borrowRequest.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BorrowRequestUpdateManyArgs>(args: SelectSubset<T, BorrowRequestUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BorrowRequests and returns the data updated in the database.
+     * @param {BorrowRequestUpdateManyAndReturnArgs} args - Arguments to update many BorrowRequests.
+     * @example
+     * // Update many BorrowRequests
+     * const borrowRequest = await prisma.borrowRequest.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BorrowRequests and only return the `id`
+     * const borrowRequestWithIdOnly = await prisma.borrowRequest.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BorrowRequestUpdateManyAndReturnArgs>(args: SelectSubset<T, BorrowRequestUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BorrowRequest.
+     * @param {BorrowRequestUpsertArgs} args - Arguments to update or create a BorrowRequest.
+     * @example
+     * // Update or create a BorrowRequest
+     * const borrowRequest = await prisma.borrowRequest.upsert({
+     *   create: {
+     *     // ... data to create a BorrowRequest
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BorrowRequest we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BorrowRequestUpsertArgs>(args: SelectSubset<T, BorrowRequestUpsertArgs<ExtArgs>>): Prisma__BorrowRequestClient<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BorrowRequests.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestCountArgs} args - Arguments to filter BorrowRequests to count.
+     * @example
+     * // Count the number of BorrowRequests
+     * const count = await prisma.borrowRequest.count({
+     *   where: {
+     *     // ... the filter for the BorrowRequests we want to count
+     *   }
+     * })
+    **/
+    count<T extends BorrowRequestCountArgs>(
+      args?: Subset<T, BorrowRequestCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BorrowRequestCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BorrowRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BorrowRequestAggregateArgs>(args: Subset<T, BorrowRequestAggregateArgs>): Prisma.PrismaPromise<GetBorrowRequestAggregateType<T>>
+
+    /**
+     * Group by BorrowRequest.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BorrowRequestGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BorrowRequestGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BorrowRequestGroupByArgs['orderBy'] }
+        : { orderBy?: BorrowRequestGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BorrowRequestGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBorrowRequestGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BorrowRequest model
+   */
+  readonly fields: BorrowRequestFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BorrowRequest.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BorrowRequestClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    Member<T extends BorrowerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BorrowerDefaultArgs<ExtArgs>>): Prisma__BorrowerClient<$Result.GetResult<Prisma.$BorrowerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    Item<T extends ItemDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ItemDefaultArgs<ExtArgs>>): Prisma__ItemClient<$Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    Room<T extends BorrowRequest$RoomArgs<ExtArgs> = {}>(args?: Subset<T, BorrowRequest$RoomArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    Borrow<T extends BorrowRequest$BorrowArgs<ExtArgs> = {}>(args?: Subset<T, BorrowRequest$BorrowArgs<ExtArgs>>): Prisma__BorrowClient<$Result.GetResult<Prisma.$BorrowPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    Requester<T extends BorrowRequest$RequesterArgs<ExtArgs> = {}>(args?: Subset<T, BorrowRequest$RequesterArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    Reviewer<T extends BorrowRequest$ReviewerArgs<ExtArgs> = {}>(args?: Subset<T, BorrowRequest$ReviewerArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BorrowRequest model
+   */
+  interface BorrowRequestFieldRefs {
+    readonly id: FieldRef<"BorrowRequest", 'Int'>
+    readonly member_id: FieldRef<"BorrowRequest", 'Int'>
+    readonly item_id: FieldRef<"BorrowRequest", 'Int'>
+    readonly room_id: FieldRef<"BorrowRequest", 'Int'>
+    readonly br_quantity: FieldRef<"BorrowRequest", 'Int'>
+    readonly br_due_date: FieldRef<"BorrowRequest", 'DateTime'>
+    readonly br_status: FieldRef<"BorrowRequest", 'Int'>
+    readonly br_purpose: FieldRef<"BorrowRequest", 'String'>
+    readonly requested_by: FieldRef<"BorrowRequest", 'Int'>
+    readonly reviewed_by: FieldRef<"BorrowRequest", 'Int'>
+    readonly br_reviewed_at: FieldRef<"BorrowRequest", 'DateTime'>
+    readonly br_review_note: FieldRef<"BorrowRequest", 'String'>
+    readonly borrow_id: FieldRef<"BorrowRequest", 'Int'>
+    readonly createdAt: FieldRef<"BorrowRequest", 'DateTime'>
+    readonly updatedAt: FieldRef<"BorrowRequest", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BorrowRequest findUnique
+   */
+  export type BorrowRequestFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which BorrowRequest to fetch.
+     */
+    where: BorrowRequestWhereUniqueInput
+  }
+
+  /**
+   * BorrowRequest findUniqueOrThrow
+   */
+  export type BorrowRequestFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which BorrowRequest to fetch.
+     */
+    where: BorrowRequestWhereUniqueInput
+  }
+
+  /**
+   * BorrowRequest findFirst
+   */
+  export type BorrowRequestFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which BorrowRequest to fetch.
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BorrowRequests to fetch.
+     */
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BorrowRequests.
+     */
+    cursor?: BorrowRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BorrowRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BorrowRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BorrowRequests.
+     */
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
+   * BorrowRequest findFirstOrThrow
+   */
+  export type BorrowRequestFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which BorrowRequest to fetch.
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BorrowRequests to fetch.
+     */
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BorrowRequests.
+     */
+    cursor?: BorrowRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BorrowRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BorrowRequests.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BorrowRequests.
+     */
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
+   * BorrowRequest findMany
+   */
+  export type BorrowRequestFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * Filter, which BorrowRequests to fetch.
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BorrowRequests to fetch.
+     */
+    orderBy?: BorrowRequestOrderByWithRelationInput | BorrowRequestOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BorrowRequests.
+     */
+    cursor?: BorrowRequestWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BorrowRequests from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BorrowRequests.
+     */
+    skip?: number
+    distinct?: BorrowRequestScalarFieldEnum | BorrowRequestScalarFieldEnum[]
+  }
+
+  /**
+   * BorrowRequest create
+   */
+  export type BorrowRequestCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * The data needed to create a BorrowRequest.
+     */
+    data: XOR<BorrowRequestCreateInput, BorrowRequestUncheckedCreateInput>
+  }
+
+  /**
+   * BorrowRequest createMany
+   */
+  export type BorrowRequestCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BorrowRequests.
+     */
+    data: BorrowRequestCreateManyInput | BorrowRequestCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BorrowRequest createManyAndReturn
+   */
+  export type BorrowRequestCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * The data used to create many BorrowRequests.
+     */
+    data: BorrowRequestCreateManyInput | BorrowRequestCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BorrowRequest update
+   */
+  export type BorrowRequestUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * The data needed to update a BorrowRequest.
+     */
+    data: XOR<BorrowRequestUpdateInput, BorrowRequestUncheckedUpdateInput>
+    /**
+     * Choose, which BorrowRequest to update.
+     */
+    where: BorrowRequestWhereUniqueInput
+  }
+
+  /**
+   * BorrowRequest updateMany
+   */
+  export type BorrowRequestUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BorrowRequests.
+     */
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which BorrowRequests to update
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * Limit how many BorrowRequests to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BorrowRequest updateManyAndReturn
+   */
+  export type BorrowRequestUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * The data used to update BorrowRequests.
+     */
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyInput>
+    /**
+     * Filter which BorrowRequests to update
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * Limit how many BorrowRequests to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * BorrowRequest upsert
+   */
+  export type BorrowRequestUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * The filter to search for the BorrowRequest to update in case it exists.
+     */
+    where: BorrowRequestWhereUniqueInput
+    /**
+     * In case the BorrowRequest found by the `where` argument doesn't exist, create a new BorrowRequest with this data.
+     */
+    create: XOR<BorrowRequestCreateInput, BorrowRequestUncheckedCreateInput>
+    /**
+     * In case the BorrowRequest was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BorrowRequestUpdateInput, BorrowRequestUncheckedUpdateInput>
+  }
+
+  /**
+   * BorrowRequest delete
+   */
+  export type BorrowRequestDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
+    /**
+     * Filter which BorrowRequest to delete.
+     */
+    where: BorrowRequestWhereUniqueInput
+  }
+
+  /**
+   * BorrowRequest deleteMany
+   */
+  export type BorrowRequestDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BorrowRequests to delete
+     */
+    where?: BorrowRequestWhereInput
+    /**
+     * Limit how many BorrowRequests to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BorrowRequest.Room
+   */
+  export type BorrowRequest$RoomArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Room
+     */
+    select?: RoomSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Room
+     */
+    omit?: RoomOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomInclude<ExtArgs> | null
+    where?: RoomWhereInput
+  }
+
+  /**
+   * BorrowRequest.Borrow
+   */
+  export type BorrowRequest$BorrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Borrow
+     */
+    select?: BorrowSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Borrow
+     */
+    omit?: BorrowOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowInclude<ExtArgs> | null
+    where?: BorrowWhereInput
+  }
+
+  /**
+   * BorrowRequest.Requester
+   */
+  export type BorrowRequest$RequesterArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * BorrowRequest.Reviewer
+   */
+  export type BorrowRequest$ReviewerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * BorrowRequest without action
+   */
+  export type BorrowRequestDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BorrowRequest
+     */
+    select?: BorrowRequestSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BorrowRequest
+     */
+    omit?: BorrowRequestOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BorrowRequestInclude<ExtArgs> | null
   }
 
 
@@ -10016,6 +13227,48 @@ export namespace Prisma {
   export type BorrowScalarFieldEnum = (typeof BorrowScalarFieldEnum)[keyof typeof BorrowScalarFieldEnum]
 
 
+  export const ItemReceiptScalarFieldEnum: {
+    id: 'id',
+    borrow_id: 'borrow_id',
+    rc_receiver_name: 'rc_receiver_name',
+    rc_receiver_id: 'rc_receiver_id',
+    rc_contact: 'rc_contact',
+    rc_relationship: 'rc_relationship',
+    rc_id_presented: 'rc_id_presented',
+    rc_receiver_photo: 'rc_receiver_photo',
+    rc_quantity: 'rc_quantity',
+    rc_condition: 'rc_condition',
+    rc_notes: 'rc_notes',
+    rc_received_at: 'rc_received_at',
+    released_by: 'released_by',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ItemReceiptScalarFieldEnum = (typeof ItemReceiptScalarFieldEnum)[keyof typeof ItemReceiptScalarFieldEnum]
+
+
+  export const BorrowRequestScalarFieldEnum: {
+    id: 'id',
+    member_id: 'member_id',
+    item_id: 'item_id',
+    room_id: 'room_id',
+    br_quantity: 'br_quantity',
+    br_due_date: 'br_due_date',
+    br_status: 'br_status',
+    br_purpose: 'br_purpose',
+    requested_by: 'requested_by',
+    reviewed_by: 'reviewed_by',
+    br_reviewed_at: 'br_reviewed_at',
+    br_review_note: 'br_review_note',
+    borrow_id: 'borrow_id',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type BorrowRequestScalarFieldEnum = (typeof BorrowRequestScalarFieldEnum)[keyof typeof BorrowRequestScalarFieldEnum]
+
+
   export const FeeSettingScalarFieldEnum: {
     id: 'id',
     f_overdue_fee_per_day: 'f_overdue_fee_per_day',
@@ -10185,6 +13438,9 @@ export namespace Prisma {
     id_number?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     status?: IntFilter<"User"> | number
+    requestedBorrows?: BorrowRequestListRelationFilter
+    reviewedBorrows?: BorrowRequestListRelationFilter
+    releasedItems?: ItemReceiptListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -10196,6 +13452,9 @@ export namespace Prisma {
     id_number?: SortOrderInput | SortOrder
     role?: SortOrder
     status?: SortOrder
+    requestedBorrows?: BorrowRequestOrderByRelationAggregateInput
+    reviewedBorrows?: BorrowRequestOrderByRelationAggregateInput
+    releasedItems?: ItemReceiptOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -10210,6 +13469,9 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     status?: IntFilter<"User"> | number
+    requestedBorrows?: BorrowRequestListRelationFilter
+    reviewedBorrows?: BorrowRequestListRelationFilter
+    releasedItems?: ItemReceiptListRelationFilter
   }, "id" | "username" | "email" | "id_number">
 
   export type UserOrderByWithAggregationInput = {
@@ -10259,6 +13521,7 @@ export namespace Prisma {
     m_status?: IntFilter<"Borrower"> | number
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
+    borrowRequests?: BorrowRequestListRelationFilter
   }
 
   export type BorrowerOrderByWithRelationInput = {
@@ -10275,6 +13538,7 @@ export namespace Prisma {
     m_status?: SortOrder
     borrows?: BorrowOrderByRelationAggregateInput
     returns?: ReturnOrderByRelationAggregateInput
+    borrowRequests?: BorrowRequestOrderByRelationAggregateInput
   }
 
   export type BorrowerWhereUniqueInput = Prisma.AtLeast<{
@@ -10294,6 +13558,7 @@ export namespace Prisma {
     m_status?: IntFilter<"Borrower"> | number
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
+    borrowRequests?: BorrowRequestListRelationFilter
   }, "id" | "m_school_id">
 
   export type BorrowerOrderByWithAggregationInput = {
@@ -10352,6 +13617,7 @@ export namespace Prisma {
     remarks?: StringNullableFilter<"Item"> | string | null
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
+    borrowRequests?: BorrowRequestListRelationFilter
   }
 
   export type ItemOrderByWithRelationInput = {
@@ -10371,6 +13637,7 @@ export namespace Prisma {
     remarks?: SortOrderInput | SortOrder
     borrows?: BorrowOrderByRelationAggregateInput
     returns?: ReturnOrderByRelationAggregateInput
+    borrowRequests?: BorrowRequestOrderByRelationAggregateInput
   }
 
   export type ItemWhereUniqueInput = Prisma.AtLeast<{
@@ -10393,6 +13660,7 @@ export namespace Prisma {
     remarks?: StringNullableFilter<"Item"> | string | null
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
+    borrowRequests?: BorrowRequestListRelationFilter
   }, "id" | "i_deviceID">
 
   export type ItemOrderByWithAggregationInput = {
@@ -10449,6 +13717,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
+    borrowRequests?: BorrowRequestListRelationFilter
   }
 
   export type RoomOrderByWithRelationInput = {
@@ -10460,6 +13729,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     borrows?: BorrowOrderByRelationAggregateInput
     returns?: ReturnOrderByRelationAggregateInput
+    borrowRequests?: BorrowRequestOrderByRelationAggregateInput
   }
 
   export type RoomWhereUniqueInput = Prisma.AtLeast<{
@@ -10474,6 +13744,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Room"> | Date | string
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
+    borrowRequests?: BorrowRequestListRelationFilter
   }, "id">
 
   export type RoomOrderByWithAggregationInput = {
@@ -10521,6 +13792,8 @@ export namespace Prisma {
     Item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
     Room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
     return?: XOR<ReturnNullableScalarRelationFilter, ReturnWhereInput> | null
+    request?: XOR<BorrowRequestNullableScalarRelationFilter, BorrowRequestWhereInput> | null
+    receipt?: XOR<ItemReceiptNullableScalarRelationFilter, ItemReceiptWhereInput> | null
   }
 
   export type BorrowOrderByWithRelationInput = {
@@ -10539,6 +13812,8 @@ export namespace Prisma {
     Item?: ItemOrderByWithRelationInput
     Room?: RoomOrderByWithRelationInput
     return?: ReturnOrderByWithRelationInput
+    request?: BorrowRequestOrderByWithRelationInput
+    receipt?: ItemReceiptOrderByWithRelationInput
   }
 
   export type BorrowWhereUniqueInput = Prisma.AtLeast<{
@@ -10560,6 +13835,8 @@ export namespace Prisma {
     Item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
     Room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
     return?: XOR<ReturnNullableScalarRelationFilter, ReturnWhereInput> | null
+    request?: XOR<BorrowRequestNullableScalarRelationFilter, BorrowRequestWhereInput> | null
+    receipt?: XOR<ItemReceiptNullableScalarRelationFilter, ItemReceiptWhereInput> | null
   }, "id">
 
   export type BorrowOrderByWithAggregationInput = {
@@ -10596,6 +13873,238 @@ export namespace Prisma {
     b_status?: IntWithAggregatesFilter<"Borrow"> | number
     b_purpose?: StringNullableWithAggregatesFilter<"Borrow"> | string | null
     b_notes?: StringNullableWithAggregatesFilter<"Borrow"> | string | null
+  }
+
+  export type ItemReceiptWhereInput = {
+    AND?: ItemReceiptWhereInput | ItemReceiptWhereInput[]
+    OR?: ItemReceiptWhereInput[]
+    NOT?: ItemReceiptWhereInput | ItemReceiptWhereInput[]
+    id?: IntFilter<"ItemReceipt"> | number
+    borrow_id?: IntFilter<"ItemReceipt"> | number
+    rc_receiver_name?: StringFilter<"ItemReceipt"> | string
+    rc_receiver_id?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_contact?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_relationship?: StringFilter<"ItemReceipt"> | string
+    rc_id_presented?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_receiver_photo?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_quantity?: IntFilter<"ItemReceipt"> | number
+    rc_condition?: StringFilter<"ItemReceipt"> | string
+    rc_notes?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_received_at?: DateTimeFilter<"ItemReceipt"> | Date | string
+    released_by?: IntNullableFilter<"ItemReceipt"> | number | null
+    createdAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+    updatedAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+    Borrow?: XOR<BorrowScalarRelationFilter, BorrowWhereInput>
+    Releaser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type ItemReceiptOrderByWithRelationInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_receiver_name?: SortOrder
+    rc_receiver_id?: SortOrderInput | SortOrder
+    rc_contact?: SortOrderInput | SortOrder
+    rc_relationship?: SortOrder
+    rc_id_presented?: SortOrderInput | SortOrder
+    rc_receiver_photo?: SortOrderInput | SortOrder
+    rc_quantity?: SortOrder
+    rc_condition?: SortOrder
+    rc_notes?: SortOrderInput | SortOrder
+    rc_received_at?: SortOrder
+    released_by?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    Borrow?: BorrowOrderByWithRelationInput
+    Releaser?: UserOrderByWithRelationInput
+  }
+
+  export type ItemReceiptWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    borrow_id?: number
+    AND?: ItemReceiptWhereInput | ItemReceiptWhereInput[]
+    OR?: ItemReceiptWhereInput[]
+    NOT?: ItemReceiptWhereInput | ItemReceiptWhereInput[]
+    rc_receiver_name?: StringFilter<"ItemReceipt"> | string
+    rc_receiver_id?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_contact?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_relationship?: StringFilter<"ItemReceipt"> | string
+    rc_id_presented?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_receiver_photo?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_quantity?: IntFilter<"ItemReceipt"> | number
+    rc_condition?: StringFilter<"ItemReceipt"> | string
+    rc_notes?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_received_at?: DateTimeFilter<"ItemReceipt"> | Date | string
+    released_by?: IntNullableFilter<"ItemReceipt"> | number | null
+    createdAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+    updatedAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+    Borrow?: XOR<BorrowScalarRelationFilter, BorrowWhereInput>
+    Releaser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id" | "borrow_id">
+
+  export type ItemReceiptOrderByWithAggregationInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_receiver_name?: SortOrder
+    rc_receiver_id?: SortOrderInput | SortOrder
+    rc_contact?: SortOrderInput | SortOrder
+    rc_relationship?: SortOrder
+    rc_id_presented?: SortOrderInput | SortOrder
+    rc_receiver_photo?: SortOrderInput | SortOrder
+    rc_quantity?: SortOrder
+    rc_condition?: SortOrder
+    rc_notes?: SortOrderInput | SortOrder
+    rc_received_at?: SortOrder
+    released_by?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ItemReceiptCountOrderByAggregateInput
+    _avg?: ItemReceiptAvgOrderByAggregateInput
+    _max?: ItemReceiptMaxOrderByAggregateInput
+    _min?: ItemReceiptMinOrderByAggregateInput
+    _sum?: ItemReceiptSumOrderByAggregateInput
+  }
+
+  export type ItemReceiptScalarWhereWithAggregatesInput = {
+    AND?: ItemReceiptScalarWhereWithAggregatesInput | ItemReceiptScalarWhereWithAggregatesInput[]
+    OR?: ItemReceiptScalarWhereWithAggregatesInput[]
+    NOT?: ItemReceiptScalarWhereWithAggregatesInput | ItemReceiptScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"ItemReceipt"> | number
+    borrow_id?: IntWithAggregatesFilter<"ItemReceipt"> | number
+    rc_receiver_name?: StringWithAggregatesFilter<"ItemReceipt"> | string
+    rc_receiver_id?: StringNullableWithAggregatesFilter<"ItemReceipt"> | string | null
+    rc_contact?: StringNullableWithAggregatesFilter<"ItemReceipt"> | string | null
+    rc_relationship?: StringWithAggregatesFilter<"ItemReceipt"> | string
+    rc_id_presented?: StringNullableWithAggregatesFilter<"ItemReceipt"> | string | null
+    rc_receiver_photo?: StringNullableWithAggregatesFilter<"ItemReceipt"> | string | null
+    rc_quantity?: IntWithAggregatesFilter<"ItemReceipt"> | number
+    rc_condition?: StringWithAggregatesFilter<"ItemReceipt"> | string
+    rc_notes?: StringNullableWithAggregatesFilter<"ItemReceipt"> | string | null
+    rc_received_at?: DateTimeWithAggregatesFilter<"ItemReceipt"> | Date | string
+    released_by?: IntNullableWithAggregatesFilter<"ItemReceipt"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"ItemReceipt"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ItemReceipt"> | Date | string
+  }
+
+  export type BorrowRequestWhereInput = {
+    AND?: BorrowRequestWhereInput | BorrowRequestWhereInput[]
+    OR?: BorrowRequestWhereInput[]
+    NOT?: BorrowRequestWhereInput | BorrowRequestWhereInput[]
+    id?: IntFilter<"BorrowRequest"> | number
+    member_id?: IntFilter<"BorrowRequest"> | number
+    item_id?: IntFilter<"BorrowRequest"> | number
+    room_id?: IntNullableFilter<"BorrowRequest"> | number | null
+    br_quantity?: IntFilter<"BorrowRequest"> | number
+    br_due_date?: DateTimeFilter<"BorrowRequest"> | Date | string
+    br_status?: IntFilter<"BorrowRequest"> | number
+    br_purpose?: StringNullableFilter<"BorrowRequest"> | string | null
+    requested_by?: IntNullableFilter<"BorrowRequest"> | number | null
+    reviewed_by?: IntNullableFilter<"BorrowRequest"> | number | null
+    br_reviewed_at?: DateTimeNullableFilter<"BorrowRequest"> | Date | string | null
+    br_review_note?: StringNullableFilter<"BorrowRequest"> | string | null
+    borrow_id?: IntNullableFilter<"BorrowRequest"> | number | null
+    createdAt?: DateTimeFilter<"BorrowRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"BorrowRequest"> | Date | string
+    Member?: XOR<BorrowerScalarRelationFilter, BorrowerWhereInput>
+    Item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    Room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
+    Borrow?: XOR<BorrowNullableScalarRelationFilter, BorrowWhereInput> | null
+    Requester?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    Reviewer?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type BorrowRequestOrderByWithRelationInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrderInput | SortOrder
+    br_quantity?: SortOrder
+    br_due_date?: SortOrder
+    br_status?: SortOrder
+    br_purpose?: SortOrderInput | SortOrder
+    requested_by?: SortOrderInput | SortOrder
+    reviewed_by?: SortOrderInput | SortOrder
+    br_reviewed_at?: SortOrderInput | SortOrder
+    br_review_note?: SortOrderInput | SortOrder
+    borrow_id?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    Member?: BorrowerOrderByWithRelationInput
+    Item?: ItemOrderByWithRelationInput
+    Room?: RoomOrderByWithRelationInput
+    Borrow?: BorrowOrderByWithRelationInput
+    Requester?: UserOrderByWithRelationInput
+    Reviewer?: UserOrderByWithRelationInput
+  }
+
+  export type BorrowRequestWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    borrow_id?: number
+    AND?: BorrowRequestWhereInput | BorrowRequestWhereInput[]
+    OR?: BorrowRequestWhereInput[]
+    NOT?: BorrowRequestWhereInput | BorrowRequestWhereInput[]
+    member_id?: IntFilter<"BorrowRequest"> | number
+    item_id?: IntFilter<"BorrowRequest"> | number
+    room_id?: IntNullableFilter<"BorrowRequest"> | number | null
+    br_quantity?: IntFilter<"BorrowRequest"> | number
+    br_due_date?: DateTimeFilter<"BorrowRequest"> | Date | string
+    br_status?: IntFilter<"BorrowRequest"> | number
+    br_purpose?: StringNullableFilter<"BorrowRequest"> | string | null
+    requested_by?: IntNullableFilter<"BorrowRequest"> | number | null
+    reviewed_by?: IntNullableFilter<"BorrowRequest"> | number | null
+    br_reviewed_at?: DateTimeNullableFilter<"BorrowRequest"> | Date | string | null
+    br_review_note?: StringNullableFilter<"BorrowRequest"> | string | null
+    createdAt?: DateTimeFilter<"BorrowRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"BorrowRequest"> | Date | string
+    Member?: XOR<BorrowerScalarRelationFilter, BorrowerWhereInput>
+    Item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    Room?: XOR<RoomNullableScalarRelationFilter, RoomWhereInput> | null
+    Borrow?: XOR<BorrowNullableScalarRelationFilter, BorrowWhereInput> | null
+    Requester?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    Reviewer?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id" | "borrow_id">
+
+  export type BorrowRequestOrderByWithAggregationInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrderInput | SortOrder
+    br_quantity?: SortOrder
+    br_due_date?: SortOrder
+    br_status?: SortOrder
+    br_purpose?: SortOrderInput | SortOrder
+    requested_by?: SortOrderInput | SortOrder
+    reviewed_by?: SortOrderInput | SortOrder
+    br_reviewed_at?: SortOrderInput | SortOrder
+    br_review_note?: SortOrderInput | SortOrder
+    borrow_id?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: BorrowRequestCountOrderByAggregateInput
+    _avg?: BorrowRequestAvgOrderByAggregateInput
+    _max?: BorrowRequestMaxOrderByAggregateInput
+    _min?: BorrowRequestMinOrderByAggregateInput
+    _sum?: BorrowRequestSumOrderByAggregateInput
+  }
+
+  export type BorrowRequestScalarWhereWithAggregatesInput = {
+    AND?: BorrowRequestScalarWhereWithAggregatesInput | BorrowRequestScalarWhereWithAggregatesInput[]
+    OR?: BorrowRequestScalarWhereWithAggregatesInput[]
+    NOT?: BorrowRequestScalarWhereWithAggregatesInput | BorrowRequestScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"BorrowRequest"> | number
+    member_id?: IntWithAggregatesFilter<"BorrowRequest"> | number
+    item_id?: IntWithAggregatesFilter<"BorrowRequest"> | number
+    room_id?: IntNullableWithAggregatesFilter<"BorrowRequest"> | number | null
+    br_quantity?: IntWithAggregatesFilter<"BorrowRequest"> | number
+    br_due_date?: DateTimeWithAggregatesFilter<"BorrowRequest"> | Date | string
+    br_status?: IntWithAggregatesFilter<"BorrowRequest"> | number
+    br_purpose?: StringNullableWithAggregatesFilter<"BorrowRequest"> | string | null
+    requested_by?: IntNullableWithAggregatesFilter<"BorrowRequest"> | number | null
+    reviewed_by?: IntNullableWithAggregatesFilter<"BorrowRequest"> | number | null
+    br_reviewed_at?: DateTimeNullableWithAggregatesFilter<"BorrowRequest"> | Date | string | null
+    br_review_note?: StringNullableWithAggregatesFilter<"BorrowRequest"> | string | null
+    borrow_id?: IntNullableWithAggregatesFilter<"BorrowRequest"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"BorrowRequest"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"BorrowRequest"> | Date | string
   }
 
   export type FeeSettingWhereInput = {
@@ -10786,6 +14295,9 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
+    reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
+    releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -10797,6 +14309,9 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
+    reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
+    releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
   }
 
   export type UserUpdateInput = {
@@ -10807,6 +14322,9 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
+    reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
+    releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -10818,6 +14336,9 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
+    reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -10865,6 +14386,7 @@ export namespace Prisma {
     m_status?: number
     borrows?: BorrowCreateNestedManyWithoutMemberInput
     returns?: ReturnCreateNestedManyWithoutMemberInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutMemberInput
   }
 
   export type BorrowerUncheckedCreateInput = {
@@ -10881,6 +14403,7 @@ export namespace Prisma {
     m_status?: number
     borrows?: BorrowUncheckedCreateNestedManyWithoutMemberInput
     returns?: ReturnUncheckedCreateNestedManyWithoutMemberInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutMemberInput
   }
 
   export type BorrowerUpdateInput = {
@@ -10896,6 +14419,7 @@ export namespace Prisma {
     m_status?: IntFieldUpdateOperationsInput | number
     borrows?: BorrowUpdateManyWithoutMemberNestedInput
     returns?: ReturnUpdateManyWithoutMemberNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutMemberNestedInput
   }
 
   export type BorrowerUncheckedUpdateInput = {
@@ -10912,6 +14436,7 @@ export namespace Prisma {
     m_status?: IntFieldUpdateOperationsInput | number
     borrows?: BorrowUncheckedUpdateManyWithoutMemberNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutMemberNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type BorrowerCreateManyInput = {
@@ -10971,6 +14496,7 @@ export namespace Prisma {
     remarks?: string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
     returns?: ReturnCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateInput = {
@@ -10990,6 +14516,7 @@ export namespace Prisma {
     remarks?: string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemUpdateInput = {
@@ -11008,6 +14535,7 @@ export namespace Prisma {
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     returns?: ReturnUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateInput = {
@@ -11027,6 +14555,7 @@ export namespace Prisma {
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type ItemCreateManyInput = {
@@ -11087,6 +14616,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     borrows?: BorrowCreateNestedManyWithoutRoomInput
     returns?: ReturnCreateNestedManyWithoutRoomInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUncheckedCreateInput = {
@@ -11098,6 +14628,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     borrows?: BorrowUncheckedCreateNestedManyWithoutRoomInput
     returns?: ReturnUncheckedCreateNestedManyWithoutRoomInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUpdateInput = {
@@ -11108,6 +14639,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     borrows?: BorrowUpdateManyWithoutRoomNestedInput
     returns?: ReturnUpdateManyWithoutRoomNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateInput = {
@@ -11119,6 +14651,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     borrows?: BorrowUncheckedUpdateManyWithoutRoomNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutRoomNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomCreateManyInput = {
@@ -11159,6 +14692,8 @@ export namespace Prisma {
     Item: ItemCreateNestedOneWithoutBorrowsInput
     Room?: RoomCreateNestedOneWithoutBorrowsInput
     return?: ReturnCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowUncheckedCreateInput = {
@@ -11174,6 +14709,8 @@ export namespace Prisma {
     b_purpose?: string | null
     b_notes?: string | null
     return?: ReturnUncheckedCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowUpdateInput = {
@@ -11188,6 +14725,8 @@ export namespace Prisma {
     Item?: ItemUpdateOneRequiredWithoutBorrowsNestedInput
     Room?: RoomUpdateOneWithoutBorrowsNestedInput
     return?: ReturnUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateInput = {
@@ -11203,6 +14742,8 @@ export namespace Prisma {
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
     return?: ReturnUncheckedUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowCreateManyInput = {
@@ -11241,6 +14782,244 @@ export namespace Prisma {
     b_status?: IntFieldUpdateOperationsInput | number
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type ItemReceiptCreateInput = {
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Borrow: BorrowCreateNestedOneWithoutReceiptInput
+    Releaser?: UserCreateNestedOneWithoutReleasedItemsInput
+  }
+
+  export type ItemReceiptUncheckedCreateInput = {
+    id?: number
+    borrow_id: number
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    released_by?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ItemReceiptUpdateInput = {
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Borrow?: BorrowUpdateOneRequiredWithoutReceiptNestedInput
+    Releaser?: UserUpdateOneWithoutReleasedItemsNestedInput
+  }
+
+  export type ItemReceiptUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    borrow_id?: IntFieldUpdateOperationsInput | number
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    released_by?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ItemReceiptCreateManyInput = {
+    id?: number
+    borrow_id: number
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    released_by?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ItemReceiptUpdateManyMutationInput = {
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ItemReceiptUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    borrow_id?: IntFieldUpdateOperationsInput | number
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    released_by?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestCreateInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Member: BorrowerCreateNestedOneWithoutBorrowRequestsInput
+    Item: ItemCreateNestedOneWithoutBorrowRequestsInput
+    Room?: RoomCreateNestedOneWithoutBorrowRequestsInput
+    Borrow?: BorrowCreateNestedOneWithoutRequestInput
+    Requester?: UserCreateNestedOneWithoutRequestedBorrowsInput
+    Reviewer?: UserCreateNestedOneWithoutReviewedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestUpdateInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowRequestsNestedInput
+    Borrow?: BorrowUpdateOneWithoutRequestNestedInput
+    Requester?: UserUpdateOneWithoutRequestedBorrowsNestedInput
+    Reviewer?: UserUpdateOneWithoutReviewedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestCreateManyInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestUpdateManyMutationInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type FeeSettingCreateInput = {
@@ -11480,9 +15259,29 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
+  export type BorrowRequestListRelationFilter = {
+    every?: BorrowRequestWhereInput
+    some?: BorrowRequestWhereInput
+    none?: BorrowRequestWhereInput
+  }
+
+  export type ItemReceiptListRelationFilter = {
+    every?: ItemReceiptWhereInput
+    some?: ItemReceiptWhereInput
+    none?: ItemReceiptWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
+  }
+
+  export type BorrowRequestOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ItemReceiptOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type UserCountOrderByAggregateInput = {
@@ -11878,6 +15677,16 @@ export namespace Prisma {
     isNot?: ReturnWhereInput | null
   }
 
+  export type BorrowRequestNullableScalarRelationFilter = {
+    is?: BorrowRequestWhereInput | null
+    isNot?: BorrowRequestWhereInput | null
+  }
+
+  export type ItemReceiptNullableScalarRelationFilter = {
+    is?: ItemReceiptWhereInput | null
+    isNot?: ItemReceiptWhereInput | null
+  }
+
   export type BorrowCountOrderByAggregateInput = {
     id?: SortOrder
     member_id?: SortOrder
@@ -11952,6 +15761,167 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type BorrowScalarRelationFilter = {
+    is?: BorrowWhereInput
+    isNot?: BorrowWhereInput
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type ItemReceiptCountOrderByAggregateInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_receiver_name?: SortOrder
+    rc_receiver_id?: SortOrder
+    rc_contact?: SortOrder
+    rc_relationship?: SortOrder
+    rc_id_presented?: SortOrder
+    rc_receiver_photo?: SortOrder
+    rc_quantity?: SortOrder
+    rc_condition?: SortOrder
+    rc_notes?: SortOrder
+    rc_received_at?: SortOrder
+    released_by?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ItemReceiptAvgOrderByAggregateInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_quantity?: SortOrder
+    released_by?: SortOrder
+  }
+
+  export type ItemReceiptMaxOrderByAggregateInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_receiver_name?: SortOrder
+    rc_receiver_id?: SortOrder
+    rc_contact?: SortOrder
+    rc_relationship?: SortOrder
+    rc_id_presented?: SortOrder
+    rc_receiver_photo?: SortOrder
+    rc_quantity?: SortOrder
+    rc_condition?: SortOrder
+    rc_notes?: SortOrder
+    rc_received_at?: SortOrder
+    released_by?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ItemReceiptMinOrderByAggregateInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_receiver_name?: SortOrder
+    rc_receiver_id?: SortOrder
+    rc_contact?: SortOrder
+    rc_relationship?: SortOrder
+    rc_id_presented?: SortOrder
+    rc_receiver_photo?: SortOrder
+    rc_quantity?: SortOrder
+    rc_condition?: SortOrder
+    rc_notes?: SortOrder
+    rc_received_at?: SortOrder
+    released_by?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ItemReceiptSumOrderByAggregateInput = {
+    id?: SortOrder
+    borrow_id?: SortOrder
+    rc_quantity?: SortOrder
+    released_by?: SortOrder
+  }
+
+  export type BorrowNullableScalarRelationFilter = {
+    is?: BorrowWhereInput | null
+    isNot?: BorrowWhereInput | null
+  }
+
+  export type BorrowRequestCountOrderByAggregateInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrder
+    br_quantity?: SortOrder
+    br_due_date?: SortOrder
+    br_status?: SortOrder
+    br_purpose?: SortOrder
+    requested_by?: SortOrder
+    reviewed_by?: SortOrder
+    br_reviewed_at?: SortOrder
+    br_review_note?: SortOrder
+    borrow_id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BorrowRequestAvgOrderByAggregateInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrder
+    br_quantity?: SortOrder
+    br_status?: SortOrder
+    requested_by?: SortOrder
+    reviewed_by?: SortOrder
+    borrow_id?: SortOrder
+  }
+
+  export type BorrowRequestMaxOrderByAggregateInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrder
+    br_quantity?: SortOrder
+    br_due_date?: SortOrder
+    br_status?: SortOrder
+    br_purpose?: SortOrder
+    requested_by?: SortOrder
+    reviewed_by?: SortOrder
+    br_reviewed_at?: SortOrder
+    br_review_note?: SortOrder
+    borrow_id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BorrowRequestMinOrderByAggregateInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrder
+    br_quantity?: SortOrder
+    br_due_date?: SortOrder
+    br_status?: SortOrder
+    br_purpose?: SortOrder
+    requested_by?: SortOrder
+    reviewed_by?: SortOrder
+    br_reviewed_at?: SortOrder
+    br_review_note?: SortOrder
+    borrow_id?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BorrowRequestSumOrderByAggregateInput = {
+    id?: SortOrder
+    member_id?: SortOrder
+    item_id?: SortOrder
+    room_id?: SortOrder
+    br_quantity?: SortOrder
+    br_status?: SortOrder
+    requested_by?: SortOrder
+    reviewed_by?: SortOrder
+    borrow_id?: SortOrder
+  }
+
   export type BoolFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolFilter<$PrismaModel> | boolean
@@ -12019,11 +15989,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
-  }
-
-  export type BorrowScalarRelationFilter = {
-    is?: BorrowWhereInput
-    isNot?: BorrowWhereInput
   }
 
   export type ReturnCountOrderByAggregateInput = {
@@ -12096,6 +16061,48 @@ export namespace Prisma {
     r_damage_fee?: SortOrder
   }
 
+  export type BorrowRequestCreateNestedManyWithoutRequesterInput = {
+    create?: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput> | BorrowRequestCreateWithoutRequesterInput[] | BorrowRequestUncheckedCreateWithoutRequesterInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRequesterInput | BorrowRequestCreateOrConnectWithoutRequesterInput[]
+    createMany?: BorrowRequestCreateManyRequesterInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
+  export type BorrowRequestCreateNestedManyWithoutReviewerInput = {
+    create?: XOR<BorrowRequestCreateWithoutReviewerInput, BorrowRequestUncheckedCreateWithoutReviewerInput> | BorrowRequestCreateWithoutReviewerInput[] | BorrowRequestUncheckedCreateWithoutReviewerInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutReviewerInput | BorrowRequestCreateOrConnectWithoutReviewerInput[]
+    createMany?: BorrowRequestCreateManyReviewerInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
+  export type ItemReceiptCreateNestedManyWithoutReleaserInput = {
+    create?: XOR<ItemReceiptCreateWithoutReleaserInput, ItemReceiptUncheckedCreateWithoutReleaserInput> | ItemReceiptCreateWithoutReleaserInput[] | ItemReceiptUncheckedCreateWithoutReleaserInput[]
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutReleaserInput | ItemReceiptCreateOrConnectWithoutReleaserInput[]
+    createMany?: ItemReceiptCreateManyReleaserInputEnvelope
+    connect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+  }
+
+  export type BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput = {
+    create?: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput> | BorrowRequestCreateWithoutRequesterInput[] | BorrowRequestUncheckedCreateWithoutRequesterInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRequesterInput | BorrowRequestCreateOrConnectWithoutRequesterInput[]
+    createMany?: BorrowRequestCreateManyRequesterInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
+  export type BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput = {
+    create?: XOR<BorrowRequestCreateWithoutReviewerInput, BorrowRequestUncheckedCreateWithoutReviewerInput> | BorrowRequestCreateWithoutReviewerInput[] | BorrowRequestUncheckedCreateWithoutReviewerInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutReviewerInput | BorrowRequestCreateOrConnectWithoutReviewerInput[]
+    createMany?: BorrowRequestCreateManyReviewerInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
+  export type ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput = {
+    create?: XOR<ItemReceiptCreateWithoutReleaserInput, ItemReceiptUncheckedCreateWithoutReleaserInput> | ItemReceiptCreateWithoutReleaserInput[] | ItemReceiptUncheckedCreateWithoutReleaserInput[]
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutReleaserInput | ItemReceiptCreateOrConnectWithoutReleaserInput[]
+    createMany?: ItemReceiptCreateManyReleaserInputEnvelope
+    connect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -12116,6 +16123,90 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BorrowRequestUpdateManyWithoutRequesterNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput> | BorrowRequestCreateWithoutRequesterInput[] | BorrowRequestUncheckedCreateWithoutRequesterInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRequesterInput | BorrowRequestCreateOrConnectWithoutRequesterInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutRequesterInput | BorrowRequestUpsertWithWhereUniqueWithoutRequesterInput[]
+    createMany?: BorrowRequestCreateManyRequesterInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutRequesterInput | BorrowRequestUpdateWithWhereUniqueWithoutRequesterInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutRequesterInput | BorrowRequestUpdateManyWithWhereWithoutRequesterInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
+  export type BorrowRequestUpdateManyWithoutReviewerNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutReviewerInput, BorrowRequestUncheckedCreateWithoutReviewerInput> | BorrowRequestCreateWithoutReviewerInput[] | BorrowRequestUncheckedCreateWithoutReviewerInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutReviewerInput | BorrowRequestCreateOrConnectWithoutReviewerInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutReviewerInput | BorrowRequestUpsertWithWhereUniqueWithoutReviewerInput[]
+    createMany?: BorrowRequestCreateManyReviewerInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutReviewerInput | BorrowRequestUpdateWithWhereUniqueWithoutReviewerInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutReviewerInput | BorrowRequestUpdateManyWithWhereWithoutReviewerInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
+  export type ItemReceiptUpdateManyWithoutReleaserNestedInput = {
+    create?: XOR<ItemReceiptCreateWithoutReleaserInput, ItemReceiptUncheckedCreateWithoutReleaserInput> | ItemReceiptCreateWithoutReleaserInput[] | ItemReceiptUncheckedCreateWithoutReleaserInput[]
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutReleaserInput | ItemReceiptCreateOrConnectWithoutReleaserInput[]
+    upsert?: ItemReceiptUpsertWithWhereUniqueWithoutReleaserInput | ItemReceiptUpsertWithWhereUniqueWithoutReleaserInput[]
+    createMany?: ItemReceiptCreateManyReleaserInputEnvelope
+    set?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    disconnect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    delete?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    connect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    update?: ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput | ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput[]
+    updateMany?: ItemReceiptUpdateManyWithWhereWithoutReleaserInput | ItemReceiptUpdateManyWithWhereWithoutReleaserInput[]
+    deleteMany?: ItemReceiptScalarWhereInput | ItemReceiptScalarWhereInput[]
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput> | BorrowRequestCreateWithoutRequesterInput[] | BorrowRequestUncheckedCreateWithoutRequesterInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRequesterInput | BorrowRequestCreateOrConnectWithoutRequesterInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutRequesterInput | BorrowRequestUpsertWithWhereUniqueWithoutRequesterInput[]
+    createMany?: BorrowRequestCreateManyRequesterInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutRequesterInput | BorrowRequestUpdateWithWhereUniqueWithoutRequesterInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutRequesterInput | BorrowRequestUpdateManyWithWhereWithoutRequesterInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutReviewerInput, BorrowRequestUncheckedCreateWithoutReviewerInput> | BorrowRequestCreateWithoutReviewerInput[] | BorrowRequestUncheckedCreateWithoutReviewerInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutReviewerInput | BorrowRequestCreateOrConnectWithoutReviewerInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutReviewerInput | BorrowRequestUpsertWithWhereUniqueWithoutReviewerInput[]
+    createMany?: BorrowRequestCreateManyReviewerInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutReviewerInput | BorrowRequestUpdateWithWhereUniqueWithoutReviewerInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutReviewerInput | BorrowRequestUpdateManyWithWhereWithoutReviewerInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
+  export type ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput = {
+    create?: XOR<ItemReceiptCreateWithoutReleaserInput, ItemReceiptUncheckedCreateWithoutReleaserInput> | ItemReceiptCreateWithoutReleaserInput[] | ItemReceiptUncheckedCreateWithoutReleaserInput[]
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutReleaserInput | ItemReceiptCreateOrConnectWithoutReleaserInput[]
+    upsert?: ItemReceiptUpsertWithWhereUniqueWithoutReleaserInput | ItemReceiptUpsertWithWhereUniqueWithoutReleaserInput[]
+    createMany?: ItemReceiptCreateManyReleaserInputEnvelope
+    set?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    disconnect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    delete?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    connect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+    update?: ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput | ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput[]
+    updateMany?: ItemReceiptUpdateManyWithWhereWithoutReleaserInput | ItemReceiptUpdateManyWithWhereWithoutReleaserInput[]
+    deleteMany?: ItemReceiptScalarWhereInput | ItemReceiptScalarWhereInput[]
+  }
+
   export type BorrowCreateNestedManyWithoutMemberInput = {
     create?: XOR<BorrowCreateWithoutMemberInput, BorrowUncheckedCreateWithoutMemberInput> | BorrowCreateWithoutMemberInput[] | BorrowUncheckedCreateWithoutMemberInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutMemberInput | BorrowCreateOrConnectWithoutMemberInput[]
@@ -12130,6 +16221,13 @@ export namespace Prisma {
     connect?: ReturnWhereUniqueInput | ReturnWhereUniqueInput[]
   }
 
+  export type BorrowRequestCreateNestedManyWithoutMemberInput = {
+    create?: XOR<BorrowRequestCreateWithoutMemberInput, BorrowRequestUncheckedCreateWithoutMemberInput> | BorrowRequestCreateWithoutMemberInput[] | BorrowRequestUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutMemberInput | BorrowRequestCreateOrConnectWithoutMemberInput[]
+    createMany?: BorrowRequestCreateManyMemberInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
   export type BorrowUncheckedCreateNestedManyWithoutMemberInput = {
     create?: XOR<BorrowCreateWithoutMemberInput, BorrowUncheckedCreateWithoutMemberInput> | BorrowCreateWithoutMemberInput[] | BorrowUncheckedCreateWithoutMemberInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutMemberInput | BorrowCreateOrConnectWithoutMemberInput[]
@@ -12142,6 +16240,13 @@ export namespace Prisma {
     connectOrCreate?: ReturnCreateOrConnectWithoutMemberInput | ReturnCreateOrConnectWithoutMemberInput[]
     createMany?: ReturnCreateManyMemberInputEnvelope
     connect?: ReturnWhereUniqueInput | ReturnWhereUniqueInput[]
+  }
+
+  export type BorrowRequestUncheckedCreateNestedManyWithoutMemberInput = {
+    create?: XOR<BorrowRequestCreateWithoutMemberInput, BorrowRequestUncheckedCreateWithoutMemberInput> | BorrowRequestCreateWithoutMemberInput[] | BorrowRequestUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutMemberInput | BorrowRequestCreateOrConnectWithoutMemberInput[]
+    createMany?: BorrowRequestCreateManyMemberInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
   }
 
   export type BorrowUpdateManyWithoutMemberNestedInput = {
@@ -12172,6 +16277,20 @@ export namespace Prisma {
     deleteMany?: ReturnScalarWhereInput | ReturnScalarWhereInput[]
   }
 
+  export type BorrowRequestUpdateManyWithoutMemberNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutMemberInput, BorrowRequestUncheckedCreateWithoutMemberInput> | BorrowRequestCreateWithoutMemberInput[] | BorrowRequestUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutMemberInput | BorrowRequestCreateOrConnectWithoutMemberInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutMemberInput | BorrowRequestUpsertWithWhereUniqueWithoutMemberInput[]
+    createMany?: BorrowRequestCreateManyMemberInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutMemberInput | BorrowRequestUpdateWithWhereUniqueWithoutMemberInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutMemberInput | BorrowRequestUpdateManyWithWhereWithoutMemberInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
   export type BorrowUncheckedUpdateManyWithoutMemberNestedInput = {
     create?: XOR<BorrowCreateWithoutMemberInput, BorrowUncheckedCreateWithoutMemberInput> | BorrowCreateWithoutMemberInput[] | BorrowUncheckedCreateWithoutMemberInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutMemberInput | BorrowCreateOrConnectWithoutMemberInput[]
@@ -12200,6 +16319,20 @@ export namespace Prisma {
     deleteMany?: ReturnScalarWhereInput | ReturnScalarWhereInput[]
   }
 
+  export type BorrowRequestUncheckedUpdateManyWithoutMemberNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutMemberInput, BorrowRequestUncheckedCreateWithoutMemberInput> | BorrowRequestCreateWithoutMemberInput[] | BorrowRequestUncheckedCreateWithoutMemberInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutMemberInput | BorrowRequestCreateOrConnectWithoutMemberInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutMemberInput | BorrowRequestUpsertWithWhereUniqueWithoutMemberInput[]
+    createMany?: BorrowRequestCreateManyMemberInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutMemberInput | BorrowRequestUpdateWithWhereUniqueWithoutMemberInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutMemberInput | BorrowRequestUpdateManyWithWhereWithoutMemberInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
   export type BorrowCreateNestedManyWithoutItemInput = {
     create?: XOR<BorrowCreateWithoutItemInput, BorrowUncheckedCreateWithoutItemInput> | BorrowCreateWithoutItemInput[] | BorrowUncheckedCreateWithoutItemInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutItemInput | BorrowCreateOrConnectWithoutItemInput[]
@@ -12214,6 +16347,13 @@ export namespace Prisma {
     connect?: ReturnWhereUniqueInput | ReturnWhereUniqueInput[]
   }
 
+  export type BorrowRequestCreateNestedManyWithoutItemInput = {
+    create?: XOR<BorrowRequestCreateWithoutItemInput, BorrowRequestUncheckedCreateWithoutItemInput> | BorrowRequestCreateWithoutItemInput[] | BorrowRequestUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutItemInput | BorrowRequestCreateOrConnectWithoutItemInput[]
+    createMany?: BorrowRequestCreateManyItemInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
   export type BorrowUncheckedCreateNestedManyWithoutItemInput = {
     create?: XOR<BorrowCreateWithoutItemInput, BorrowUncheckedCreateWithoutItemInput> | BorrowCreateWithoutItemInput[] | BorrowUncheckedCreateWithoutItemInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutItemInput | BorrowCreateOrConnectWithoutItemInput[]
@@ -12226,6 +16366,13 @@ export namespace Prisma {
     connectOrCreate?: ReturnCreateOrConnectWithoutItemInput | ReturnCreateOrConnectWithoutItemInput[]
     createMany?: ReturnCreateManyItemInputEnvelope
     connect?: ReturnWhereUniqueInput | ReturnWhereUniqueInput[]
+  }
+
+  export type BorrowRequestUncheckedCreateNestedManyWithoutItemInput = {
+    create?: XOR<BorrowRequestCreateWithoutItemInput, BorrowRequestUncheckedCreateWithoutItemInput> | BorrowRequestCreateWithoutItemInput[] | BorrowRequestUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutItemInput | BorrowRequestCreateOrConnectWithoutItemInput[]
+    createMany?: BorrowRequestCreateManyItemInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
   }
 
   export type DecimalFieldUpdateOperationsInput = {
@@ -12272,6 +16419,20 @@ export namespace Prisma {
     deleteMany?: ReturnScalarWhereInput | ReturnScalarWhereInput[]
   }
 
+  export type BorrowRequestUpdateManyWithoutItemNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutItemInput, BorrowRequestUncheckedCreateWithoutItemInput> | BorrowRequestCreateWithoutItemInput[] | BorrowRequestUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutItemInput | BorrowRequestCreateOrConnectWithoutItemInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutItemInput | BorrowRequestUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: BorrowRequestCreateManyItemInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutItemInput | BorrowRequestUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutItemInput | BorrowRequestUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
   export type BorrowUncheckedUpdateManyWithoutItemNestedInput = {
     create?: XOR<BorrowCreateWithoutItemInput, BorrowUncheckedCreateWithoutItemInput> | BorrowCreateWithoutItemInput[] | BorrowUncheckedCreateWithoutItemInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutItemInput | BorrowCreateOrConnectWithoutItemInput[]
@@ -12300,6 +16461,20 @@ export namespace Prisma {
     deleteMany?: ReturnScalarWhereInput | ReturnScalarWhereInput[]
   }
 
+  export type BorrowRequestUncheckedUpdateManyWithoutItemNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutItemInput, BorrowRequestUncheckedCreateWithoutItemInput> | BorrowRequestCreateWithoutItemInput[] | BorrowRequestUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutItemInput | BorrowRequestCreateOrConnectWithoutItemInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutItemInput | BorrowRequestUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: BorrowRequestCreateManyItemInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutItemInput | BorrowRequestUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutItemInput | BorrowRequestUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
   export type BorrowCreateNestedManyWithoutRoomInput = {
     create?: XOR<BorrowCreateWithoutRoomInput, BorrowUncheckedCreateWithoutRoomInput> | BorrowCreateWithoutRoomInput[] | BorrowUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutRoomInput | BorrowCreateOrConnectWithoutRoomInput[]
@@ -12314,6 +16489,13 @@ export namespace Prisma {
     connect?: ReturnWhereUniqueInput | ReturnWhereUniqueInput[]
   }
 
+  export type BorrowRequestCreateNestedManyWithoutRoomInput = {
+    create?: XOR<BorrowRequestCreateWithoutRoomInput, BorrowRequestUncheckedCreateWithoutRoomInput> | BorrowRequestCreateWithoutRoomInput[] | BorrowRequestUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRoomInput | BorrowRequestCreateOrConnectWithoutRoomInput[]
+    createMany?: BorrowRequestCreateManyRoomInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
   export type BorrowUncheckedCreateNestedManyWithoutRoomInput = {
     create?: XOR<BorrowCreateWithoutRoomInput, BorrowUncheckedCreateWithoutRoomInput> | BorrowCreateWithoutRoomInput[] | BorrowUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutRoomInput | BorrowCreateOrConnectWithoutRoomInput[]
@@ -12326,6 +16508,13 @@ export namespace Prisma {
     connectOrCreate?: ReturnCreateOrConnectWithoutRoomInput | ReturnCreateOrConnectWithoutRoomInput[]
     createMany?: ReturnCreateManyRoomInputEnvelope
     connect?: ReturnWhereUniqueInput | ReturnWhereUniqueInput[]
+  }
+
+  export type BorrowRequestUncheckedCreateNestedManyWithoutRoomInput = {
+    create?: XOR<BorrowRequestCreateWithoutRoomInput, BorrowRequestUncheckedCreateWithoutRoomInput> | BorrowRequestCreateWithoutRoomInput[] | BorrowRequestUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRoomInput | BorrowRequestCreateOrConnectWithoutRoomInput[]
+    createMany?: BorrowRequestCreateManyRoomInputEnvelope
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -12360,6 +16549,20 @@ export namespace Prisma {
     deleteMany?: ReturnScalarWhereInput | ReturnScalarWhereInput[]
   }
 
+  export type BorrowRequestUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutRoomInput, BorrowRequestUncheckedCreateWithoutRoomInput> | BorrowRequestCreateWithoutRoomInput[] | BorrowRequestUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRoomInput | BorrowRequestCreateOrConnectWithoutRoomInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutRoomInput | BorrowRequestUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: BorrowRequestCreateManyRoomInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutRoomInput | BorrowRequestUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutRoomInput | BorrowRequestUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
   export type BorrowUncheckedUpdateManyWithoutRoomNestedInput = {
     create?: XOR<BorrowCreateWithoutRoomInput, BorrowUncheckedCreateWithoutRoomInput> | BorrowCreateWithoutRoomInput[] | BorrowUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutRoomInput | BorrowCreateOrConnectWithoutRoomInput[]
@@ -12388,6 +16591,20 @@ export namespace Prisma {
     deleteMany?: ReturnScalarWhereInput | ReturnScalarWhereInput[]
   }
 
+  export type BorrowRequestUncheckedUpdateManyWithoutRoomNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutRoomInput, BorrowRequestUncheckedCreateWithoutRoomInput> | BorrowRequestCreateWithoutRoomInput[] | BorrowRequestUncheckedCreateWithoutRoomInput[]
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutRoomInput | BorrowRequestCreateOrConnectWithoutRoomInput[]
+    upsert?: BorrowRequestUpsertWithWhereUniqueWithoutRoomInput | BorrowRequestUpsertWithWhereUniqueWithoutRoomInput[]
+    createMany?: BorrowRequestCreateManyRoomInputEnvelope
+    set?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    disconnect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    delete?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+    update?: BorrowRequestUpdateWithWhereUniqueWithoutRoomInput | BorrowRequestUpdateWithWhereUniqueWithoutRoomInput[]
+    updateMany?: BorrowRequestUpdateManyWithWhereWithoutRoomInput | BorrowRequestUpdateManyWithWhereWithoutRoomInput[]
+    deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+  }
+
   export type BorrowerCreateNestedOneWithoutBorrowsInput = {
     create?: XOR<BorrowerCreateWithoutBorrowsInput, BorrowerUncheckedCreateWithoutBorrowsInput>
     connectOrCreate?: BorrowerCreateOrConnectWithoutBorrowsInput
@@ -12412,10 +16629,34 @@ export namespace Prisma {
     connect?: ReturnWhereUniqueInput
   }
 
+  export type BorrowRequestCreateNestedOneWithoutBorrowInput = {
+    create?: XOR<BorrowRequestCreateWithoutBorrowInput, BorrowRequestUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutBorrowInput
+    connect?: BorrowRequestWhereUniqueInput
+  }
+
+  export type ItemReceiptCreateNestedOneWithoutBorrowInput = {
+    create?: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutBorrowInput
+    connect?: ItemReceiptWhereUniqueInput
+  }
+
   export type ReturnUncheckedCreateNestedOneWithoutBorrowInput = {
     create?: XOR<ReturnCreateWithoutBorrowInput, ReturnUncheckedCreateWithoutBorrowInput>
     connectOrCreate?: ReturnCreateOrConnectWithoutBorrowInput
     connect?: ReturnWhereUniqueInput
+  }
+
+  export type BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput = {
+    create?: XOR<BorrowRequestCreateWithoutBorrowInput, BorrowRequestUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutBorrowInput
+    connect?: BorrowRequestWhereUniqueInput
+  }
+
+  export type ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput = {
+    create?: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutBorrowInput
+    connect?: ItemReceiptWhereUniqueInput
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -12458,6 +16699,26 @@ export namespace Prisma {
     update?: XOR<XOR<ReturnUpdateToOneWithWhereWithoutBorrowInput, ReturnUpdateWithoutBorrowInput>, ReturnUncheckedUpdateWithoutBorrowInput>
   }
 
+  export type BorrowRequestUpdateOneWithoutBorrowNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutBorrowInput, BorrowRequestUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutBorrowInput
+    upsert?: BorrowRequestUpsertWithoutBorrowInput
+    disconnect?: BorrowRequestWhereInput | boolean
+    delete?: BorrowRequestWhereInput | boolean
+    connect?: BorrowRequestWhereUniqueInput
+    update?: XOR<XOR<BorrowRequestUpdateToOneWithWhereWithoutBorrowInput, BorrowRequestUpdateWithoutBorrowInput>, BorrowRequestUncheckedUpdateWithoutBorrowInput>
+  }
+
+  export type ItemReceiptUpdateOneWithoutBorrowNestedInput = {
+    create?: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutBorrowInput
+    upsert?: ItemReceiptUpsertWithoutBorrowInput
+    disconnect?: ItemReceiptWhereInput | boolean
+    delete?: ItemReceiptWhereInput | boolean
+    connect?: ItemReceiptWhereUniqueInput
+    update?: XOR<XOR<ItemReceiptUpdateToOneWithWhereWithoutBorrowInput, ItemReceiptUpdateWithoutBorrowInput>, ItemReceiptUncheckedUpdateWithoutBorrowInput>
+  }
+
   export type ReturnUncheckedUpdateOneWithoutBorrowNestedInput = {
     create?: XOR<ReturnCreateWithoutBorrowInput, ReturnUncheckedCreateWithoutBorrowInput>
     connectOrCreate?: ReturnCreateOrConnectWithoutBorrowInput
@@ -12466,6 +16727,148 @@ export namespace Prisma {
     delete?: ReturnWhereInput | boolean
     connect?: ReturnWhereUniqueInput
     update?: XOR<XOR<ReturnUpdateToOneWithWhereWithoutBorrowInput, ReturnUpdateWithoutBorrowInput>, ReturnUncheckedUpdateWithoutBorrowInput>
+  }
+
+  export type BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput = {
+    create?: XOR<BorrowRequestCreateWithoutBorrowInput, BorrowRequestUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: BorrowRequestCreateOrConnectWithoutBorrowInput
+    upsert?: BorrowRequestUpsertWithoutBorrowInput
+    disconnect?: BorrowRequestWhereInput | boolean
+    delete?: BorrowRequestWhereInput | boolean
+    connect?: BorrowRequestWhereUniqueInput
+    update?: XOR<XOR<BorrowRequestUpdateToOneWithWhereWithoutBorrowInput, BorrowRequestUpdateWithoutBorrowInput>, BorrowRequestUncheckedUpdateWithoutBorrowInput>
+  }
+
+  export type ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput = {
+    create?: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
+    connectOrCreate?: ItemReceiptCreateOrConnectWithoutBorrowInput
+    upsert?: ItemReceiptUpsertWithoutBorrowInput
+    disconnect?: ItemReceiptWhereInput | boolean
+    delete?: ItemReceiptWhereInput | boolean
+    connect?: ItemReceiptWhereUniqueInput
+    update?: XOR<XOR<ItemReceiptUpdateToOneWithWhereWithoutBorrowInput, ItemReceiptUpdateWithoutBorrowInput>, ItemReceiptUncheckedUpdateWithoutBorrowInput>
+  }
+
+  export type BorrowCreateNestedOneWithoutReceiptInput = {
+    create?: XOR<BorrowCreateWithoutReceiptInput, BorrowUncheckedCreateWithoutReceiptInput>
+    connectOrCreate?: BorrowCreateOrConnectWithoutReceiptInput
+    connect?: BorrowWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutReleasedItemsInput = {
+    create?: XOR<UserCreateWithoutReleasedItemsInput, UserUncheckedCreateWithoutReleasedItemsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutReleasedItemsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type BorrowUpdateOneRequiredWithoutReceiptNestedInput = {
+    create?: XOR<BorrowCreateWithoutReceiptInput, BorrowUncheckedCreateWithoutReceiptInput>
+    connectOrCreate?: BorrowCreateOrConnectWithoutReceiptInput
+    upsert?: BorrowUpsertWithoutReceiptInput
+    connect?: BorrowWhereUniqueInput
+    update?: XOR<XOR<BorrowUpdateToOneWithWhereWithoutReceiptInput, BorrowUpdateWithoutReceiptInput>, BorrowUncheckedUpdateWithoutReceiptInput>
+  }
+
+  export type UserUpdateOneWithoutReleasedItemsNestedInput = {
+    create?: XOR<UserCreateWithoutReleasedItemsInput, UserUncheckedCreateWithoutReleasedItemsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutReleasedItemsInput
+    upsert?: UserUpsertWithoutReleasedItemsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReleasedItemsInput, UserUpdateWithoutReleasedItemsInput>, UserUncheckedUpdateWithoutReleasedItemsInput>
+  }
+
+  export type BorrowerCreateNestedOneWithoutBorrowRequestsInput = {
+    create?: XOR<BorrowerCreateWithoutBorrowRequestsInput, BorrowerUncheckedCreateWithoutBorrowRequestsInput>
+    connectOrCreate?: BorrowerCreateOrConnectWithoutBorrowRequestsInput
+    connect?: BorrowerWhereUniqueInput
+  }
+
+  export type ItemCreateNestedOneWithoutBorrowRequestsInput = {
+    create?: XOR<ItemCreateWithoutBorrowRequestsInput, ItemUncheckedCreateWithoutBorrowRequestsInput>
+    connectOrCreate?: ItemCreateOrConnectWithoutBorrowRequestsInput
+    connect?: ItemWhereUniqueInput
+  }
+
+  export type RoomCreateNestedOneWithoutBorrowRequestsInput = {
+    create?: XOR<RoomCreateWithoutBorrowRequestsInput, RoomUncheckedCreateWithoutBorrowRequestsInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutBorrowRequestsInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type BorrowCreateNestedOneWithoutRequestInput = {
+    create?: XOR<BorrowCreateWithoutRequestInput, BorrowUncheckedCreateWithoutRequestInput>
+    connectOrCreate?: BorrowCreateOrConnectWithoutRequestInput
+    connect?: BorrowWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutRequestedBorrowsInput = {
+    create?: XOR<UserCreateWithoutRequestedBorrowsInput, UserUncheckedCreateWithoutRequestedBorrowsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRequestedBorrowsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutReviewedBorrowsInput = {
+    create?: XOR<UserCreateWithoutReviewedBorrowsInput, UserUncheckedCreateWithoutReviewedBorrowsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutReviewedBorrowsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput = {
+    create?: XOR<BorrowerCreateWithoutBorrowRequestsInput, BorrowerUncheckedCreateWithoutBorrowRequestsInput>
+    connectOrCreate?: BorrowerCreateOrConnectWithoutBorrowRequestsInput
+    upsert?: BorrowerUpsertWithoutBorrowRequestsInput
+    connect?: BorrowerWhereUniqueInput
+    update?: XOR<XOR<BorrowerUpdateToOneWithWhereWithoutBorrowRequestsInput, BorrowerUpdateWithoutBorrowRequestsInput>, BorrowerUncheckedUpdateWithoutBorrowRequestsInput>
+  }
+
+  export type ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput = {
+    create?: XOR<ItemCreateWithoutBorrowRequestsInput, ItemUncheckedCreateWithoutBorrowRequestsInput>
+    connectOrCreate?: ItemCreateOrConnectWithoutBorrowRequestsInput
+    upsert?: ItemUpsertWithoutBorrowRequestsInput
+    connect?: ItemWhereUniqueInput
+    update?: XOR<XOR<ItemUpdateToOneWithWhereWithoutBorrowRequestsInput, ItemUpdateWithoutBorrowRequestsInput>, ItemUncheckedUpdateWithoutBorrowRequestsInput>
+  }
+
+  export type RoomUpdateOneWithoutBorrowRequestsNestedInput = {
+    create?: XOR<RoomCreateWithoutBorrowRequestsInput, RoomUncheckedCreateWithoutBorrowRequestsInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutBorrowRequestsInput
+    upsert?: RoomUpsertWithoutBorrowRequestsInput
+    disconnect?: RoomWhereInput | boolean
+    delete?: RoomWhereInput | boolean
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutBorrowRequestsInput, RoomUpdateWithoutBorrowRequestsInput>, RoomUncheckedUpdateWithoutBorrowRequestsInput>
+  }
+
+  export type BorrowUpdateOneWithoutRequestNestedInput = {
+    create?: XOR<BorrowCreateWithoutRequestInput, BorrowUncheckedCreateWithoutRequestInput>
+    connectOrCreate?: BorrowCreateOrConnectWithoutRequestInput
+    upsert?: BorrowUpsertWithoutRequestInput
+    disconnect?: BorrowWhereInput | boolean
+    delete?: BorrowWhereInput | boolean
+    connect?: BorrowWhereUniqueInput
+    update?: XOR<XOR<BorrowUpdateToOneWithWhereWithoutRequestInput, BorrowUpdateWithoutRequestInput>, BorrowUncheckedUpdateWithoutRequestInput>
+  }
+
+  export type UserUpdateOneWithoutRequestedBorrowsNestedInput = {
+    create?: XOR<UserCreateWithoutRequestedBorrowsInput, UserUncheckedCreateWithoutRequestedBorrowsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRequestedBorrowsInput
+    upsert?: UserUpsertWithoutRequestedBorrowsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRequestedBorrowsInput, UserUpdateWithoutRequestedBorrowsInput>, UserUncheckedUpdateWithoutRequestedBorrowsInput>
+  }
+
+  export type UserUpdateOneWithoutReviewedBorrowsNestedInput = {
+    create?: XOR<UserCreateWithoutReviewedBorrowsInput, UserUncheckedCreateWithoutReviewedBorrowsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutReviewedBorrowsInput
+    upsert?: UserUpsertWithoutReviewedBorrowsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReviewedBorrowsInput, UserUpdateWithoutReviewedBorrowsInput>, UserUncheckedUpdateWithoutReviewedBorrowsInput>
   }
 
   export type BoolFieldUpdateOperationsInput = {
@@ -12775,6 +17178,225 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type BorrowRequestCreateWithoutRequesterInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Member: BorrowerCreateNestedOneWithoutBorrowRequestsInput
+    Item: ItemCreateNestedOneWithoutBorrowRequestsInput
+    Room?: RoomCreateNestedOneWithoutBorrowRequestsInput
+    Borrow?: BorrowCreateNestedOneWithoutRequestInput
+    Reviewer?: UserCreateNestedOneWithoutReviewedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateWithoutRequesterInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateOrConnectWithoutRequesterInput = {
+    where: BorrowRequestWhereUniqueInput
+    create: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput>
+  }
+
+  export type BorrowRequestCreateManyRequesterInputEnvelope = {
+    data: BorrowRequestCreateManyRequesterInput | BorrowRequestCreateManyRequesterInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BorrowRequestCreateWithoutReviewerInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Member: BorrowerCreateNestedOneWithoutBorrowRequestsInput
+    Item: ItemCreateNestedOneWithoutBorrowRequestsInput
+    Room?: RoomCreateNestedOneWithoutBorrowRequestsInput
+    Borrow?: BorrowCreateNestedOneWithoutRequestInput
+    Requester?: UserCreateNestedOneWithoutRequestedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateWithoutReviewerInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateOrConnectWithoutReviewerInput = {
+    where: BorrowRequestWhereUniqueInput
+    create: XOR<BorrowRequestCreateWithoutReviewerInput, BorrowRequestUncheckedCreateWithoutReviewerInput>
+  }
+
+  export type BorrowRequestCreateManyReviewerInputEnvelope = {
+    data: BorrowRequestCreateManyReviewerInput | BorrowRequestCreateManyReviewerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ItemReceiptCreateWithoutReleaserInput = {
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Borrow: BorrowCreateNestedOneWithoutReceiptInput
+  }
+
+  export type ItemReceiptUncheckedCreateWithoutReleaserInput = {
+    id?: number
+    borrow_id: number
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ItemReceiptCreateOrConnectWithoutReleaserInput = {
+    where: ItemReceiptWhereUniqueInput
+    create: XOR<ItemReceiptCreateWithoutReleaserInput, ItemReceiptUncheckedCreateWithoutReleaserInput>
+  }
+
+  export type ItemReceiptCreateManyReleaserInputEnvelope = {
+    data: ItemReceiptCreateManyReleaserInput | ItemReceiptCreateManyReleaserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BorrowRequestUpsertWithWhereUniqueWithoutRequesterInput = {
+    where: BorrowRequestWhereUniqueInput
+    update: XOR<BorrowRequestUpdateWithoutRequesterInput, BorrowRequestUncheckedUpdateWithoutRequesterInput>
+    create: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput>
+  }
+
+  export type BorrowRequestUpdateWithWhereUniqueWithoutRequesterInput = {
+    where: BorrowRequestWhereUniqueInput
+    data: XOR<BorrowRequestUpdateWithoutRequesterInput, BorrowRequestUncheckedUpdateWithoutRequesterInput>
+  }
+
+  export type BorrowRequestUpdateManyWithWhereWithoutRequesterInput = {
+    where: BorrowRequestScalarWhereInput
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyWithoutRequesterInput>
+  }
+
+  export type BorrowRequestScalarWhereInput = {
+    AND?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+    OR?: BorrowRequestScalarWhereInput[]
+    NOT?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
+    id?: IntFilter<"BorrowRequest"> | number
+    member_id?: IntFilter<"BorrowRequest"> | number
+    item_id?: IntFilter<"BorrowRequest"> | number
+    room_id?: IntNullableFilter<"BorrowRequest"> | number | null
+    br_quantity?: IntFilter<"BorrowRequest"> | number
+    br_due_date?: DateTimeFilter<"BorrowRequest"> | Date | string
+    br_status?: IntFilter<"BorrowRequest"> | number
+    br_purpose?: StringNullableFilter<"BorrowRequest"> | string | null
+    requested_by?: IntNullableFilter<"BorrowRequest"> | number | null
+    reviewed_by?: IntNullableFilter<"BorrowRequest"> | number | null
+    br_reviewed_at?: DateTimeNullableFilter<"BorrowRequest"> | Date | string | null
+    br_review_note?: StringNullableFilter<"BorrowRequest"> | string | null
+    borrow_id?: IntNullableFilter<"BorrowRequest"> | number | null
+    createdAt?: DateTimeFilter<"BorrowRequest"> | Date | string
+    updatedAt?: DateTimeFilter<"BorrowRequest"> | Date | string
+  }
+
+  export type BorrowRequestUpsertWithWhereUniqueWithoutReviewerInput = {
+    where: BorrowRequestWhereUniqueInput
+    update: XOR<BorrowRequestUpdateWithoutReviewerInput, BorrowRequestUncheckedUpdateWithoutReviewerInput>
+    create: XOR<BorrowRequestCreateWithoutReviewerInput, BorrowRequestUncheckedCreateWithoutReviewerInput>
+  }
+
+  export type BorrowRequestUpdateWithWhereUniqueWithoutReviewerInput = {
+    where: BorrowRequestWhereUniqueInput
+    data: XOR<BorrowRequestUpdateWithoutReviewerInput, BorrowRequestUncheckedUpdateWithoutReviewerInput>
+  }
+
+  export type BorrowRequestUpdateManyWithWhereWithoutReviewerInput = {
+    where: BorrowRequestScalarWhereInput
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyWithoutReviewerInput>
+  }
+
+  export type ItemReceiptUpsertWithWhereUniqueWithoutReleaserInput = {
+    where: ItemReceiptWhereUniqueInput
+    update: XOR<ItemReceiptUpdateWithoutReleaserInput, ItemReceiptUncheckedUpdateWithoutReleaserInput>
+    create: XOR<ItemReceiptCreateWithoutReleaserInput, ItemReceiptUncheckedCreateWithoutReleaserInput>
+  }
+
+  export type ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput = {
+    where: ItemReceiptWhereUniqueInput
+    data: XOR<ItemReceiptUpdateWithoutReleaserInput, ItemReceiptUncheckedUpdateWithoutReleaserInput>
+  }
+
+  export type ItemReceiptUpdateManyWithWhereWithoutReleaserInput = {
+    where: ItemReceiptScalarWhereInput
+    data: XOR<ItemReceiptUpdateManyMutationInput, ItemReceiptUncheckedUpdateManyWithoutReleaserInput>
+  }
+
+  export type ItemReceiptScalarWhereInput = {
+    AND?: ItemReceiptScalarWhereInput | ItemReceiptScalarWhereInput[]
+    OR?: ItemReceiptScalarWhereInput[]
+    NOT?: ItemReceiptScalarWhereInput | ItemReceiptScalarWhereInput[]
+    id?: IntFilter<"ItemReceipt"> | number
+    borrow_id?: IntFilter<"ItemReceipt"> | number
+    rc_receiver_name?: StringFilter<"ItemReceipt"> | string
+    rc_receiver_id?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_contact?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_relationship?: StringFilter<"ItemReceipt"> | string
+    rc_id_presented?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_receiver_photo?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_quantity?: IntFilter<"ItemReceipt"> | number
+    rc_condition?: StringFilter<"ItemReceipt"> | string
+    rc_notes?: StringNullableFilter<"ItemReceipt"> | string | null
+    rc_received_at?: DateTimeFilter<"ItemReceipt"> | Date | string
+    released_by?: IntNullableFilter<"ItemReceipt"> | number | null
+    createdAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+    updatedAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+  }
+
   export type BorrowCreateWithoutMemberInput = {
     b_date_borrowed?: Date | string
     b_date_returned?: Date | string | null
@@ -12786,6 +17408,8 @@ export namespace Prisma {
     Item: ItemCreateNestedOneWithoutBorrowsInput
     Room?: RoomCreateNestedOneWithoutBorrowsInput
     return?: ReturnCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowUncheckedCreateWithoutMemberInput = {
@@ -12800,6 +17424,8 @@ export namespace Prisma {
     b_purpose?: string | null
     b_notes?: string | null
     return?: ReturnUncheckedCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowCreateOrConnectWithoutMemberInput = {
@@ -12848,6 +17474,49 @@ export namespace Prisma {
 
   export type ReturnCreateManyMemberInputEnvelope = {
     data: ReturnCreateManyMemberInput | ReturnCreateManyMemberInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BorrowRequestCreateWithoutMemberInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Item: ItemCreateNestedOneWithoutBorrowRequestsInput
+    Room?: RoomCreateNestedOneWithoutBorrowRequestsInput
+    Borrow?: BorrowCreateNestedOneWithoutRequestInput
+    Requester?: UserCreateNestedOneWithoutRequestedBorrowsInput
+    Reviewer?: UserCreateNestedOneWithoutReviewedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateWithoutMemberInput = {
+    id?: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateOrConnectWithoutMemberInput = {
+    where: BorrowRequestWhereUniqueInput
+    create: XOR<BorrowRequestCreateWithoutMemberInput, BorrowRequestUncheckedCreateWithoutMemberInput>
+  }
+
+  export type BorrowRequestCreateManyMemberInputEnvelope = {
+    data: BorrowRequestCreateManyMemberInput | BorrowRequestCreateManyMemberInput[]
     skipDuplicates?: boolean
   }
 
@@ -12919,6 +17588,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Return"> | Date | string
   }
 
+  export type BorrowRequestUpsertWithWhereUniqueWithoutMemberInput = {
+    where: BorrowRequestWhereUniqueInput
+    update: XOR<BorrowRequestUpdateWithoutMemberInput, BorrowRequestUncheckedUpdateWithoutMemberInput>
+    create: XOR<BorrowRequestCreateWithoutMemberInput, BorrowRequestUncheckedCreateWithoutMemberInput>
+  }
+
+  export type BorrowRequestUpdateWithWhereUniqueWithoutMemberInput = {
+    where: BorrowRequestWhereUniqueInput
+    data: XOR<BorrowRequestUpdateWithoutMemberInput, BorrowRequestUncheckedUpdateWithoutMemberInput>
+  }
+
+  export type BorrowRequestUpdateManyWithWhereWithoutMemberInput = {
+    where: BorrowRequestScalarWhereInput
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyWithoutMemberInput>
+  }
+
   export type BorrowCreateWithoutItemInput = {
     b_date_borrowed?: Date | string
     b_date_returned?: Date | string | null
@@ -12930,6 +17615,8 @@ export namespace Prisma {
     Member: BorrowerCreateNestedOneWithoutBorrowsInput
     Room?: RoomCreateNestedOneWithoutBorrowsInput
     return?: ReturnCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowUncheckedCreateWithoutItemInput = {
@@ -12944,6 +17631,8 @@ export namespace Prisma {
     b_purpose?: string | null
     b_notes?: string | null
     return?: ReturnUncheckedCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowCreateOrConnectWithoutItemInput = {
@@ -12995,6 +17684,49 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type BorrowRequestCreateWithoutItemInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Member: BorrowerCreateNestedOneWithoutBorrowRequestsInput
+    Room?: RoomCreateNestedOneWithoutBorrowRequestsInput
+    Borrow?: BorrowCreateNestedOneWithoutRequestInput
+    Requester?: UserCreateNestedOneWithoutRequestedBorrowsInput
+    Reviewer?: UserCreateNestedOneWithoutReviewedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateWithoutItemInput = {
+    id?: number
+    member_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateOrConnectWithoutItemInput = {
+    where: BorrowRequestWhereUniqueInput
+    create: XOR<BorrowRequestCreateWithoutItemInput, BorrowRequestUncheckedCreateWithoutItemInput>
+  }
+
+  export type BorrowRequestCreateManyItemInputEnvelope = {
+    data: BorrowRequestCreateManyItemInput | BorrowRequestCreateManyItemInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BorrowUpsertWithWhereUniqueWithoutItemInput = {
     where: BorrowWhereUniqueInput
     update: XOR<BorrowUpdateWithoutItemInput, BorrowUncheckedUpdateWithoutItemInput>
@@ -13027,6 +17759,22 @@ export namespace Prisma {
     data: XOR<ReturnUpdateManyMutationInput, ReturnUncheckedUpdateManyWithoutItemInput>
   }
 
+  export type BorrowRequestUpsertWithWhereUniqueWithoutItemInput = {
+    where: BorrowRequestWhereUniqueInput
+    update: XOR<BorrowRequestUpdateWithoutItemInput, BorrowRequestUncheckedUpdateWithoutItemInput>
+    create: XOR<BorrowRequestCreateWithoutItemInput, BorrowRequestUncheckedCreateWithoutItemInput>
+  }
+
+  export type BorrowRequestUpdateWithWhereUniqueWithoutItemInput = {
+    where: BorrowRequestWhereUniqueInput
+    data: XOR<BorrowRequestUpdateWithoutItemInput, BorrowRequestUncheckedUpdateWithoutItemInput>
+  }
+
+  export type BorrowRequestUpdateManyWithWhereWithoutItemInput = {
+    where: BorrowRequestScalarWhereInput
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyWithoutItemInput>
+  }
+
   export type BorrowCreateWithoutRoomInput = {
     b_date_borrowed?: Date | string
     b_date_returned?: Date | string | null
@@ -13038,6 +17786,8 @@ export namespace Prisma {
     Member: BorrowerCreateNestedOneWithoutBorrowsInput
     Item: ItemCreateNestedOneWithoutBorrowsInput
     return?: ReturnCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowUncheckedCreateWithoutRoomInput = {
@@ -13052,6 +17802,8 @@ export namespace Prisma {
     b_purpose?: string | null
     b_notes?: string | null
     return?: ReturnUncheckedCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowCreateOrConnectWithoutRoomInput = {
@@ -13103,6 +17855,49 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type BorrowRequestCreateWithoutRoomInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Member: BorrowerCreateNestedOneWithoutBorrowRequestsInput
+    Item: ItemCreateNestedOneWithoutBorrowRequestsInput
+    Borrow?: BorrowCreateNestedOneWithoutRequestInput
+    Requester?: UserCreateNestedOneWithoutRequestedBorrowsInput
+    Reviewer?: UserCreateNestedOneWithoutReviewedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateWithoutRoomInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateOrConnectWithoutRoomInput = {
+    where: BorrowRequestWhereUniqueInput
+    create: XOR<BorrowRequestCreateWithoutRoomInput, BorrowRequestUncheckedCreateWithoutRoomInput>
+  }
+
+  export type BorrowRequestCreateManyRoomInputEnvelope = {
+    data: BorrowRequestCreateManyRoomInput | BorrowRequestCreateManyRoomInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BorrowUpsertWithWhereUniqueWithoutRoomInput = {
     where: BorrowWhereUniqueInput
     update: XOR<BorrowUpdateWithoutRoomInput, BorrowUncheckedUpdateWithoutRoomInput>
@@ -13135,6 +17930,22 @@ export namespace Prisma {
     data: XOR<ReturnUpdateManyMutationInput, ReturnUncheckedUpdateManyWithoutRoomInput>
   }
 
+  export type BorrowRequestUpsertWithWhereUniqueWithoutRoomInput = {
+    where: BorrowRequestWhereUniqueInput
+    update: XOR<BorrowRequestUpdateWithoutRoomInput, BorrowRequestUncheckedUpdateWithoutRoomInput>
+    create: XOR<BorrowRequestCreateWithoutRoomInput, BorrowRequestUncheckedCreateWithoutRoomInput>
+  }
+
+  export type BorrowRequestUpdateWithWhereUniqueWithoutRoomInput = {
+    where: BorrowRequestWhereUniqueInput
+    data: XOR<BorrowRequestUpdateWithoutRoomInput, BorrowRequestUncheckedUpdateWithoutRoomInput>
+  }
+
+  export type BorrowRequestUpdateManyWithWhereWithoutRoomInput = {
+    where: BorrowRequestScalarWhereInput
+    data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyWithoutRoomInput>
+  }
+
   export type BorrowerCreateWithoutBorrowsInput = {
     m_school_id: string
     m_fname: string
@@ -13147,6 +17958,7 @@ export namespace Prisma {
     m_password: string
     m_status?: number
     returns?: ReturnCreateNestedManyWithoutMemberInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutMemberInput
   }
 
   export type BorrowerUncheckedCreateWithoutBorrowsInput = {
@@ -13162,6 +17974,7 @@ export namespace Prisma {
     m_password: string
     m_status?: number
     returns?: ReturnUncheckedCreateNestedManyWithoutMemberInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutMemberInput
   }
 
   export type BorrowerCreateOrConnectWithoutBorrowsInput = {
@@ -13184,6 +17997,7 @@ export namespace Prisma {
     no_of_items?: number | null
     remarks?: string | null
     returns?: ReturnCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateWithoutBorrowsInput = {
@@ -13202,6 +18016,7 @@ export namespace Prisma {
     no_of_items?: number | null
     remarks?: string | null
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemCreateOrConnectWithoutBorrowsInput = {
@@ -13216,6 +18031,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     returns?: ReturnCreateNestedManyWithoutRoomInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUncheckedCreateWithoutBorrowsInput = {
@@ -13226,6 +18042,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     returns?: ReturnUncheckedCreateNestedManyWithoutRoomInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutRoomInput
   }
 
   export type RoomCreateOrConnectWithoutBorrowsInput = {
@@ -13267,6 +18084,82 @@ export namespace Prisma {
     create: XOR<ReturnCreateWithoutBorrowInput, ReturnUncheckedCreateWithoutBorrowInput>
   }
 
+  export type BorrowRequestCreateWithoutBorrowInput = {
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Member: BorrowerCreateNestedOneWithoutBorrowRequestsInput
+    Item: ItemCreateNestedOneWithoutBorrowRequestsInput
+    Room?: RoomCreateNestedOneWithoutBorrowRequestsInput
+    Requester?: UserCreateNestedOneWithoutRequestedBorrowsInput
+    Reviewer?: UserCreateNestedOneWithoutReviewedBorrowsInput
+  }
+
+  export type BorrowRequestUncheckedCreateWithoutBorrowInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateOrConnectWithoutBorrowInput = {
+    where: BorrowRequestWhereUniqueInput
+    create: XOR<BorrowRequestCreateWithoutBorrowInput, BorrowRequestUncheckedCreateWithoutBorrowInput>
+  }
+
+  export type ItemReceiptCreateWithoutBorrowInput = {
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    Releaser?: UserCreateNestedOneWithoutReleasedItemsInput
+  }
+
+  export type ItemReceiptUncheckedCreateWithoutBorrowInput = {
+    id?: number
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    released_by?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ItemReceiptCreateOrConnectWithoutBorrowInput = {
+    where: ItemReceiptWhereUniqueInput
+    create: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
+  }
+
   export type BorrowerUpsertWithoutBorrowsInput = {
     update: XOR<BorrowerUpdateWithoutBorrowsInput, BorrowerUncheckedUpdateWithoutBorrowsInput>
     create: XOR<BorrowerCreateWithoutBorrowsInput, BorrowerUncheckedCreateWithoutBorrowsInput>
@@ -13290,6 +18183,7 @@ export namespace Prisma {
     m_password?: StringFieldUpdateOperationsInput | string
     m_status?: IntFieldUpdateOperationsInput | number
     returns?: ReturnUpdateManyWithoutMemberNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutMemberNestedInput
   }
 
   export type BorrowerUncheckedUpdateWithoutBorrowsInput = {
@@ -13305,6 +18199,7 @@ export namespace Prisma {
     m_password?: StringFieldUpdateOperationsInput | string
     m_status?: IntFieldUpdateOperationsInput | number
     returns?: ReturnUncheckedUpdateManyWithoutMemberNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type ItemUpsertWithoutBorrowsInput = {
@@ -13333,6 +18228,7 @@ export namespace Prisma {
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     returns?: ReturnUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateWithoutBorrowsInput = {
@@ -13351,6 +18247,7 @@ export namespace Prisma {
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type RoomUpsertWithoutBorrowsInput = {
@@ -13371,6 +18268,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     returns?: ReturnUpdateManyWithoutRoomNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateWithoutBorrowsInput = {
@@ -13381,6 +18279,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     returns?: ReturnUncheckedUpdateManyWithoutRoomNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutRoomNestedInput
   }
 
   export type ReturnUpsertWithoutBorrowInput = {
@@ -13423,6 +18322,674 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BorrowRequestUpsertWithoutBorrowInput = {
+    update: XOR<BorrowRequestUpdateWithoutBorrowInput, BorrowRequestUncheckedUpdateWithoutBorrowInput>
+    create: XOR<BorrowRequestCreateWithoutBorrowInput, BorrowRequestUncheckedCreateWithoutBorrowInput>
+    where?: BorrowRequestWhereInput
+  }
+
+  export type BorrowRequestUpdateToOneWithWhereWithoutBorrowInput = {
+    where?: BorrowRequestWhereInput
+    data: XOR<BorrowRequestUpdateWithoutBorrowInput, BorrowRequestUncheckedUpdateWithoutBorrowInput>
+  }
+
+  export type BorrowRequestUpdateWithoutBorrowInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowRequestsNestedInput
+    Requester?: UserUpdateOneWithoutRequestedBorrowsNestedInput
+    Reviewer?: UserUpdateOneWithoutReviewedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateWithoutBorrowInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ItemReceiptUpsertWithoutBorrowInput = {
+    update: XOR<ItemReceiptUpdateWithoutBorrowInput, ItemReceiptUncheckedUpdateWithoutBorrowInput>
+    create: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
+    where?: ItemReceiptWhereInput
+  }
+
+  export type ItemReceiptUpdateToOneWithWhereWithoutBorrowInput = {
+    where?: ItemReceiptWhereInput
+    data: XOR<ItemReceiptUpdateWithoutBorrowInput, ItemReceiptUncheckedUpdateWithoutBorrowInput>
+  }
+
+  export type ItemReceiptUpdateWithoutBorrowInput = {
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Releaser?: UserUpdateOneWithoutReleasedItemsNestedInput
+  }
+
+  export type ItemReceiptUncheckedUpdateWithoutBorrowInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    released_by?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowCreateWithoutReceiptInput = {
+    b_date_borrowed?: Date | string
+    b_date_returned?: Date | string | null
+    b_due_date: Date | string
+    b_quantity?: number
+    b_status?: number
+    b_purpose?: string | null
+    b_notes?: string | null
+    Member: BorrowerCreateNestedOneWithoutBorrowsInput
+    Item: ItemCreateNestedOneWithoutBorrowsInput
+    Room?: RoomCreateNestedOneWithoutBorrowsInput
+    return?: ReturnCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestCreateNestedOneWithoutBorrowInput
+  }
+
+  export type BorrowUncheckedCreateWithoutReceiptInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    b_date_borrowed?: Date | string
+    b_date_returned?: Date | string | null
+    b_due_date: Date | string
+    b_quantity?: number
+    b_status?: number
+    b_purpose?: string | null
+    b_notes?: string | null
+    return?: ReturnUncheckedCreateNestedOneWithoutBorrowInput
+    request?: BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput
+  }
+
+  export type BorrowCreateOrConnectWithoutReceiptInput = {
+    where: BorrowWhereUniqueInput
+    create: XOR<BorrowCreateWithoutReceiptInput, BorrowUncheckedCreateWithoutReceiptInput>
+  }
+
+  export type UserCreateWithoutReleasedItemsInput = {
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
+    reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
+  }
+
+  export type UserUncheckedCreateWithoutReleasedItemsInput = {
+    id?: number
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
+    reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
+  }
+
+  export type UserCreateOrConnectWithoutReleasedItemsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutReleasedItemsInput, UserUncheckedCreateWithoutReleasedItemsInput>
+  }
+
+  export type BorrowUpsertWithoutReceiptInput = {
+    update: XOR<BorrowUpdateWithoutReceiptInput, BorrowUncheckedUpdateWithoutReceiptInput>
+    create: XOR<BorrowCreateWithoutReceiptInput, BorrowUncheckedCreateWithoutReceiptInput>
+    where?: BorrowWhereInput
+  }
+
+  export type BorrowUpdateToOneWithWhereWithoutReceiptInput = {
+    where?: BorrowWhereInput
+    data: XOR<BorrowUpdateWithoutReceiptInput, BorrowUncheckedUpdateWithoutReceiptInput>
+  }
+
+  export type BorrowUpdateWithoutReceiptInput = {
+    b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    b_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_quantity?: IntFieldUpdateOperationsInput | number
+    b_status?: IntFieldUpdateOperationsInput | number
+    b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowsNestedInput
+    return?: ReturnUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUpdateOneWithoutBorrowNestedInput
+  }
+
+  export type BorrowUncheckedUpdateWithoutReceiptInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    b_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_quantity?: IntFieldUpdateOperationsInput | number
+    b_status?: IntFieldUpdateOperationsInput | number
+    b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    return?: ReturnUncheckedUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput
+  }
+
+  export type UserUpsertWithoutReleasedItemsInput = {
+    update: XOR<UserUpdateWithoutReleasedItemsInput, UserUncheckedUpdateWithoutReleasedItemsInput>
+    create: XOR<UserCreateWithoutReleasedItemsInput, UserUncheckedCreateWithoutReleasedItemsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutReleasedItemsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutReleasedItemsInput, UserUncheckedUpdateWithoutReleasedItemsInput>
+  }
+
+  export type UserUpdateWithoutReleasedItemsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
+    reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutReleasedItemsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
+    reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  }
+
+  export type BorrowerCreateWithoutBorrowRequestsInput = {
+    m_school_id: string
+    m_fname: string
+    m_lname: string
+    m_gender: string
+    m_contact: string
+    m_department: string
+    m_year_section: string
+    m_type: number
+    m_password: string
+    m_status?: number
+    borrows?: BorrowCreateNestedManyWithoutMemberInput
+    returns?: ReturnCreateNestedManyWithoutMemberInput
+  }
+
+  export type BorrowerUncheckedCreateWithoutBorrowRequestsInput = {
+    id?: number
+    m_school_id: string
+    m_fname: string
+    m_lname: string
+    m_gender: string
+    m_contact: string
+    m_department: string
+    m_year_section: string
+    m_type: number
+    m_password: string
+    m_status?: number
+    borrows?: BorrowUncheckedCreateNestedManyWithoutMemberInput
+    returns?: ReturnUncheckedCreateNestedManyWithoutMemberInput
+  }
+
+  export type BorrowerCreateOrConnectWithoutBorrowRequestsInput = {
+    where: BorrowerWhereUniqueInput
+    create: XOR<BorrowerCreateWithoutBorrowRequestsInput, BorrowerUncheckedCreateWithoutBorrowRequestsInput>
+  }
+
+  export type ItemCreateWithoutBorrowRequestsInput = {
+    i_deviceID: string
+    i_model: string
+    i_category: string
+    i_brand: string
+    i_description: string
+    i_type: string
+    item_rawstock?: number
+    i_status?: number
+    i_mr: string
+    i_price: Decimal | DecimalJsLike | number | string
+    i_photo?: string
+    no_of_items?: number | null
+    remarks?: string | null
+    borrows?: BorrowCreateNestedManyWithoutItemInput
+    returns?: ReturnCreateNestedManyWithoutItemInput
+  }
+
+  export type ItemUncheckedCreateWithoutBorrowRequestsInput = {
+    id?: number
+    i_deviceID: string
+    i_model: string
+    i_category: string
+    i_brand: string
+    i_description: string
+    i_type: string
+    item_rawstock?: number
+    i_status?: number
+    i_mr: string
+    i_price: Decimal | DecimalJsLike | number | string
+    i_photo?: string
+    no_of_items?: number | null
+    remarks?: string | null
+    borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
+    returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
+  }
+
+  export type ItemCreateOrConnectWithoutBorrowRequestsInput = {
+    where: ItemWhereUniqueInput
+    create: XOR<ItemCreateWithoutBorrowRequestsInput, ItemUncheckedCreateWithoutBorrowRequestsInput>
+  }
+
+  export type RoomCreateWithoutBorrowRequestsInput = {
+    r_name: string
+    r_description?: string | null
+    r_status?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    borrows?: BorrowCreateNestedManyWithoutRoomInput
+    returns?: ReturnCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutBorrowRequestsInput = {
+    id?: number
+    r_name: string
+    r_description?: string | null
+    r_status?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    borrows?: BorrowUncheckedCreateNestedManyWithoutRoomInput
+    returns?: ReturnUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutBorrowRequestsInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutBorrowRequestsInput, RoomUncheckedCreateWithoutBorrowRequestsInput>
+  }
+
+  export type BorrowCreateWithoutRequestInput = {
+    b_date_borrowed?: Date | string
+    b_date_returned?: Date | string | null
+    b_due_date: Date | string
+    b_quantity?: number
+    b_status?: number
+    b_purpose?: string | null
+    b_notes?: string | null
+    Member: BorrowerCreateNestedOneWithoutBorrowsInput
+    Item: ItemCreateNestedOneWithoutBorrowsInput
+    Room?: RoomCreateNestedOneWithoutBorrowsInput
+    return?: ReturnCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptCreateNestedOneWithoutBorrowInput
+  }
+
+  export type BorrowUncheckedCreateWithoutRequestInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    b_date_borrowed?: Date | string
+    b_date_returned?: Date | string | null
+    b_due_date: Date | string
+    b_quantity?: number
+    b_status?: number
+    b_purpose?: string | null
+    b_notes?: string | null
+    return?: ReturnUncheckedCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput
+  }
+
+  export type BorrowCreateOrConnectWithoutRequestInput = {
+    where: BorrowWhereUniqueInput
+    create: XOR<BorrowCreateWithoutRequestInput, BorrowUncheckedCreateWithoutRequestInput>
+  }
+
+  export type UserCreateWithoutRequestedBorrowsInput = {
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
+    releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
+  }
+
+  export type UserUncheckedCreateWithoutRequestedBorrowsInput = {
+    id?: number
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
+    releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
+  }
+
+  export type UserCreateOrConnectWithoutRequestedBorrowsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRequestedBorrowsInput, UserUncheckedCreateWithoutRequestedBorrowsInput>
+  }
+
+  export type UserCreateWithoutReviewedBorrowsInput = {
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
+    releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
+  }
+
+  export type UserUncheckedCreateWithoutReviewedBorrowsInput = {
+    id?: number
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
+    releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
+  }
+
+  export type UserCreateOrConnectWithoutReviewedBorrowsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutReviewedBorrowsInput, UserUncheckedCreateWithoutReviewedBorrowsInput>
+  }
+
+  export type BorrowerUpsertWithoutBorrowRequestsInput = {
+    update: XOR<BorrowerUpdateWithoutBorrowRequestsInput, BorrowerUncheckedUpdateWithoutBorrowRequestsInput>
+    create: XOR<BorrowerCreateWithoutBorrowRequestsInput, BorrowerUncheckedCreateWithoutBorrowRequestsInput>
+    where?: BorrowerWhereInput
+  }
+
+  export type BorrowerUpdateToOneWithWhereWithoutBorrowRequestsInput = {
+    where?: BorrowerWhereInput
+    data: XOR<BorrowerUpdateWithoutBorrowRequestsInput, BorrowerUncheckedUpdateWithoutBorrowRequestsInput>
+  }
+
+  export type BorrowerUpdateWithoutBorrowRequestsInput = {
+    m_school_id?: StringFieldUpdateOperationsInput | string
+    m_fname?: StringFieldUpdateOperationsInput | string
+    m_lname?: StringFieldUpdateOperationsInput | string
+    m_gender?: StringFieldUpdateOperationsInput | string
+    m_contact?: StringFieldUpdateOperationsInput | string
+    m_department?: StringFieldUpdateOperationsInput | string
+    m_year_section?: StringFieldUpdateOperationsInput | string
+    m_type?: IntFieldUpdateOperationsInput | number
+    m_password?: StringFieldUpdateOperationsInput | string
+    m_status?: IntFieldUpdateOperationsInput | number
+    borrows?: BorrowUpdateManyWithoutMemberNestedInput
+    returns?: ReturnUpdateManyWithoutMemberNestedInput
+  }
+
+  export type BorrowerUncheckedUpdateWithoutBorrowRequestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    m_school_id?: StringFieldUpdateOperationsInput | string
+    m_fname?: StringFieldUpdateOperationsInput | string
+    m_lname?: StringFieldUpdateOperationsInput | string
+    m_gender?: StringFieldUpdateOperationsInput | string
+    m_contact?: StringFieldUpdateOperationsInput | string
+    m_department?: StringFieldUpdateOperationsInput | string
+    m_year_section?: StringFieldUpdateOperationsInput | string
+    m_type?: IntFieldUpdateOperationsInput | number
+    m_password?: StringFieldUpdateOperationsInput | string
+    m_status?: IntFieldUpdateOperationsInput | number
+    borrows?: BorrowUncheckedUpdateManyWithoutMemberNestedInput
+    returns?: ReturnUncheckedUpdateManyWithoutMemberNestedInput
+  }
+
+  export type ItemUpsertWithoutBorrowRequestsInput = {
+    update: XOR<ItemUpdateWithoutBorrowRequestsInput, ItemUncheckedUpdateWithoutBorrowRequestsInput>
+    create: XOR<ItemCreateWithoutBorrowRequestsInput, ItemUncheckedCreateWithoutBorrowRequestsInput>
+    where?: ItemWhereInput
+  }
+
+  export type ItemUpdateToOneWithWhereWithoutBorrowRequestsInput = {
+    where?: ItemWhereInput
+    data: XOR<ItemUpdateWithoutBorrowRequestsInput, ItemUncheckedUpdateWithoutBorrowRequestsInput>
+  }
+
+  export type ItemUpdateWithoutBorrowRequestsInput = {
+    i_deviceID?: StringFieldUpdateOperationsInput | string
+    i_model?: StringFieldUpdateOperationsInput | string
+    i_category?: StringFieldUpdateOperationsInput | string
+    i_brand?: StringFieldUpdateOperationsInput | string
+    i_description?: StringFieldUpdateOperationsInput | string
+    i_type?: StringFieldUpdateOperationsInput | string
+    item_rawstock?: IntFieldUpdateOperationsInput | number
+    i_status?: IntFieldUpdateOperationsInput | number
+    i_mr?: StringFieldUpdateOperationsInput | string
+    i_price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    i_photo?: StringFieldUpdateOperationsInput | string
+    no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    borrows?: BorrowUpdateManyWithoutItemNestedInput
+    returns?: ReturnUpdateManyWithoutItemNestedInput
+  }
+
+  export type ItemUncheckedUpdateWithoutBorrowRequestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    i_deviceID?: StringFieldUpdateOperationsInput | string
+    i_model?: StringFieldUpdateOperationsInput | string
+    i_category?: StringFieldUpdateOperationsInput | string
+    i_brand?: StringFieldUpdateOperationsInput | string
+    i_description?: StringFieldUpdateOperationsInput | string
+    i_type?: StringFieldUpdateOperationsInput | string
+    item_rawstock?: IntFieldUpdateOperationsInput | number
+    i_status?: IntFieldUpdateOperationsInput | number
+    i_mr?: StringFieldUpdateOperationsInput | string
+    i_price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    i_photo?: StringFieldUpdateOperationsInput | string
+    no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
+    returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
+  }
+
+  export type RoomUpsertWithoutBorrowRequestsInput = {
+    update: XOR<RoomUpdateWithoutBorrowRequestsInput, RoomUncheckedUpdateWithoutBorrowRequestsInput>
+    create: XOR<RoomCreateWithoutBorrowRequestsInput, RoomUncheckedCreateWithoutBorrowRequestsInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutBorrowRequestsInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutBorrowRequestsInput, RoomUncheckedUpdateWithoutBorrowRequestsInput>
+  }
+
+  export type RoomUpdateWithoutBorrowRequestsInput = {
+    r_name?: StringFieldUpdateOperationsInput | string
+    r_description?: NullableStringFieldUpdateOperationsInput | string | null
+    r_status?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    borrows?: BorrowUpdateManyWithoutRoomNestedInput
+    returns?: ReturnUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutBorrowRequestsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    r_name?: StringFieldUpdateOperationsInput | string
+    r_description?: NullableStringFieldUpdateOperationsInput | string | null
+    r_status?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    borrows?: BorrowUncheckedUpdateManyWithoutRoomNestedInput
+    returns?: ReturnUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type BorrowUpsertWithoutRequestInput = {
+    update: XOR<BorrowUpdateWithoutRequestInput, BorrowUncheckedUpdateWithoutRequestInput>
+    create: XOR<BorrowCreateWithoutRequestInput, BorrowUncheckedCreateWithoutRequestInput>
+    where?: BorrowWhereInput
+  }
+
+  export type BorrowUpdateToOneWithWhereWithoutRequestInput = {
+    where?: BorrowWhereInput
+    data: XOR<BorrowUpdateWithoutRequestInput, BorrowUncheckedUpdateWithoutRequestInput>
+  }
+
+  export type BorrowUpdateWithoutRequestInput = {
+    b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    b_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_quantity?: IntFieldUpdateOperationsInput | number
+    b_status?: IntFieldUpdateOperationsInput | number
+    b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowsNestedInput
+    return?: ReturnUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUpdateOneWithoutBorrowNestedInput
+  }
+
+  export type BorrowUncheckedUpdateWithoutRequestInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    b_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    b_quantity?: IntFieldUpdateOperationsInput | number
+    b_status?: IntFieldUpdateOperationsInput | number
+    b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    return?: ReturnUncheckedUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput
+  }
+
+  export type UserUpsertWithoutRequestedBorrowsInput = {
+    update: XOR<UserUpdateWithoutRequestedBorrowsInput, UserUncheckedUpdateWithoutRequestedBorrowsInput>
+    create: XOR<UserCreateWithoutRequestedBorrowsInput, UserUncheckedCreateWithoutRequestedBorrowsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRequestedBorrowsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRequestedBorrowsInput, UserUncheckedUpdateWithoutRequestedBorrowsInput>
+  }
+
+  export type UserUpdateWithoutRequestedBorrowsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
+    releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRequestedBorrowsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
+  }
+
+  export type UserUpsertWithoutReviewedBorrowsInput = {
+    update: XOR<UserUpdateWithoutReviewedBorrowsInput, UserUncheckedUpdateWithoutReviewedBorrowsInput>
+    create: XOR<UserCreateWithoutReviewedBorrowsInput, UserUncheckedCreateWithoutReviewedBorrowsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutReviewedBorrowsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutReviewedBorrowsInput, UserUncheckedUpdateWithoutReviewedBorrowsInput>
+  }
+
+  export type UserUpdateWithoutReviewedBorrowsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
+    releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutReviewedBorrowsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
+    releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
+  }
+
   export type BorrowCreateWithoutReturnInput = {
     b_date_borrowed?: Date | string
     b_date_returned?: Date | string | null
@@ -13434,6 +19001,8 @@ export namespace Prisma {
     Member: BorrowerCreateNestedOneWithoutBorrowsInput
     Item: ItemCreateNestedOneWithoutBorrowsInput
     Room?: RoomCreateNestedOneWithoutBorrowsInput
+    request?: BorrowRequestCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowUncheckedCreateWithoutReturnInput = {
@@ -13448,6 +19017,8 @@ export namespace Prisma {
     b_status?: number
     b_purpose?: string | null
     b_notes?: string | null
+    request?: BorrowRequestUncheckedCreateNestedOneWithoutBorrowInput
+    receipt?: ItemReceiptUncheckedCreateNestedOneWithoutBorrowInput
   }
 
   export type BorrowCreateOrConnectWithoutReturnInput = {
@@ -13467,6 +19038,7 @@ export namespace Prisma {
     m_password: string
     m_status?: number
     borrows?: BorrowCreateNestedManyWithoutMemberInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutMemberInput
   }
 
   export type BorrowerUncheckedCreateWithoutReturnsInput = {
@@ -13482,6 +19054,7 @@ export namespace Prisma {
     m_password: string
     m_status?: number
     borrows?: BorrowUncheckedCreateNestedManyWithoutMemberInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutMemberInput
   }
 
   export type BorrowerCreateOrConnectWithoutReturnsInput = {
@@ -13504,6 +19077,7 @@ export namespace Prisma {
     no_of_items?: number | null
     remarks?: string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateWithoutReturnsInput = {
@@ -13522,6 +19096,7 @@ export namespace Prisma {
     no_of_items?: number | null
     remarks?: string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemCreateOrConnectWithoutReturnsInput = {
@@ -13536,6 +19111,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     borrows?: BorrowCreateNestedManyWithoutRoomInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutRoomInput
   }
 
   export type RoomUncheckedCreateWithoutReturnsInput = {
@@ -13546,6 +19122,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     borrows?: BorrowUncheckedCreateNestedManyWithoutRoomInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutRoomInput
   }
 
   export type RoomCreateOrConnectWithoutReturnsInput = {
@@ -13575,6 +19152,8 @@ export namespace Prisma {
     Member?: BorrowerUpdateOneRequiredWithoutBorrowsNestedInput
     Item?: ItemUpdateOneRequiredWithoutBorrowsNestedInput
     Room?: RoomUpdateOneWithoutBorrowsNestedInput
+    request?: BorrowRequestUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateWithoutReturnInput = {
@@ -13589,6 +19168,8 @@ export namespace Prisma {
     b_status?: IntFieldUpdateOperationsInput | number
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    request?: BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowerUpsertWithoutReturnsInput = {
@@ -13614,6 +19195,7 @@ export namespace Prisma {
     m_password?: StringFieldUpdateOperationsInput | string
     m_status?: IntFieldUpdateOperationsInput | number
     borrows?: BorrowUpdateManyWithoutMemberNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutMemberNestedInput
   }
 
   export type BorrowerUncheckedUpdateWithoutReturnsInput = {
@@ -13629,6 +19211,7 @@ export namespace Prisma {
     m_password?: StringFieldUpdateOperationsInput | string
     m_status?: IntFieldUpdateOperationsInput | number
     borrows?: BorrowUncheckedUpdateManyWithoutMemberNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutMemberNestedInput
   }
 
   export type ItemUpsertWithoutReturnsInput = {
@@ -13657,6 +19240,7 @@ export namespace Prisma {
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateWithoutReturnsInput = {
@@ -13675,6 +19259,7 @@ export namespace Prisma {
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type RoomUpsertWithoutReturnsInput = {
@@ -13695,6 +19280,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     borrows?: BorrowUpdateManyWithoutRoomNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutRoomNestedInput
   }
 
   export type RoomUncheckedUpdateWithoutReturnsInput = {
@@ -13705,6 +19291,208 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     borrows?: BorrowUncheckedUpdateManyWithoutRoomNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type BorrowRequestCreateManyRequesterInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestCreateManyReviewerInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ItemReceiptCreateManyReleaserInput = {
+    id?: number
+    borrow_id: number
+    rc_receiver_name: string
+    rc_receiver_id?: string | null
+    rc_contact?: string | null
+    rc_relationship?: string
+    rc_id_presented?: string | null
+    rc_receiver_photo?: string | null
+    rc_quantity?: number
+    rc_condition?: string
+    rc_notes?: string | null
+    rc_received_at?: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type BorrowRequestUpdateWithoutRequesterInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowRequestsNestedInput
+    Borrow?: BorrowUpdateOneWithoutRequestNestedInput
+    Reviewer?: UserUpdateOneWithoutReviewedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateWithoutRequesterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutRequesterInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUpdateWithoutReviewerInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowRequestsNestedInput
+    Borrow?: BorrowUpdateOneWithoutRequestNestedInput
+    Requester?: UserUpdateOneWithoutRequestedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateWithoutReviewerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutReviewerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ItemReceiptUpdateWithoutReleaserInput = {
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Borrow?: BorrowUpdateOneRequiredWithoutReceiptNestedInput
+  }
+
+  export type ItemReceiptUncheckedUpdateWithoutReleaserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    borrow_id?: IntFieldUpdateOperationsInput | number
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ItemReceiptUncheckedUpdateManyWithoutReleaserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    borrow_id?: IntFieldUpdateOperationsInput | number
+    rc_receiver_name?: StringFieldUpdateOperationsInput | string
+    rc_receiver_id?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_contact?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_relationship?: StringFieldUpdateOperationsInput | string
+    rc_id_presented?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_receiver_photo?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_quantity?: IntFieldUpdateOperationsInput | number
+    rc_condition?: StringFieldUpdateOperationsInput | string
+    rc_notes?: NullableStringFieldUpdateOperationsInput | string | null
+    rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BorrowCreateManyMemberInput = {
@@ -13735,6 +19523,23 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type BorrowRequestCreateManyMemberInput = {
+    id?: number
+    item_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type BorrowUpdateWithoutMemberInput = {
     b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
     b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13746,6 +19551,8 @@ export namespace Prisma {
     Item?: ItemUpdateOneRequiredWithoutBorrowsNestedInput
     Room?: RoomUpdateOneWithoutBorrowsNestedInput
     return?: ReturnUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateWithoutMemberInput = {
@@ -13760,6 +19567,8 @@ export namespace Prisma {
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
     return?: ReturnUncheckedUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateManyWithoutMemberInput = {
@@ -13819,6 +19628,56 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BorrowRequestUpdateWithoutMemberInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Item?: ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowRequestsNestedInput
+    Borrow?: BorrowUpdateOneWithoutRequestNestedInput
+    Requester?: UserUpdateOneWithoutRequestedBorrowsNestedInput
+    Reviewer?: UserUpdateOneWithoutReviewedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateWithoutMemberInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutMemberInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BorrowCreateManyItemInput = {
     id?: number
     member_id: number
@@ -13847,6 +19706,23 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type BorrowRequestCreateManyItemInput = {
+    id?: number
+    member_id: number
+    room_id?: number | null
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type BorrowUpdateWithoutItemInput = {
     b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
     b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13858,6 +19734,8 @@ export namespace Prisma {
     Member?: BorrowerUpdateOneRequiredWithoutBorrowsNestedInput
     Room?: RoomUpdateOneWithoutBorrowsNestedInput
     return?: ReturnUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateWithoutItemInput = {
@@ -13872,6 +19750,8 @@ export namespace Prisma {
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
     return?: ReturnUncheckedUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateManyWithoutItemInput = {
@@ -13931,6 +19811,56 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type BorrowRequestUpdateWithoutItemInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Room?: RoomUpdateOneWithoutBorrowRequestsNestedInput
+    Borrow?: BorrowUpdateOneWithoutRequestNestedInput
+    Requester?: UserUpdateOneWithoutRequestedBorrowsNestedInput
+    Reviewer?: UserUpdateOneWithoutReviewedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateWithoutItemInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutItemInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    room_id?: NullableIntFieldUpdateOperationsInput | number | null
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type BorrowCreateManyRoomInput = {
     id?: number
     member_id: number
@@ -13959,6 +19889,23 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type BorrowRequestCreateManyRoomInput = {
+    id?: number
+    member_id: number
+    item_id: number
+    br_quantity?: number
+    br_due_date: Date | string
+    br_status?: number
+    br_purpose?: string | null
+    requested_by?: number | null
+    reviewed_by?: number | null
+    br_reviewed_at?: Date | string | null
+    br_review_note?: string | null
+    borrow_id?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type BorrowUpdateWithoutRoomInput = {
     b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
     b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13970,6 +19917,8 @@ export namespace Prisma {
     Member?: BorrowerUpdateOneRequiredWithoutBorrowsNestedInput
     Item?: ItemUpdateOneRequiredWithoutBorrowsNestedInput
     return?: ReturnUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateWithoutRoomInput = {
@@ -13984,6 +19933,8 @@ export namespace Prisma {
     b_purpose?: NullableStringFieldUpdateOperationsInput | string | null
     b_notes?: NullableStringFieldUpdateOperationsInput | string | null
     return?: ReturnUncheckedUpdateOneWithoutBorrowNestedInput
+    request?: BorrowRequestUncheckedUpdateOneWithoutBorrowNestedInput
+    receipt?: ItemReceiptUncheckedUpdateOneWithoutBorrowNestedInput
   }
 
   export type BorrowUncheckedUpdateManyWithoutRoomInput = {
@@ -14039,6 +19990,56 @@ export namespace Prisma {
     r_notes?: NullableStringFieldUpdateOperationsInput | string | null
     r_late_fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     r_damage_fee?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUpdateWithoutRoomInput = {
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    Member?: BorrowerUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Item?: ItemUpdateOneRequiredWithoutBorrowRequestsNestedInput
+    Borrow?: BorrowUpdateOneWithoutRequestNestedInput
+    Requester?: UserUpdateOneWithoutRequestedBorrowsNestedInput
+    Reviewer?: UserUpdateOneWithoutReviewedBorrowsNestedInput
+  }
+
+  export type BorrowRequestUncheckedUpdateWithoutRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BorrowRequestUncheckedUpdateManyWithoutRoomInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    member_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    br_quantity?: IntFieldUpdateOperationsInput | number
+    br_due_date?: DateTimeFieldUpdateOperationsInput | Date | string
+    br_status?: IntFieldUpdateOperationsInput | number
+    br_purpose?: NullableStringFieldUpdateOperationsInput | string | null
+    requested_by?: NullableIntFieldUpdateOperationsInput | number | null
+    reviewed_by?: NullableIntFieldUpdateOperationsInput | number | null
+    br_reviewed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    br_review_note?: NullableStringFieldUpdateOperationsInput | string | null
+    borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

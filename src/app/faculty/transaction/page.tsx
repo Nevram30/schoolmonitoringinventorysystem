@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession } from 'next-auth/react';
 import { PlusIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { trpcClient } from '@/trpc/client';
 import ItemPicker from '@/components/ui-components/item.picker';
 import ItemAvatar from '@/components/ui-components/item.avatar';
+import BorrowRequestsTable from '@/components/ui-components/borrow.requests.table';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 
@@ -40,6 +42,7 @@ interface Pagination {
 }
 
 export default function FacultyTransactionPage() {
+    const { data: session } = useSession();
     const [borrows, setBorrows] = useState<Borrow[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -47,9 +50,10 @@ export default function FacultyTransactionPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [itemError, setItemError] = useState('');
+    // Bumped after a request is sent so the requests table reloads and shows it as pending.
+    const [requestsRefresh, setRequestsRefresh] = useState(0);
     const { alert, showSuccess, showError, hideAlert } = useAlert();
     const [items, setItems] = useState<any[]>([]);
-    const [borrowers, setBorrowers] = useState<any[]>([]);
     const [rooms, setRooms] = useState<any[]>([]);
     const [pagination, setPagination] = useState<Pagination>({
         page: 1,
@@ -59,10 +63,10 @@ export default function FacultyTransactionPage() {
     });
     const [formData, setFormData] = useState({
         b_itemid: '',
-        b_memberid: '',
         b_roomid: '',
         b_qty: '1',
-        b_returndate: ''
+        b_returndate: '',
+        b_purpose: ''
     });
 
     const fetchBorrows = useCallback(async () => {
@@ -125,26 +129,27 @@ export default function FacultyTransactionPage() {
 
     const fetchDropdownData = async () => {
         try {
-            // Fetch items, borrowers, and rooms
-            const [itemsData, borrowersData, roomsData] = await Promise.all([
+            // Items and rooms only — the borrow is always for the signed-in account, so there is
+            // no borrower list to choose from.
+            const [itemsData, roomsData] = await Promise.all([
                 trpcClient.items.list.query({ limit: 1000 }),
-                trpcClient.borrowers.list.query({ limit: 1000 }),
                 trpcClient.rooms.list.query({ limit: 1000 })
             ]);
 
             if (itemsData.success) setItems(itemsData.data);
-            if (borrowersData.success) setBorrowers(borrowersData.data);
             if (roomsData.success) setRooms(roomsData.data);
         } catch (error) {
             console.error('Error fetching dropdown data:', error);
         }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    // Sends the borrow for admin approval rather than creating it outright — nothing leaves the
+    // shelf and no stock moves until an admin approves it on /admin/requests.
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -157,12 +162,13 @@ export default function FacultyTransactionPage() {
         setSubmitting(true);
 
         try {
-            const data = await trpcClient.borrows.create.mutate({
-                member_id: parseInt(formData.b_memberid),
+            // No member_id: the server files the request against the signed-in account.
+            const data = await trpcClient.borrowRequests.create.mutate({
                 item_id: parseInt(formData.b_itemid),
-                stock_id: parseInt(formData.b_qty),
+                quantity: parseInt(formData.b_qty),
                 room_assigned: parseInt(formData.b_roomid),
-                time_limit: formData.b_returndate
+                time_limit: formData.b_returndate,
+                purpose: formData.b_purpose
             });
 
             if (data.success) {
@@ -170,19 +176,19 @@ export default function FacultyTransactionPage() {
                 setItemError('');
                 setFormData({
                     b_itemid: '',
-                    b_memberid: '',
                     b_roomid: '',
                     b_qty: '1',
-                    b_returndate: ''
+                    b_returndate: '',
+                    b_purpose: ''
                 });
-                fetchBorrows(); // Refresh the list
-                showSuccess('Borrow record created successfully', 'Success');
+                setRequestsRefresh(prev => prev + 1);
+                showSuccess('Your borrow request was sent to the admin for approval.', 'Request sent');
             } else {
-                showError(data.error ?? 'Error creating borrow record', 'Something went wrong');
+                showError(data.error ?? 'Error sending borrow request', 'Something went wrong');
             }
         } catch (error) {
-            console.error('Error creating borrow record:', error);
-            showError('Error creating borrow record', 'Something went wrong');
+            console.error('Error sending borrow request:', error);
+            showError('Error sending borrow request', 'Something went wrong');
         } finally {
             setSubmitting(false);
         }
@@ -201,7 +207,7 @@ export default function FacultyTransactionPage() {
                 <div className="sm:flex-auto">
                     <h1 className="text-2xl font-semibold text-gray-900">Borrowing</h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        Manage property borrowing transactions and track returns.
+                        Request items to borrow and track returns. Requests need admin approval.
                     </p>
                 </div>
                 <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -211,10 +217,13 @@ export default function FacultyTransactionPage() {
                         className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
                     >
                         <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-                        New Borrow
+                        Request Borrow
                     </button>
                 </div>
             </div>
+
+            {/* Requests sent from this screen, with whatever the admin decided. */}
+            <BorrowRequestsTable refreshKey={requestsRefresh} />
 
             {/* Search and Filters */}
             <div className="bg-white shadow rounded-lg">
@@ -241,7 +250,6 @@ export default function FacultyTransactionPage() {
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
                                 <option value="">All Status</option>
-                                <option value="pending">Pending</option>
                                 <option value="borrowed">Borrowed</option>
                                 <option value="returned">Returned</option>
                                 <option value="overdue">Overdue</option>
@@ -409,13 +417,18 @@ export default function FacultyTransactionPage() {
                 )}
             </div>
 
-            {/* Add Borrow Modal */}
+            {/* Request Borrow slide-over */}
             {showAddModal && (
-                <div className="fixed inset-0 bg-gray-600/25 bg-opacity-20 overflow-y-auto h-full w-full z-50">
-                    <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                <div className="fixed inset-0 bg-gray-600/25 bg-opacity-20 h-full w-full z-50 flex justify-end">
+                    <div className="slide-over-panel relative h-full w-full max-w-2xl p-5 border-l shadow-xl bg-white overflow-y-auto">
                         <div className="mt-3">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-medium text-gray-900">New Borrow Transaction</h3>
+                            <div className="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Request Borrow</h3>
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        An admin reviews this before the item is released.
+                                    </p>
+                                </div>
                                 <button
                                     onClick={() => setShowAddModal(false)}
                                     className="text-gray-400 hover:text-gray-600"
@@ -439,22 +452,21 @@ export default function FacultyTransactionPage() {
                                         />
                                     </div>
 
+                                    {/* Borrower is fixed to the signed-in account — only an admin can
+                                        request on someone else's behalf. */}
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Select Borrower</label>
-                                        <select
-                                            name="b_memberid"
-                                            value={formData.b_memberid}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                        >
-                                            <option value="">Choose a borrower...</option>
-                                            {borrowers.map((borrower: any) => (
-                                                <option key={borrower.id} value={borrower.id}>
-                                                    {borrower.m_fname} {borrower.m_lname} ({borrower.m_type})
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <label className="block text-sm font-medium text-gray-700">Borrower</label>
+                                        <div className="mt-1 flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                                            <span className="truncate text-sm font-medium text-gray-900">
+                                                {session?.user?.name ?? 'Your account'}
+                                            </span>
+                                            {session?.user?.role && (
+                                                <span className="shrink-0 rounded-full bg-gray-200 px-2 py-0.5 text-xs capitalize text-gray-600">
+                                                    {session.user.role}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="mt-1 text-xs text-gray-500">Requests are filed under your own account.</p>
                                     </div>
 
                                     <div>
@@ -501,6 +513,20 @@ export default function FacultyTransactionPage() {
                                             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
+
+                                    <div className="md:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Purpose <span className="text-gray-400">(optional)</span>
+                                        </label>
+                                        <textarea
+                                            name="b_purpose"
+                                            value={formData.b_purpose}
+                                            onChange={handleInputChange}
+                                            rows={3}
+                                            className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="What the item is needed for — this helps the admin decide."
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex justify-end space-x-3 pt-4">
@@ -516,7 +542,7 @@ export default function FacultyTransactionPage() {
                                         disabled={submitting}
                                         className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                                     >
-                                        {submitting ? 'Creating...' : 'Create Borrow'}
+                                        {submitting ? 'Sending...' : 'Send Request'}
                                     </button>
                                 </div>
                             </form>

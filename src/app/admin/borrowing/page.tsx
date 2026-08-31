@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PlusIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
+import ItemPicker from '@/components/ui-components/item.picker';
 import ItemAvatar from '@/components/ui-components/item.avatar';
+import Alert from '@/components/ui-components/alert';
+import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
 
 interface Borrow {
@@ -44,6 +47,8 @@ export default function BorrowingPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [itemError, setItemError] = useState('');
+  const { alert, showSuccess, showError, hideAlert } = useAlert();
   const [items, setItems] = useState<any[]>([]);
   const [borrowers, setBorrowers] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
@@ -58,7 +63,8 @@ export default function BorrowingPage() {
     b_memberid: '',
     b_roomid: '',
     b_qty: '1',
-    b_returndate: ''
+    b_returndate: '',
+    b_purpose: ''
   });
 
   const fetchBorrows = useCallback(async () => {
@@ -145,13 +151,20 @@ export default function BorrowingPage() {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // The item field is a photo picker rather than a native input, so it needs its own check.
+    if (!formData.b_itemid) {
+      setItemError('Please select an item.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -160,26 +173,29 @@ export default function BorrowingPage() {
         item_id: parseInt(formData.b_itemid),
         stock_id: parseInt(formData.b_qty),
         room_assigned: parseInt(formData.b_roomid),
-        time_limit: formData.b_returndate
+        time_limit: formData.b_returndate,
+        purpose: formData.b_purpose
       });
 
       if (data.success) {
         setShowAddModal(false);
+        setItemError('');
         setFormData({
           b_itemid: '',
           b_memberid: '',
           b_roomid: '',
           b_qty: '1',
-          b_returndate: ''
+          b_returndate: '',
+          b_purpose: ''
         });
         fetchBorrows(); // Refresh the list
-        alert('Borrow record created successfully!');
+        showSuccess('Borrow record created successfully!', 'Borrow created');
       } else {
-        alert('Error creating borrow record: ' + data.error);
+        showError(data.error ?? 'Error creating borrow record', 'Something went wrong');
       }
     } catch (error) {
       console.error('Error creating borrow record:', error);
-      alert('Error creating borrow record');
+      showError('Error creating borrow record', 'Something went wrong');
     } finally {
       setSubmitting(false);
     }
@@ -187,6 +203,7 @@ export default function BorrowingPage() {
 
   const handleAddClick = () => {
     fetchDropdownData();
+    setItemError('');
     setShowAddModal(true);
   };
 
@@ -411,8 +428,13 @@ export default function BorrowingPage() {
           <div className="fixed inset-0 bg-gray-600/25 bg-opacity-20 h-full w-full z-50 flex justify-end">
             <div className="slide-over-panel relative h-full w-full max-w-2xl p-5 border-l shadow-xl bg-white overflow-y-auto">
               <div className="mt-3">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">New Borrow Transaction</h3>
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900">New Borrow Transaction</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Recorded right away — stock is deducted on save.
+                    </p>
+                  </div>
                   <button
                     onClick={() => setShowAddModal(false)}
                     className="text-gray-400 hover:text-gray-600"
@@ -423,22 +445,17 @@ export default function BorrowingPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700">Select Item</label>
-                      <select
-                        name="b_itemid"
+                      <ItemPicker
+                        items={items}
                         value={formData.b_itemid}
-                        onChange={handleInputChange}
-                        required
-                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Choose an item...</option>
-                        {items.map((item) => (
-                          <option key={item.id} value={item.id}>
-                            {item.i_model} - {item.i_deviceID} (Stock: {item.item_rawstock})
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(itemId) => {
+                          setFormData(prev => ({ ...prev, b_itemid: itemId }));
+                          setItemError('');
+                        }}
+                        error={itemError}
+                      />
                     </div>
 
                     <div>
@@ -503,6 +520,20 @@ export default function BorrowingPage() {
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Purpose <span className="text-gray-400">(optional)</span>
+                      </label>
+                      <textarea
+                        name="b_purpose"
+                        value={formData.b_purpose}
+                        onChange={handleInputChange}
+                        rows={3}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="What the item is needed for."
+                      />
+                    </div>
                   </div>
 
                   <div className="flex justify-end space-x-3 pt-4">
@@ -526,6 +557,15 @@ export default function BorrowingPage() {
             </div>
           </div>
         )}
+
+        {/* Toast: rendered last so it stays above the modal. */}
+        <Alert
+          type={alert.type}
+          title={alert.title}
+          message={alert.message}
+          isVisible={alert.isVisible}
+          onClose={hideAlert}
+        />
       </div>
     </Layout>
   );

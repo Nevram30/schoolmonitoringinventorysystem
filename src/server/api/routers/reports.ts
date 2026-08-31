@@ -22,7 +22,178 @@ const buildWhere = (input: z.infer<typeof dateRange>) => {
   return where;
 };
 
+/** Same range as `buildWhere`, but for the column the returns table is dated by. */
+const buildReturnWhere = (input: z.infer<typeof dateRange>) => {
+  const where: any = {};
+
+  if (input.startDate && input.endDate) {
+    where.r_date_returned = {
+      gte: new Date(input.startDate),
+      lte: new Date(input.endDate),
+    };
+  }
+
+  return where;
+};
+
+/** `Item.i_status` codes, in the order the inventory-condition card lists them. */
+const ITEM_STATUS_LABELS: Record<number, string> = {
+  1: "Available",
+  2: "Borrowed",
+  3: "Maintenance",
+  4: "Damaged",
+};
+
 export const reportsRouter = createTRPCRouter({
+  /**
+   * The figures the student / staff / faculty dashboards show: what is out on loan, what came
+   * back and in what condition, and what the returns added up to in late and damage fees.
+   *
+   * Scoped exactly like the other pages in those portals — every borrow and return, not only the
+   * signed-in account's — so the totals here agree with what their Borrowed Items and Returned
+   * Items screens list.
+   */
+  portalDashboard: protectedProcedure
+    .input(dateRange.default({}))
+    .query(async ({ ctx, input }) => {
+      try {
+        const borrowWhere = buildWhere(input);
+        const returnWhere = buildReturnWhere(input);
+        const now = new Date();
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const [
+          totalBorrows,
+          activeBorrows,
+          overdueBorrows,
+          returnedBorrows,
+          borrowedQuantity,
+          pendingRequests,
+          totalReturns,
+          returnsThisMonth,
+          feeTotals,
+          feesThisMonth,
+          conditionGroups,
+          itemStatusGroups,
+          recentReturns,
+          overdueItems,
+        ] = await Promise.all([
+          ctx.db.borrow.count({ where: borrowWhere }),
+          ctx.db.borrow.count({ where: { ...borrowWhere, b_status: 1 } }),
+          ctx.db.borrow.count({
+            where: { ...borrowWhere, b_status: 1, b_due_date: { lt: now } },
+          }),
+          ctx.db.borrow.count({ where: { ...borrowWhere, b_status: 2 } }),
+          ctx.db.borrow.aggregate({
+            where: { ...borrowWhere, b_status: 1 },
+            _sum: { b_quantity: true },
+          }),
+          ctx.db.borrowRequest.count({ where: { br_status: 1 } }),
+          ctx.db.return.count({ where: returnWhere }),
+          ctx.db.return.count({
+            where: { ...returnWhere, r_date_returned: { gte: monthStart } },
+          }),
+          ctx.db.return.aggregate({
+            where: returnWhere,
+            _sum: { r_late_fee: true, r_damage_fee: true },
+          }),
+          ctx.db.return.aggregate({
+            where: { ...returnWhere, r_date_returned: { gte: monthStart } },
+            _sum: { r_late_fee: true, r_damage_fee: true },
+          }),
+          ctx.db.return.groupBy({
+            by: ["r_condition"],
+            where: returnWhere,
+            _count: { _all: true },
+            _sum: { r_damage_fee: true, r_quantity: true },
+          }),
+          ctx.db.item.groupBy({
+            by: ["i_status"],
+            _count: { _all: true },
+          }),
+          ctx.db.return.findMany({
+            where: returnWhere,
+            include: {
+              Item: { select: { i_model: true, i_deviceID: true, i_brand: true } },
+              Member: { select: { m_fname: true, m_lname: true } },
+              Room: { select: { r_name: true } },
+            },
+            orderBy: { r_date_returned: "desc" },
+            take: 5,
+          }),
+          ctx.db.borrow.findMany({
+            where: { ...borrowWhere, b_status: 1, b_due_date: { lt: now } },
+            include: {
+              Item: { select: { i_model: true, i_deviceID: true } },
+              Member: { select: { m_fname: true, m_lname: true } },
+            },
+            orderBy: { b_due_date: "asc" },
+            take: 5,
+          }),
+        ]);
+
+        const lateFees = feeTotals._sum.r_late_fee?.toNumber() ?? 0;
+        const damageFees = feeTotals._sum.r_damage_fee?.toNumber() ?? 0;
+
+        // A return saved before the condition dropdown existed has none; it is still a return,
+        // so it is counted rather than dropped from the breakdown.
+        const conditions = conditionGroups
+          .map((row) => ({
+            condition: row.r_condition ?? "Unspecified",
+            count: row._count._all,
+            quantity: row._sum.r_quantity ?? 0,
+            damageFee: row._sum.r_damage_fee?.toNumber() ?? 0,
+          }))
+          .sort((a, b) => b.count - a.count);
+
+        const itemConditions = Object.entries(ITEM_STATUS_LABELS).map(
+          ([code, label]) => ({
+            status: Number(code),
+            label,
+            count:
+              itemStatusGroups.find((row) => row.i_status === Number(code))
+                ?._count._all ?? 0,
+          })
+        );
+
+        return {
+          success: true as const,
+          data: {
+            borrowed: {
+              total: totalBorrows,
+              active: activeBorrows,
+              overdue: overdueBorrows,
+              returned: returnedBorrows,
+              quantityOut: borrowedQuantity._sum.b_quantity ?? 0,
+              pendingRequests,
+            },
+            returns: {
+              total: totalReturns,
+              thisMonth: returnsThisMonth,
+            },
+            fees: {
+              lateFees,
+              damageFees,
+              total: lateFees + damageFees,
+              lateFeesThisMonth: feesThisMonth._sum.r_late_fee?.toNumber() ?? 0,
+              damageFeesThisMonth:
+                feesThisMonth._sum.r_damage_fee?.toNumber() ?? 0,
+            },
+            conditions,
+            itemConditions,
+            recentReturns: recentReturns.map(serialize),
+            overdueItems: overdueItems.map(serialize),
+          },
+        };
+      } catch (error) {
+        console.error("Portal dashboard report error:", error);
+        return {
+          success: false as const,
+          error: "Failed to load dashboard report",
+        };
+      }
+    }),
+
   // GET /api/reports?type=summary
   summary: protectedProcedure
     .input(dateRange)

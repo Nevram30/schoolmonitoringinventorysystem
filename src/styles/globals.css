@@ -16,16 +16,34 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /*
+   * The screens are built almost entirely from `text-sm` and `text-xs` — barely anything uses
+   * `text-base` — so Tailwind's defaults left the whole UI reading a step or two below the 16px
+   * body size browsers assume. Nudging the two sizes here lifts every page at once, without
+   * touching the classes or the rem-based spacing scale (raising the root font size instead
+   * would scale padding and fixed widths too, and reflow the wide tables).
+   */
+  --text-xs: 0.8125rem; /* 13px, was 12 */
+  --text-xs--line-height: calc(1.125 / 0.8125);
+  --text-sm: 0.9375rem; /* 15px, was 14 */
+  --text-sm--line-height: calc(1.375 / 0.9375);
 }
 
 html, body {
   height: 100%;
 }
 
+/*
+ * `--font-geist-sans` is defined by next/font on the body element itself, so it is named here
+ * rather than left to Tailwind's preflight — that sets `font-family` on `html`, where the
+ * variable is out of scope and would resolve to nothing. Arial stays as the fallback for the
+ * moment before the webfont loads.
+ */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 /*

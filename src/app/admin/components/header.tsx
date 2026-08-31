@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { Cog6ToothIcon } from '@heroicons/react/24/outline'
+import AdminNotificationBell from './notification.bell'
 
 export default function AdminHeader() {
     const { data: session } = useSession()
@@ -41,6 +42,8 @@ export default function AdminHeader() {
                 </div>
 
                 <div className="flex items-center space-x-2">
+                    <AdminNotificationBell />
+
                     <div className="relative" ref={menuRef}>
                         <button
                             onClick={toggleDropdown}

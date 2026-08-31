@@ -5,6 +5,7 @@ import { withAuth, withAuthLayout } from '@/server/withAuth'
 import FullScreenLoader from '@/components/ui-components/loader.screen'
 import AsideNavigation from './components/aside.navigation'
 import AdminHeader from './components/header'
+import { PendingRequestsProvider } from './components/pending-requests.context'
 
 const ProtectedLayout: React.FC<PropsWithChildren> = ({
   children,
@@ -41,13 +42,16 @@ const ProtectedLayout: React.FC<PropsWithChildren> = ({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <AsideNavigation />
-      <div className="flex-1 flex flex-col">
-        <AdminHeader />
-        <main className="flex-1 p-6">{children}</main>
+    // Wraps the nav, the header and the page so all three read one shared pending-request count.
+    <PendingRequestsProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        <AsideNavigation />
+        <div className="flex-1 flex flex-col">
+          <AdminHeader />
+          <main className="flex-1 p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </PendingRequestsProvider>
   )
 }
 

@@ -1,6 +1,8 @@
 import { borrowersRouter } from "~/server/api/routers/borrowers";
+import { borrowRequestsRouter } from "~/server/api/routers/borrow-requests";
 import { borrowsRouter } from "~/server/api/routers/borrows";
 import { itemsRouter } from "~/server/api/routers/items";
+import { receiptsRouter } from "~/server/api/routers/receipts";
 import { reportsRouter } from "~/server/api/routers/reports";
 import { returnsRouter } from "~/server/api/routers/returns";
 import { roomsRouter } from "~/server/api/routers/rooms";
@@ -15,8 +17,10 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   borrowers: borrowersRouter,
+  borrowRequests: borrowRequestsRouter,
   borrows: borrowsRouter,
   items: itemsRouter,
+  receipts: receiptsRouter,
   reports: reportsRouter,
   returns: returnsRouter,
   rooms: roomsRouter,

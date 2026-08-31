@@ -2,9 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { usePendingRequests } from './pending-requests.context'
 
 export default function AdminAsidecomponent() {
     const pathname = usePathname()
+    // Same source as the header bell, so the two counts never disagree.
+    const { count: pendingRequests } = usePendingRequests()
 
     const navigationItems = [
         {
@@ -31,6 +34,17 @@ export default function AdminAsidecomponent() {
             href: '/admin/borrowing',
             label: 'Transactions',
             icon: '📋'
+        },
+        {
+            href: '/admin/requests',
+            label: 'Borrow Requests',
+            icon: '📝',
+            badge: pendingRequests
+        },
+        {
+            href: '/admin/received-items',
+            label: 'Received Items',
+            icon: '🤝'
         },
         {
             href: '/admin/overdue-items',
@@ -79,7 +93,12 @@ export default function AdminAsidecomponent() {
                                         }`}
                                 >
                                     <span className="mr-3 text-lg">{item.icon}</span>
-                                    {item.label}
+                                    <span className="flex-1">{item.label}</span>
+                                    {!!item.badge && (
+                                        <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
+                                            {item.badge > 99 ? '99+' : item.badge}
+                                        </span>
+                                    )}
                                 </Link>
                             </li>
                         )
