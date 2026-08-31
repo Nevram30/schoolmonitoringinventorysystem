@@ -21,7 +21,7 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        name: { label: 'Name', type: 'text' },
+        id_number: { label: 'ID Number', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials: any): Promise<any> {
@@ -29,15 +29,17 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const { name, password } = credentials
+        const { id_number, password } = credentials
 
         try {
           // Validate form data with Yup schema
-          authschema.validateSync({ name, password }, { abortEarly: false })
+          authschema.validateSync({ id_number, password }, { abortEarly: false })
 
-          // Find user by username (not name)
+          // Everyone signs in with their school ID number. Accounts created
+          // before the column existed have none, so they cannot sign in until
+          // an admin fills it in on /admin/users.
           const user = await db.user.findUnique({
-            where: { username: credentials.name },
+            where: { id_number: String(id_number).trim() },
           })
 
           if (!user) {
@@ -45,7 +47,7 @@ export const authOptions: NextAuthOptions = {
               JSON.stringify({
                 success: false,
                 error: {
-                  general: 'Invalid name or password',
+                  general: 'Invalid ID number or password',
                 },
               })
             )
@@ -84,7 +86,7 @@ export const authOptions: NextAuthOptions = {
               JSON.stringify({
                 success: false,
                 error: {
-                  general: 'Invalid name or password',
+                  general: 'Invalid ID number or password',
                 },
               })
             )
@@ -113,10 +115,19 @@ export const authOptions: NextAuthOptions = {
             )
           }
 
+          // The failure branches above already throw the `{ success, error }`
+          // envelope the login form parses — re-wrapping it would nest a JSON
+          // string inside `error` and the form would print raw JSON.
+          const message = (error as Error).message
+
+          if (message.startsWith('{')) {
+            throw error
+          }
+
           throw new Error(
             JSON.stringify({
               success: false,
-              error: (error as Error).message,
+              error: { general: message },
               status: 500,
             })
           )

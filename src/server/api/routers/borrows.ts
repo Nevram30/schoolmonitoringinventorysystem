@@ -9,6 +9,7 @@ import {
 import { serialize } from "@/server/api/serialize";
 import { loadFeeSettings } from "@/server/api/fee-settings";
 import { calculateOverdueFee, DEFAULT_FEE_SETTINGS } from "@/lib/fees";
+import { isKnownDepartment } from "@/lib/departments";
 
 const insensitive = { mode: "insensitive" } as const;
 
@@ -87,7 +88,9 @@ export const borrowsRouter = createTRPCRouter({
                   i_brand: true,
                 },
               },
-              Member: { select: { m_fname: true, m_lname: true } },
+              Member: {
+                select: { m_fname: true, m_lname: true, m_department: true },
+              },
               Room: { select: { r_name: true } },
             },
             take: limit,
@@ -277,6 +280,8 @@ export const borrowsRouter = createTRPCRouter({
         room_assigned: z.number().nullish(),
         time_limit: z.string(),
         purpose: z.string().optional(),
+        /** Department picked on the form; kept on the borrower rather than on the borrow. */
+        department: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -294,6 +299,22 @@ export const borrowsRouter = createTRPCRouter({
             success: false as const,
             error: "Insufficient stock available",
           };
+        }
+
+        // The department lives on the borrower, so recording a borrow for someone whose program
+        // has changed (or was never filled in) keeps their record current.
+        const department = input.department?.trim();
+        if (department) {
+          if (!isKnownDepartment(department)) {
+            return {
+              success: false as const,
+              error: "Unknown department",
+            };
+          }
+          await ctx.db.borrower.update({
+            where: { id: input.member_id },
+            data: { m_department: department },
+          });
         }
 
         const newBorrow = await ctx.db.borrow.create({

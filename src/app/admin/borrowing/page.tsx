@@ -5,6 +5,8 @@ import { PlusIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/ou
 import Layout from '../Layout';
 import ItemPicker from '@/components/ui-components/item.picker';
 import ItemAvatar from '@/components/ui-components/item.avatar';
+import DepartmentSelect from '@/components/ui-components/department.select';
+import { departmentLabel, DEPARTMENT_VALUES } from '@/lib/departments';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
@@ -27,6 +29,7 @@ interface Borrow {
   Member?: {
     m_fname: string;
     m_lname: string;
+    m_department?: string | null;
   };
   Room?: null | {
     r_name: string;
@@ -61,6 +64,7 @@ export default function BorrowingPage() {
   const [formData, setFormData] = useState({
     b_itemid: '',
     b_memberid: '',
+    b_department: '',
     b_roomid: '',
     b_qty: '1',
     b_returndate: '',
@@ -153,6 +157,21 @@ export default function BorrowingPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+
+    // Picking a borrower fills in the department already on their record, so the admin only has
+    // to touch it when it is missing or has changed. Departments recorded before this dropdown
+    // existed (free text, "General", ...) match no option, so those are left for the admin to set.
+    if (name === 'b_memberid') {
+      const borrower = borrowers.find((b: any) => String(b.id) === value);
+      const department = borrower?.m_department ?? '';
+      setFormData(prev => ({
+        ...prev,
+        b_memberid: value,
+        b_department: DEPARTMENT_VALUES.includes(department) ? department : '',
+      }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -174,7 +193,8 @@ export default function BorrowingPage() {
         stock_id: parseInt(formData.b_qty),
         room_assigned: parseInt(formData.b_roomid),
         time_limit: formData.b_returndate,
-        purpose: formData.b_purpose
+        purpose: formData.b_purpose,
+        department: formData.b_department
       });
 
       if (data.success) {
@@ -183,6 +203,7 @@ export default function BorrowingPage() {
         setFormData({
           b_itemid: '',
           b_memberid: '',
+          b_department: '',
           b_roomid: '',
           b_qty: '1',
           b_returndate: '',
@@ -290,6 +311,9 @@ export default function BorrowingPage() {
                         Borrower
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Department
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Room
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -326,6 +350,15 @@ export default function BorrowingPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {borrow.Member ? `${borrow.Member.m_fname} ${borrow.Member.m_lname}` : 'N/A'}
+                        </td>
+                        {/* Abbreviated, with the full program name on hover — the stored names are
+                            too long for a table cell. */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {borrow.Member?.m_department ? (
+                            <span title={borrow.Member.m_department}>
+                              {departmentLabel(borrow.Member.m_department)}
+                            </span>
+                          ) : 'N/A'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {borrow.Room?.r_name || 'N/A'}
@@ -474,6 +507,17 @@ export default function BorrowingPage() {
                           </option>
                         ))}
                       </select>
+                    </div>
+
+                    {/* Prefilled from the borrower's record and saved back to it, so the borrower
+                        list and reports stay in step with what is picked here. */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Department</label>
+                      <DepartmentSelect
+                        value={formData.b_department}
+                        onChange={handleInputChange}
+                        required
+                      />
                     </div>
 
                     <div>

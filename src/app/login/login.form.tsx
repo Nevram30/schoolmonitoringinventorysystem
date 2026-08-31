@@ -1,21 +1,52 @@
 'use client'
 import React, { useId, useState } from 'react'
-import { User, Lock, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react'
+import { IdCard, Lock, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 
+// Faculty, staff, students and the admin all sign in with their school ID
+// number — the account's username is never typed here.
 type SignInFormData = {
-  name: string
+  id_number: string
   password: string
+}
+
+type AuthError = Partial<SignInFormData> & { general?: string }
+
+/**
+ * `authorize` reports failures as a JSON string, so a malformed or unexpected
+ * value must still produce something readable rather than blanking the alert.
+ */
+const parseAuthError = (raw: string): AuthError => {
+  try {
+    const parsed = JSON.parse(raw)
+    const error = parsed?.error
+
+    if (typeof error === 'string') {
+      return { general: error }
+    }
+
+    if (error && typeof error === 'object') {
+      return {
+        id_number: error.id_number,
+        password: error.password,
+        general: error.general,
+      }
+    }
+  } catch {
+    // Not our envelope — fall through to the generic message below.
+  }
+
+  return { general: 'Unable to sign in. Please try again.' }
 }
 
 const SignInForm: React.FC = () => {
   const ids: SignInFormData = {
     password: useId(),
-    name: useId(),
+    id_number: useId(),
   }
 
   const [formData, setFormData] = useState<SignInFormData>({
-    name: '',
+    id_number: '',
     password: '',
   })
 
@@ -56,12 +87,25 @@ const SignInForm: React.FC = () => {
       })
 
       if ((response as any).error) {
-        const jsonError = JSON.parse((response as any).error)
-        setErrorMessage(jsonError.error)
-        setLoginError(true)
+        // `error` is the `{ success, error }` envelope thrown by `authorize`:
+        // field messages for a failed validation, `general` for everything else.
+        const { id_number, password, general } = parseAuthError(
+          (response as any).error
+        )
+
+        setFormError({ id_number, password })
+
+        if (general) {
+          setErrorMessage(general)
+          setLoginError(true)
+        } else {
+          setLoginError(false)
+        }
+
         return
       }
 
+      setFormError({})
       setLoginError(false)
     } catch (error) {
       console.error(error)
@@ -74,26 +118,26 @@ const SignInForm: React.FC = () => {
     <form className="space-y-5" onSubmit={OnSubmit}>
       <div>
         <label
-          htmlFor={ids.name}
+          htmlFor={ids.id_number}
           className="mb-1.5 block text-sm font-medium text-gray-700"
         >
-          Username
+          ID Number
         </label>
         <div className="relative">
-          <User className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <IdCard className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
           <input
-            id={ids.name}
+            id={ids.id_number}
             type="text"
             className="w-full rounded-lg border border-gray-300 py-3 pl-10 pr-4 text-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-            placeholder="Enter your username"
-            name="name"
+            placeholder="Enter your ID number"
+            name="id_number"
             autoComplete="username"
-            value={formData.name}
+            value={formData.id_number}
             onChange={handleInputChange}
           />
         </div>
-        {formError.name && (
-          <p className="mt-1.5 text-sm text-red-600">{formError.name}</p>
+        {formError.id_number && (
+          <p className="mt-1.5 text-sm text-red-600">{formError.id_number}</p>
         )}
       </div>
 

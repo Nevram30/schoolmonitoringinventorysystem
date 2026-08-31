@@ -98,46 +98,82 @@ const ROOMS = [
   { r_name: "D73", r_description: "7th Floor - Room D73", r_status: 1 },
 ];
 
-async function seedUsers() {
-  const existing = await db.user.findMany({
-    where: { username: { in: ["admin", "staff", "faculty"] } },
-    select: { username: true },
+/**
+ * The default administrator. Sign-in is by ID number, so this is the only
+ * account that ships with one — faculty, staff and student accounts are given
+ * their real school ID by the admin on /admin/users.
+ */
+const ADMIN = {
+  name: "System Administrator",
+  username: "admin",
+  id_number: "ADMIN-001",
+  email: "admin@school.com",
+  password: "admin",
+};
+
+async function seedAdmin() {
+  const existing = await db.user.findUnique({
+    where: { username: ADMIN.username },
   });
 
-  if (existing.length > 0) {
-    console.log("Demo users already exist, skipping.");
+  if (existing) {
+    if (existing.id_number) {
+      console.log(
+        `Admin already exists with ID number ${existing.id_number}, skipping.`
+      );
+      return;
+    }
+
+    // A database seeded before login moved to ID numbers has an admin with no
+    // ID, which would leave nobody able to sign in — backfill the default.
+    const taken = await db.user.findUnique({
+      where: { id_number: ADMIN.id_number },
+    });
+
+    if (taken) {
+      console.log(
+        `Admin has no ID number but ${ADMIN.id_number} is taken by user #${taken.id}; set one manually.`
+      );
+      return;
+    }
+
+    await db.user.update({
+      where: { id: existing.id },
+      data: { id_number: ADMIN.id_number },
+    });
+
+    console.log(`Backfilled admin ID number ${ADMIN.id_number}.`);
     return;
   }
 
-  const saltRounds = 10;
-
-  await db.user.createMany({
-    data: [
-      {
-        name: "System Administrator",
-        username: "admin",
-        password: await bcrypt.hash("admin", saltRounds),
-        role: "admin",
-        status: 1,
-      },
-      {
-        name: "Staff User",
-        username: "staff",
-        password: await bcrypt.hash("staff", saltRounds),
-        role: "staff",
-        status: 1,
-      },
-      {
-        name: "Faculty User",
-        username: "faculty",
-        password: await bcrypt.hash("faculty", saltRounds),
-        role: "faculty",
-        status: 1,
-      },
-    ],
+  const clash = await db.user.findFirst({
+    where: {
+      OR: [{ id_number: ADMIN.id_number }, { email: ADMIN.email }],
+    },
   });
 
-  console.log("Seeded 3 demo users (admin / staff / faculty).");
+  if (clash) {
+    console.log(
+      `Cannot seed the admin: ID number ${ADMIN.id_number} or e-mail ${ADMIN.email} is already used by user #${clash.id}.`
+    );
+    return;
+  }
+
+  await db.user.create({
+    data: {
+      name: ADMIN.name,
+      username: ADMIN.username,
+      email: ADMIN.email,
+      id_number: ADMIN.id_number,
+      password: await bcrypt.hash(ADMIN.password, 10),
+      role: "admin",
+      status: 1,
+    },
+  });
+
+  console.log(
+    `Seeded the default admin — ID number "${ADMIN.id_number}", password "${ADMIN.password}".`
+  );
 }
 
 async function seedRooms() {
@@ -154,7 +190,7 @@ async function seedRooms() {
 }
 
 async function main() {
-  await seedUsers();
+  await seedAdmin();
   await seedRooms();
 }
 

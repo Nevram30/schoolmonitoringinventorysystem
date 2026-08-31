@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { trpcClient } from '@/trpc/client';
 import ItemAvatar from '@/components/ui-components/item.avatar';
+import { departmentLabel } from '@/lib/departments';
 
 /**
  * Borrow requests waiting on — or already decided by — an admin.
@@ -27,7 +28,7 @@ interface BorrowRequest {
         i_photo?: string | null;
         i_brand?: string | null;
     } | null;
-    Member?: { m_fname: string; m_lname: string } | null;
+    Member?: { m_fname: string; m_lname: string; m_department?: string | null } | null;
     Room?: { r_name: string } | null;
     Reviewer?: { name: string } | null;
 }
@@ -116,6 +117,7 @@ export default function BorrowRequestsTable({
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Borrower</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested</th>
@@ -143,6 +145,15 @@ export default function BorrowRequestsTable({
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {request.Member ? `${request.Member.m_fname} ${request.Member.m_lname}` : 'N/A'}
+                                        </td>
+                                        {/* Abbreviated, with the full program name on hover — the
+                                            stored names are too long for a table cell. */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {request.Member?.m_department ? (
+                                                <span title={request.Member.m_department}>
+                                                    {departmentLabel(request.Member.m_department)}
+                                                </span>
+                                            ) : 'N/A'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {request.Room?.r_name || 'N/A'}

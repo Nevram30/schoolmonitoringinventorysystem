@@ -7,6 +7,8 @@ import { trpcClient } from '@/trpc/client';
 import ItemPicker from '@/components/ui-components/item.picker';
 import ItemAvatar from '@/components/ui-components/item.avatar';
 import BorrowRequestsTable from '@/components/ui-components/borrow.requests.table';
+import DepartmentSelect from '@/components/ui-components/department.select';
+import { departmentLabel } from '@/lib/departments';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 
@@ -28,6 +30,7 @@ interface Borrow {
     Member?: {
         m_fname: string;
         m_lname: string;
+        m_department?: string | null;
     };
     Room?: null | {
         r_name: string;
@@ -63,6 +66,7 @@ export default function FacultyTransactionPage() {
     });
     const [formData, setFormData] = useState({
         b_itemid: '',
+        b_department: '',
         b_roomid: '',
         b_qty: '1',
         b_returndate: '',
@@ -168,7 +172,8 @@ export default function FacultyTransactionPage() {
                 quantity: parseInt(formData.b_qty),
                 room_assigned: parseInt(formData.b_roomid),
                 time_limit: formData.b_returndate,
-                purpose: formData.b_purpose
+                purpose: formData.b_purpose,
+                department: formData.b_department
             });
 
             if (data.success) {
@@ -176,6 +181,7 @@ export default function FacultyTransactionPage() {
                 setItemError('');
                 setFormData({
                     b_itemid: '',
+                    b_department: '',
                     b_roomid: '',
                     b_qty: '1',
                     b_returndate: '',
@@ -284,6 +290,9 @@ export default function FacultyTransactionPage() {
                                             Borrower
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Department
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Room
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -320,6 +329,15 @@ export default function FacultyTransactionPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {borrow.Member ? `${borrow.Member.m_fname} ${borrow.Member.m_lname}` : 'N/A'}
+                                            </td>
+                                            {/* Abbreviated, with the full program name on hover —
+                                                the stored names are too long for a table cell. */}
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {borrow.Member?.m_department ? (
+                                                    <span title={borrow.Member.m_department}>
+                                                        {departmentLabel(borrow.Member.m_department)}
+                                                    </span>
+                                                ) : 'N/A'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {borrow.Room?.r_name || 'N/A'}
@@ -467,6 +485,17 @@ export default function FacultyTransactionPage() {
                                             )}
                                         </div>
                                         <p className="mt-1 text-xs text-gray-500">Requests are filed under your own account.</p>
+                                    </div>
+
+                                    {/* Saved onto the requester's borrower record, so the borrower
+                                        list and reports show the program rather than "General". */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Department</label>
+                                        <DepartmentSelect
+                                            value={formData.b_department}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
                                     </div>
 
                                     <div>

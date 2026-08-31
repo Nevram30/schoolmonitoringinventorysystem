@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
+import Alert from '@/components/ui-components/alert';
+import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
 
 interface User {
@@ -63,6 +65,35 @@ const ID_LABELS: Record<'admin' | 'staff' | 'faculty' | 'student', string> = {
   student: 'Student ID'
 };
 
+/**
+ * Feedback shown inside the Edit User panel. A failed update leaves the panel
+ * open so the admin can correct the field, and the panel covers the toast in
+ * the corner — so these have to be rendered in the form itself.
+ *
+ * `error` is the server refusing the save (a duplicate ID number, say);
+ * `warning` is the form catching something before it is sent.
+ */
+type EditNotice = { type: 'error' | 'warning'; message: string };
+
+const EDIT_NOTICE_STYLES = {
+  error: {
+    container: 'border-red-200 bg-red-50',
+    icon: 'text-red-400',
+    title: 'text-red-800',
+    message: 'text-red-700',
+    button: 'text-red-500 hover:bg-red-100 hover:text-red-600',
+    heading: 'Could not update user'
+  },
+  warning: {
+    container: 'border-yellow-200 bg-yellow-50',
+    icon: 'text-yellow-400',
+    title: 'text-yellow-800',
+    message: 'text-yellow-700',
+    button: 'text-yellow-500 hover:bg-yellow-100 hover:text-yellow-600',
+    heading: 'Check the details below'
+  }
+} as const;
+
 export default function UsersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -88,7 +119,12 @@ export default function UsersPage() {
     role: 'staff' as 'admin' | 'staff' | 'faculty' | 'student'
   });
 
+  // `alert` is aliased so it does not shadow `window.alert`, still used by the
+  // add-user and activate/deactivate flows.
+  const { alert: toast, showSuccess, hideAlert } = useAlert();
+
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editNotice, setEditNotice] = useState<EditNotice | null>(null);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editFormData, setEditFormData] = useState({
     name: '',
@@ -214,10 +250,19 @@ export default function UsersPage() {
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setEditFormData(prev => ({ ...prev, [name]: value }));
+    // The message refers to what was submitted, so editing anything retires it.
+    setEditNotice(null);
+  };
+
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setEditingUser(null);
+    setEditNotice(null);
   };
 
   const openEditModal = (user: User) => {
     setEditingUser(user);
+    setEditNotice(null);
     setEditFormData({
       name: user.name,
       username: user.username,
@@ -237,15 +282,22 @@ export default function UsersPage() {
     if (!editingUser) return;
 
     if (editFormData.password && editFormData.password.length < MIN_PASSWORD_LENGTH) {
-      alert(`Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
+      setEditNotice({
+        type: 'warning',
+        message: `The new password must be at least ${MIN_PASSWORD_LENGTH} characters long.`
+      });
       return;
     }
 
     if (editFormData.password !== editFormData.confirmPassword) {
-      alert('Passwords do not match.');
+      setEditNotice({
+        type: 'warning',
+        message: 'The new password and its confirmation do not match.'
+      });
       return;
     }
 
+    setEditNotice(null);
     setSubmitting(true);
 
     try {
@@ -261,16 +313,20 @@ export default function UsersPage() {
       });
 
       if (data.success) {
-        setShowEditModal(false);
-        setEditingUser(null);
+        const updatedName = editFormData.name;
+        closeEditModal();
         fetchUsers(); // Refresh the list
-        alert('User updated successfully!');
+        showSuccess(`${updatedName}'s account has been saved.`, 'User updated');
       } else {
-        alert('Error updating user: ' + data.error);
+        // The panel stays open on failure so the offending field can be fixed.
+        setEditNotice({ type: 'error', message: data.error });
       }
     } catch (error) {
       console.error('Error updating user:', error);
-      alert('Error updating user');
+      setEditNotice({
+        type: 'error',
+        message: 'Something went wrong while saving. Please try again.'
+      });
     } finally {
       setSubmitting(false);
     }
@@ -322,6 +378,15 @@ export default function UsersPage() {
 
   return (
     <Layout>
+      {/* Confirmation toast — shown after the Edit panel has closed. */}
+      <Alert
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        isVisible={toast.isVisible}
+        onClose={hideAlert}
+      />
+
       <div className="space-y-6">
         {/* Header */}
         <div className="sm:flex sm:items-center">
@@ -719,7 +784,7 @@ export default function UsersPage() {
               <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
                 <h3 className="text-lg font-medium text-gray-900">Edit User</h3>
                 <button
-                  onClick={() => setShowEditModal(false)}
+                  onClick={closeEditModal}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <XMarkIcon className="h-6 w-6" />
@@ -728,6 +793,38 @@ export default function UsersPage() {
 
               <form onSubmit={handleEditSubmit} className="flex flex-1 flex-col overflow-hidden">
                 <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
+                  {editNotice && (() => {
+                    const styles = EDIT_NOTICE_STYLES[editNotice.type];
+                    const NoticeIcon =
+                      editNotice.type === 'error' ? XCircleIcon : ExclamationTriangleIcon;
+
+                    return (
+                      <div
+                        role="alert"
+                        aria-live="assertive"
+                        className={`flex items-start rounded-md border p-4 ${styles.container}`}
+                      >
+                        <NoticeIcon className={`h-5 w-5 shrink-0 ${styles.icon}`} />
+                        <div className="ml-3 flex-1">
+                          <h4 className={`text-sm font-medium ${styles.title}`}>
+                            {styles.heading}
+                          </h4>
+                          <p className={`mt-1 text-sm ${styles.message}`}>
+                            {editNotice.message}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setEditNotice(null)}
+                          className={`-my-1.5 -mr-1.5 ml-3 inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 ${styles.button}`}
+                        >
+                          <span className="sr-only">Dismiss</span>
+                          <XMarkIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+                    );
+                  })()}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Full Name</label>
                     <input
@@ -867,7 +964,7 @@ export default function UsersPage() {
                 <div className="flex justify-end space-x-3 border-t border-gray-200 px-6 py-4">
                   <button
                     type="button"
-                    onClick={() => setShowEditModal(false)}
+                    onClick={closeEditModal}
                     className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     Cancel

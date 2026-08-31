@@ -7,6 +7,7 @@ import {
 } from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
 import { generateBorrowerIdByType } from "@/server/db/utils/borrowerIdGenerator";
+import { isKnownDepartment } from "@/lib/departments";
 import type { PrismaClient } from "../../../../generated/prisma";
 
 const insensitive = { mode: "insensitive" } as const;
@@ -32,7 +33,14 @@ const requestInclude = {
       item_rawstock: true,
     },
   },
-  Member: { select: { m_fname: true, m_lname: true, m_school_id: true } },
+  Member: {
+    select: {
+      m_fname: true,
+      m_lname: true,
+      m_school_id: true,
+      m_department: true,
+    },
+  },
   Room: { select: { r_name: true } },
   Requester: { select: { name: true, role: true } },
   Reviewer: { select: { name: true } },
@@ -56,8 +64,16 @@ const borrowerTypeForRole = (role: string) => {
  * borrower, matched to an existing row by school ID and created from the account's own details
  * the first time they borrow. Defaults mirror `borrowers.create`, which fills the columns its
  * form does not collect the same way.
+ *
+ * `department` is the program picked on the request form — used for a borrower row created here,
+ * which would otherwise be stuck with the "General" placeholder. An existing row is updated by the
+ * caller, which does the same for the borrower an admin picked.
  */
-async function resolveRequesterBorrower(db: PrismaClient, userId: number) {
+async function resolveRequesterBorrower(
+  db: PrismaClient,
+  userId: number,
+  department?: string
+) {
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return null;
 
@@ -88,7 +104,7 @@ async function resolveRequesterBorrower(db: PrismaClient, userId: number) {
       m_lname: rest.join(" "),
       m_gender: "N/A",
       m_contact: "",
-      m_department: "General",
+      m_department: department ?? "General",
       m_year_section: "N/A",
       m_type: type,
       m_password: "",
@@ -116,6 +132,8 @@ export const borrowRequestsRouter = createTRPCRouter({
         room_assigned: z.number().nullish(),
         time_limit: z.string(),
         purpose: z.string().nullish(),
+        /** Department picked on the form; kept on the borrower rather than on the request. */
+        department: z.string().nullish(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -136,13 +154,22 @@ export const borrowRequestsRouter = createTRPCRouter({
           };
         }
 
+        const department = input.department?.trim() || undefined;
+        if (department && !isKnownDepartment(department)) {
+          return { success: false as const, error: "Unknown department" };
+        }
+
         const isAdmin = ctx.session.user.role === "admin";
         const borrower =
           isAdmin && input.member_id
             ? await ctx.db.borrower.findUnique({
                 where: { id: input.member_id },
               })
-            : await resolveRequesterBorrower(ctx.db, ctx.session.user.id);
+            : await resolveRequesterBorrower(
+                ctx.db,
+                ctx.session.user.id,
+                department
+              );
 
         if (!borrower) {
           return {
@@ -151,6 +178,15 @@ export const borrowRequestsRouter = createTRPCRouter({
               ? "Borrower not found"
               : "Your account could not be matched to a borrower record",
           };
+        }
+
+        // The department belongs to the person, not the request, so it is kept on the borrower —
+        // a no-op when `resolveRequesterBorrower` just created the row with it.
+        if (department && borrower.m_department !== department) {
+          await ctx.db.borrower.update({
+            where: { id: borrower.id },
+            data: { m_department: department },
+          });
         }
 
         const request = await ctx.db.borrowRequest.create({
