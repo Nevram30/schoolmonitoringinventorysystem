@@ -6,6 +6,7 @@ import { PlusIcon, MagnifyingGlassIcon, XMarkIcon, PencilIcon, EyeIcon, UserMinu
 import { FileDown, Printer } from 'lucide-react';
 import { escapeHtml, openPrintableReport, printColorStyles } from '@/lib/print-report';
 import Layout from '../Layout';
+import UserPicker, { PickableUser } from '@/components/ui-components/user.picker';
 import { trpcClient } from '@/trpc/client';
 
 interface Borrower {
@@ -17,8 +18,13 @@ interface Borrower {
     m_department: string;
     m_type: number;
     m_status: number;
-    createdAt?: string;
+    /** When this borrower last borrowed an item; null if they never have. */
+    lastBorrowedAt?: Date | string | null;
 }
+
+/** Borrow dates arrive as Date objects (superjson); never-borrowed reads as a dash. */
+const formatBorrowedDate = (value?: Date | string | null) =>
+    value ? new Date(value).toLocaleDateString() : '—';
 
 interface Pagination {
     page: number;
@@ -56,8 +62,11 @@ export default function BorrowersPage() {
         m_mname: '',
         m_contact: '',
         m_address: '',
-        m_type: 'Student'
+        m_type: 'Student',
+        m_school_id: ''
     });
+    // Name of the account the Add form was filled from, if any.
+    const [filledFromUser, setFilledFromUser] = useState<string | null>(null);
     const [editFormData, setEditFormData] = useState({
         id: 0,
         m_fname: '',
@@ -107,6 +116,31 @@ export default function BorrowersPage() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    /**
+     * Copies what a user account and a borrower record have in common. Accounts
+     * hold one `name` string, so the first word becomes the first name and the
+     * rest the last name — anything unusual is left for the admin to correct.
+     * Contact and address have no equivalent on a user, so they are untouched.
+     */
+    const handleUserSelect = (user: PickableUser) => {
+        const parts = user.name.trim().split(/\s+/);
+        const [first, ...rest] = parts;
+
+        setFormData(prev => ({
+            ...prev,
+            m_fname: first ?? '',
+            m_lname: rest.join(' '),
+            m_school_id: user.id_number ?? '',
+            // `admin` has no borrower equivalent; those accounts are school staff.
+            m_type: user.role === 'student'
+                ? 'Student'
+                : user.role === 'faculty'
+                    ? 'Faculty'
+                    : 'Staff'
+        }));
+        setFilledFromUser(user.name);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
@@ -122,8 +156,10 @@ export default function BorrowersPage() {
                     m_mname: '',
                     m_contact: '',
                     m_address: '',
-                    m_type: 'Student'
+                    m_type: 'Student',
+                    m_school_id: ''
                 });
+                setFilledFromUser(null);
                 fetchBorrowers(); // Refresh the list
                 setSuccessMessage('Borrower added successfully!');
                 setShowSuccessModal(true);
@@ -272,7 +308,7 @@ export default function BorrowersPage() {
                     <td>${escapeHtml(borrower.m_department || 'N/A')}</td>
                     <td>${escapeHtml(getTypeString(borrower.m_type))}</td>
                     <td>${escapeHtml(borrower.m_status === 1 ? 'Active' : 'Inactive')}</td>
-                    <td>${borrower.createdAt ? new Date(borrower.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td>${escapeHtml(formatBorrowedDate(borrower.lastBorrowedAt))}</td>
                 </tr>`
             )
             .join('');
@@ -325,7 +361,7 @@ export default function BorrowersPage() {
                                 <th>Department</th>
                                 <th>Type</th>
                                 <th>Status</th>
-                                <th>Joined</th>
+                                <th>Date Borrowed</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -464,7 +500,7 @@ export default function BorrowersPage() {
                                                 Status
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Joined
+                                                Date Borrowed
                                             </th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                 Actions
@@ -517,7 +553,7 @@ export default function BorrowersPage() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        {borrower.createdAt ? new Date(borrower.createdAt).toLocaleDateString() : 'N/A'}
+                                                        {formatBorrowedDate(borrower.lastBorrowedAt)}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                         <div className="flex space-x-2">
@@ -639,6 +675,21 @@ export default function BorrowersPage() {
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Fill from an existing user
+                                        </label>
+                                        <UserPicker
+                                            onSelect={handleUserSelect}
+                                            selectedLabel={filledFromUser ?? undefined}
+                                            onClear={() => setFilledFromUser(null)}
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Optional. Copies the name, ID number and type from the account —
+                                            you can still edit every field below.
+                                        </p>
+                                    </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700">First Name</label>
@@ -717,6 +768,21 @@ export default function BorrowersPage() {
                                                 <option value="Faculty">Faculty</option>
                                                 <option value="Staff">Staff</option>
                                             </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700">
+                                                {formData.m_type} ID
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="m_school_id"
+                                                value={formData.m_school_id}
+                                                onChange={handleInputChange}
+                                                required
+                                                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder={`Enter ${formData.m_type.toLowerCase()} ID`}
+                                            />
                                         </div>
                                     </div>
 
@@ -930,9 +996,9 @@ export default function BorrowersPage() {
                                         </div>
 
                                         <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">Joined Date</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Date Borrowed</label>
                                             <p className="text-sm text-gray-900">
-                                                {selectedBorrower.createdAt ? new Date(selectedBorrower.createdAt).toLocaleDateString() : 'N/A'}
+                                                {formatBorrowedDate(selectedBorrower.lastBorrowedAt)}
                                             </p>
                                         </div>
                                     </div>

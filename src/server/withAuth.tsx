@@ -24,7 +24,7 @@ export function withAuth(options?: UseAuthOptions) {
   const logout = useCallback(() => {
     setIsLoggingOut(true)
     signOut({ redirect: false })
-      .then(() => router.push(options?.redirectTo || '/signin'))
+      .then(() => router.push(options?.redirectTo || '/login'))
       .finally(() => setIsLoggingOut(false))
   }, [router, options?.redirectTo])
 
@@ -54,7 +54,7 @@ export function withAuthLayout<P extends object>(options?: UseAuthOptions) {
         if (auth.isLoading) return
 
         if (!auth.isAuthenticated) {
-          router.push(options?.redirectTo || '/signin')
+          router.push(options?.redirectTo || '/login')
         } else if (!auth.hasValidRole) {
           router.push(options?.unauthorizedRedirect || '/unauthorized')
         }

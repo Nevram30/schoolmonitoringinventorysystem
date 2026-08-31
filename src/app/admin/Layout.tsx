@@ -11,7 +11,7 @@ const ProtectedLayout: React.FC<PropsWithChildren> = ({
 }: PropsWithChildren) => {
   const { isLoading, isAuthenticated, logout } = withAuth({
     role: 'admin',
-    redirectTo: '/signin',
+    redirectTo: '/login',
   })
 
   if (isLoading) {
@@ -53,6 +53,6 @@ const ProtectedLayout: React.FC<PropsWithChildren> = ({
 
 export default withAuthLayout({
   role: 'admin',
-  redirectTo: '/signin',
+  redirectTo: '/login',
   unauthorizedRedirect: '/admin/forbidden',
 })(ProtectedLayout)

@@ -44,13 +44,25 @@ export const borrowersRouter = createTRPCRouter({
             take: limit,
             skip: offset,
             orderBy: { id: "desc" },
+            include: {
+              // Most recent borrow only — the table shows one date per borrower.
+              borrows: {
+                select: { b_date_borrowed: true },
+                orderBy: { b_date_borrowed: "desc" },
+                take: 1,
+              },
+            },
           }),
           ctx.db.borrower.count({ where }),
         ]);
 
         return {
           success: true as const,
-          data: rows,
+          data: rows.map(({ borrows, ...borrower }) => ({
+            ...borrower,
+            // Null for a borrower who has never borrowed anything.
+            lastBorrowedAt: borrows[0]?.b_date_borrowed ?? null,
+          })),
           pagination: {
             page,
             limit,
@@ -103,6 +115,8 @@ export const borrowersRouter = createTRPCRouter({
         m_contact: z.string().nullish(),
         m_address: z.string().nullish(),
         m_type: z.string(),
+        // The school ID typed on the form; falls back to a generated one when omitted.
+        m_school_id: z.string().min(1).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -110,12 +124,25 @@ export const borrowersRouter = createTRPCRouter({
         // Convert borrower type string to integer
         const borrowerType = getBorrowerTypeFromString(input.m_type);
 
-        // Generate custom ID based on borrower type
-        const customSchoolId = await generateBorrowerIdByType(borrowerType);
+        const customSchoolId =
+          input.m_school_id?.trim() ||
+          (await generateBorrowerIdByType(borrowerType));
+
+        // m_school_id is unique, so report a clash rather than failing on the insert.
+        const existing = await ctx.db.borrower.findUnique({
+          where: { m_school_id: customSchoolId },
+        });
+
+        if (existing) {
+          return {
+            success: false as const,
+            error: `ID "${customSchoolId}" is already assigned to another borrower`,
+          };
+        }
 
         const newBorrower = await ctx.db.borrower.create({
           data: {
-            m_school_id: customSchoolId, // Generate custom ID based on borrower type
+            m_school_id: customSchoolId,
             m_fname: input.m_fname,
             m_lname: input.m_lname,
             m_gender: "N/A", // Default value since frontend doesn't collect this (max 10 chars)
