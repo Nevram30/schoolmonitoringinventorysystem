@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { DocumentArrowDownIcon, ChartBarIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
 import ItemAvatar from '@/components/ui-components/item.avatar';
+import BarcodeGenerator from '@/components/ui-components/barcode.generator';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 import {
@@ -464,6 +465,9 @@ export default function ReportsPage() {
             <p className="text-sm text-gray-500">Failed to load report data.</p>
           </div>
         )}
+
+        {/* Independent of the date range, so it stays available while the report loads. */}
+        <BarcodeGenerator onSuccess={showSuccess} onError={showError} />
 
         <Alert
           type={alert.type}
