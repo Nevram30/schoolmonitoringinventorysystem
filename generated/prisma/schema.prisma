@@ -67,21 +67,23 @@ model Borrower {
 }
 
 model Item {
-  id            Int     @id @default(autoincrement())
-  i_deviceID    String  @unique @db.VarChar(50)
-  i_model       String  @db.VarChar(100)
-  i_category    String  @db.VarChar(50)
-  i_brand       String  @db.VarChar(50)
-  i_description String  @db.Text
-  i_type        String  @db.VarChar(50)
-  item_rawstock Int     @default(1)
+  id              Int       @id @default(autoincrement())
+  i_deviceID      String    @unique @db.VarChar(50)
+  i_model         String    @db.VarChar(100)
+  i_category      String    @db.VarChar(50)
+  i_brand         String    @db.VarChar(50)
+  i_description   String    @db.Text
+  i_type          String    @db.VarChar(50)
+  item_rawstock   Int       @default(1)
   /// 1=available, 2=borrowed, 3=maintenance, 4=damaged
-  i_status      Int     @default(1)
-  i_mr          String  @db.VarChar(50)
-  i_price       Decimal @db.Decimal(10, 2)
-  i_photo       String  @default("default.jpg") @db.VarChar(255)
-  no_of_items   Int?
-  remarks       String? @db.Text
+  i_status        Int       @default(1)
+  i_mr            String    @db.VarChar(50)
+  i_price         Decimal   @db.Decimal(10, 2)
+  i_photo         String    @default("default.jpg") @db.VarChar(255)
+  no_of_items     Int?
+  remarks         String?   @db.Text
+  /// Day the school acquired the item. Nullable because items added before this column have none.
+  i_date_acquired DateTime? @db.Date
 
   borrows        Borrow[]
   returns        Return[]

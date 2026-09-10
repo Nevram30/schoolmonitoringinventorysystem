@@ -82,6 +82,8 @@ model Item {
   i_photo       String  @default("default.jpg") @db.VarChar(255)
   no_of_items   Int?
   remarks       String? @db.Text
+  /// Day the school acquired the item. Nullable because items added before this column have none.
+  i_date_acquired DateTime? @db.Date
 
   borrows        Borrow[]
   returns        Return[]

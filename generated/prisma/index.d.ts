@@ -4318,6 +4318,7 @@ export namespace Prisma {
     i_photo: string | null
     no_of_items: number | null
     remarks: string | null
+    i_date_acquired: Date | null
   }
 
   export type ItemMaxAggregateOutputType = {
@@ -4335,6 +4336,7 @@ export namespace Prisma {
     i_photo: string | null
     no_of_items: number | null
     remarks: string | null
+    i_date_acquired: Date | null
   }
 
   export type ItemCountAggregateOutputType = {
@@ -4352,6 +4354,7 @@ export namespace Prisma {
     i_photo: number
     no_of_items: number
     remarks: number
+    i_date_acquired: number
     _all: number
   }
 
@@ -4387,6 +4390,7 @@ export namespace Prisma {
     i_photo?: true
     no_of_items?: true
     remarks?: true
+    i_date_acquired?: true
   }
 
   export type ItemMaxAggregateInputType = {
@@ -4404,6 +4408,7 @@ export namespace Prisma {
     i_photo?: true
     no_of_items?: true
     remarks?: true
+    i_date_acquired?: true
   }
 
   export type ItemCountAggregateInputType = {
@@ -4421,6 +4426,7 @@ export namespace Prisma {
     i_photo?: true
     no_of_items?: true
     remarks?: true
+    i_date_acquired?: true
     _all?: true
   }
 
@@ -4525,6 +4531,7 @@ export namespace Prisma {
     i_photo: string
     no_of_items: number | null
     remarks: string | null
+    i_date_acquired: Date | null
     _count: ItemCountAggregateOutputType | null
     _avg: ItemAvgAggregateOutputType | null
     _sum: ItemSumAggregateOutputType | null
@@ -4561,6 +4568,7 @@ export namespace Prisma {
     i_photo?: boolean
     no_of_items?: boolean
     remarks?: boolean
+    i_date_acquired?: boolean
     borrows?: boolean | Item$borrowsArgs<ExtArgs>
     returns?: boolean | Item$returnsArgs<ExtArgs>
     borrowRequests?: boolean | Item$borrowRequestsArgs<ExtArgs>
@@ -4582,6 +4590,7 @@ export namespace Prisma {
     i_photo?: boolean
     no_of_items?: boolean
     remarks?: boolean
+    i_date_acquired?: boolean
   }, ExtArgs["result"]["item"]>
 
   export type ItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4599,6 +4608,7 @@ export namespace Prisma {
     i_photo?: boolean
     no_of_items?: boolean
     remarks?: boolean
+    i_date_acquired?: boolean
   }, ExtArgs["result"]["item"]>
 
   export type ItemSelectScalar = {
@@ -4616,9 +4626,10 @@ export namespace Prisma {
     i_photo?: boolean
     no_of_items?: boolean
     remarks?: boolean
+    i_date_acquired?: boolean
   }
 
-  export type ItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "i_deviceID" | "i_model" | "i_category" | "i_brand" | "i_description" | "i_type" | "item_rawstock" | "i_status" | "i_mr" | "i_price" | "i_photo" | "no_of_items" | "remarks", ExtArgs["result"]["item"]>
+  export type ItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "i_deviceID" | "i_model" | "i_category" | "i_brand" | "i_description" | "i_type" | "item_rawstock" | "i_status" | "i_mr" | "i_price" | "i_photo" | "no_of_items" | "remarks" | "i_date_acquired", ExtArgs["result"]["item"]>
   export type ItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | Item$borrowsArgs<ExtArgs>
     returns?: boolean | Item$returnsArgs<ExtArgs>
@@ -4653,6 +4664,10 @@ export namespace Prisma {
       i_photo: string
       no_of_items: number | null
       remarks: string | null
+      /**
+       * Day the school acquired the item. Nullable because items added before this column have none.
+       */
+      i_date_acquired: Date | null
     }, ExtArgs["result"]["item"]>
     composites: {}
   }
@@ -5093,6 +5108,7 @@ export namespace Prisma {
     readonly i_photo: FieldRef<"Item", 'String'>
     readonly no_of_items: FieldRef<"Item", 'Int'>
     readonly remarks: FieldRef<"Item", 'String'>
+    readonly i_date_acquired: FieldRef<"Item", 'DateTime'>
   }
     
 
@@ -13192,7 +13208,8 @@ export namespace Prisma {
     i_price: 'i_price',
     i_photo: 'i_photo',
     no_of_items: 'no_of_items',
-    remarks: 'remarks'
+    remarks: 'remarks',
+    i_date_acquired: 'i_date_acquired'
   };
 
   export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]
@@ -13615,6 +13632,7 @@ export namespace Prisma {
     i_photo?: StringFilter<"Item"> | string
     no_of_items?: IntNullableFilter<"Item"> | number | null
     remarks?: StringNullableFilter<"Item"> | string | null
+    i_date_acquired?: DateTimeNullableFilter<"Item"> | Date | string | null
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
     borrowRequests?: BorrowRequestListRelationFilter
@@ -13635,6 +13653,7 @@ export namespace Prisma {
     i_photo?: SortOrder
     no_of_items?: SortOrderInput | SortOrder
     remarks?: SortOrderInput | SortOrder
+    i_date_acquired?: SortOrderInput | SortOrder
     borrows?: BorrowOrderByRelationAggregateInput
     returns?: ReturnOrderByRelationAggregateInput
     borrowRequests?: BorrowRequestOrderByRelationAggregateInput
@@ -13658,6 +13677,7 @@ export namespace Prisma {
     i_photo?: StringFilter<"Item"> | string
     no_of_items?: IntNullableFilter<"Item"> | number | null
     remarks?: StringNullableFilter<"Item"> | string | null
+    i_date_acquired?: DateTimeNullableFilter<"Item"> | Date | string | null
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
     borrowRequests?: BorrowRequestListRelationFilter
@@ -13678,6 +13698,7 @@ export namespace Prisma {
     i_photo?: SortOrder
     no_of_items?: SortOrderInput | SortOrder
     remarks?: SortOrderInput | SortOrder
+    i_date_acquired?: SortOrderInput | SortOrder
     _count?: ItemCountOrderByAggregateInput
     _avg?: ItemAvgOrderByAggregateInput
     _max?: ItemMaxOrderByAggregateInput
@@ -13703,6 +13724,7 @@ export namespace Prisma {
     i_photo?: StringWithAggregatesFilter<"Item"> | string
     no_of_items?: IntNullableWithAggregatesFilter<"Item"> | number | null
     remarks?: StringNullableWithAggregatesFilter<"Item"> | string | null
+    i_date_acquired?: DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
   }
 
   export type RoomWhereInput = {
@@ -14494,6 +14516,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
     returns?: ReturnCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
@@ -14514,6 +14537,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
@@ -14533,6 +14557,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     returns?: ReturnUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
@@ -14553,6 +14578,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
@@ -14573,6 +14599,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
   }
 
   export type ItemUpdateManyMutationInput = {
@@ -14589,6 +14616,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ItemUncheckedUpdateManyInput = {
@@ -14606,6 +14634,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RoomCreateInput = {
@@ -15485,6 +15514,17 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type ItemCountOrderByAggregateInput = {
     id?: SortOrder
     i_deviceID?: SortOrder
@@ -15500,6 +15540,7 @@ export namespace Prisma {
     i_photo?: SortOrder
     no_of_items?: SortOrder
     remarks?: SortOrder
+    i_date_acquired?: SortOrder
   }
 
   export type ItemAvgOrderByAggregateInput = {
@@ -15525,6 +15566,7 @@ export namespace Prisma {
     i_photo?: SortOrder
     no_of_items?: SortOrder
     remarks?: SortOrder
+    i_date_acquired?: SortOrder
   }
 
   export type ItemMinOrderByAggregateInput = {
@@ -15542,6 +15584,7 @@ export namespace Prisma {
     i_photo?: SortOrder
     no_of_items?: SortOrder
     remarks?: SortOrder
+    i_date_acquired?: SortOrder
   }
 
   export type ItemSumOrderByAggregateInput = {
@@ -15582,6 +15625,20 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type DateTimeFilter<$PrismaModel = never> = {
@@ -15644,17 +15701,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type BorrowerScalarRelationFilter = {
@@ -15745,20 +15791,6 @@ export namespace Prisma {
     room_id?: SortOrder
     b_quantity?: SortOrder
     b_status?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type BorrowScalarRelationFilter = {
@@ -16391,6 +16423,10 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type BorrowUpdateManyWithoutItemNestedInput = {
     create?: XOR<BorrowCreateWithoutItemInput, BorrowUncheckedCreateWithoutItemInput> | BorrowCreateWithoutItemInput[] | BorrowUncheckedCreateWithoutItemInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutItemInput | BorrowCreateOrConnectWithoutItemInput[]
@@ -16657,10 +16693,6 @@ export namespace Prisma {
     create?: XOR<ItemReceiptCreateWithoutBorrowInput, ItemReceiptUncheckedCreateWithoutBorrowInput>
     connectOrCreate?: ItemReceiptCreateOrConnectWithoutBorrowInput
     connect?: ItemReceiptWhereUniqueInput
-  }
-
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
   }
 
   export type BorrowerUpdateOneRequiredWithoutBorrowsNestedInput = {
@@ -17072,6 +17104,17 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
     in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
@@ -17115,6 +17158,20 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -17138,31 +17195,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedBoolFilter<$PrismaModel = never> = {
@@ -17996,6 +18028,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     returns?: ReturnCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
   }
@@ -18015,6 +18048,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
   }
@@ -18227,6 +18261,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     returns?: ReturnUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
   }
@@ -18246,6 +18281,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
   }
@@ -18604,6 +18640,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
     returns?: ReturnCreateNestedManyWithoutItemInput
   }
@@ -18623,6 +18660,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
   }
@@ -18821,6 +18859,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     returns?: ReturnUpdateManyWithoutItemNestedInput
   }
@@ -18840,6 +18879,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
   }
@@ -19076,6 +19116,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
   }
@@ -19095,6 +19136,7 @@ export namespace Prisma {
     i_photo?: string
     no_of_items?: number | null
     remarks?: string | null
+    i_date_acquired?: Date | string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
   }
@@ -19239,6 +19281,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
   }
@@ -19258,6 +19301,7 @@ export namespace Prisma {
     i_photo?: StringFieldUpdateOperationsInput | string
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
   }

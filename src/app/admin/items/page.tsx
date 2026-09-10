@@ -30,6 +30,8 @@ interface Item {
   i_photo: string;
   no_of_items?: number | null;
   remarks?: string | null;
+  // A Date from the server; the `YYYY-MM-DD` string from the form after a local edit.
+  i_date_acquired?: Date | string | null;
 }
 
 interface Pagination {
@@ -41,6 +43,27 @@ interface Pagination {
 
 /** The categories an item can be filed under; stored as-is in `i_category`. */
 const ITEM_CATEGORIES = ['School Supplies', 'Electronic Devices'];
+
+// `i_date_acquired` is a date-only column stored as UTC midnight, so it is read in UTC
+// to keep it from shifting a day in the viewer's timezone.
+const toDateInputValue = (value?: Date | string | null) =>
+  value ? new Date(value).toISOString().slice(0, 10) : '';
+
+const formatDateAcquired = (value?: Date | string | null) =>
+  value
+    ? new Date(value).toLocaleDateString(undefined, {
+        timeZone: 'UTC',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'Not recorded';
+
+/** Today as `YYYY-MM-DD` in local time — the latest date the picker allows. */
+const todayInputValue = () => {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+};
 
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
@@ -78,7 +101,8 @@ export default function ItemsPage() {
     item_rawstock: '',
     i_mr: '',
     i_price: '',
-    i_status: '1'
+    i_status: '1',
+    i_date_acquired: ''
   });
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -104,7 +128,8 @@ export default function ItemsPage() {
     item_rawstock: '',
     i_mr: '',
     i_price: '',
-    i_status: '1'
+    i_status: '1',
+    i_date_acquired: ''
   });
   const [statusFormData, setStatusFormData] = useState({
     i_status: '1',
@@ -258,7 +283,8 @@ export default function ItemsPage() {
         item_rawstock: parseInt(formData.item_rawstock),
         i_price: parseFloat(formData.i_price),
         i_status: parseInt(formData.i_status),
-        i_photo: photo
+        i_photo: photo,
+        i_date_acquired: formData.i_date_acquired || null
       });
 
       if (data.success) {
@@ -272,7 +298,8 @@ export default function ItemsPage() {
           item_rawstock: '',
           i_mr: '',
           i_price: '',
-          i_status: '1'
+          i_status: '1',
+          i_date_acquired: ''
         });
         setSelectedPhoto(null);
         setPhotoPreview(null);
@@ -329,7 +356,8 @@ export default function ItemsPage() {
       item_rawstock: item.item_rawstock.toString(),
       i_mr: item.i_mr,
       i_price: item.i_price.toString(),
-      i_status: item.i_status.toString()
+      i_status: item.i_status.toString(),
+      i_date_acquired: toDateInputValue(item.i_date_acquired)
     });
     setShowEditModal(true);
   };
@@ -378,7 +406,8 @@ export default function ItemsPage() {
           ...editFormData,
           item_rawstock: parseInt(editFormData.item_rawstock),
           i_price: parseFloat(editFormData.i_price),
-          i_status: parseInt(editFormData.i_status)
+          i_status: parseInt(editFormData.i_status),
+          i_date_acquired: editFormData.i_date_acquired || null
         }
       });
 
@@ -388,7 +417,8 @@ export default function ItemsPage() {
           ...editFormData,
           item_rawstock: parseInt(editFormData.item_rawstock),
           i_price: parseFloat(editFormData.i_price),
-          i_status: parseInt(editFormData.i_status)
+          i_status: parseInt(editFormData.i_status),
+          i_date_acquired: editFormData.i_date_acquired || null
         };
 
         setItems(prev => prev.map(item =>
@@ -936,6 +966,18 @@ export default function ItemsPage() {
                         <option value="0">Old</option>
                       </select>
                     </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Date Acquired</label>
+                      <input
+                        type="date"
+                        name="i_date_acquired"
+                        value={formData.i_date_acquired}
+                        onChange={handleInputChange}
+                        max={todayInputValue()}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -1070,6 +1112,11 @@ export default function ItemsPage() {
                           {selectedItem.i_status === 1 ? 'New' : 'Old'}
                         </span>
                       </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Date Acquired</label>
+                      <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{formatDateAcquired(selectedItem.i_date_acquired)}</p>
                     </div>
 
                     <div>
@@ -1281,6 +1328,18 @@ export default function ItemsPage() {
                         <option value="1">New</option>
                         <option value="0">Old</option>
                       </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Date Acquired</label>
+                      <input
+                        type="date"
+                        name="i_date_acquired"
+                        value={editFormData.i_date_acquired}
+                        onChange={handleEditInputChange}
+                        max={todayInputValue()}
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
                     </div>
                   </div>
 

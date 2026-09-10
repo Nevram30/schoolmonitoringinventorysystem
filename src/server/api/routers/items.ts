@@ -30,6 +30,12 @@ const computeNextDeviceId = (existing: string[]) => {
   return next > DEVICE_ID_MAX ? null : String(next).padStart(6, "0");
 };
 
+/** A `YYYY-MM-DD` value from a date input, stored as UTC midnight in the date-only column. */
+const dateOnly = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected a YYYY-MM-DD date")
+  .transform((value) => new Date(`${value}T00:00:00.000Z`));
+
 /** Prisma reports a broken unique constraint (a device ID race) as P2002. */
 const isUniqueViolation = (error: unknown) =>
   typeof error === "object" &&
@@ -157,6 +163,7 @@ export const itemsRouter = createTRPCRouter({
         i_mr: z.string(),
         i_price: z.number(),
         i_photo: z.string().nullish(),
+        i_date_acquired: dateOnly.nullish(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -189,6 +196,7 @@ export const itemsRouter = createTRPCRouter({
               i_mr: input.i_mr,
               i_price: input.i_price,
               i_photo: input.i_photo || "default.jpg",
+              i_date_acquired: input.i_date_acquired ?? null,
             },
           });
 
@@ -230,6 +238,7 @@ export const itemsRouter = createTRPCRouter({
           i_photo: z.string().optional(),
           no_of_items: z.number().nullish(),
           remarks: z.string().nullish(),
+          i_date_acquired: dateOnly.nullish(),
         }),
       })
     )

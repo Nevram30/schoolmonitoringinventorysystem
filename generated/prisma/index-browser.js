@@ -160,7 +160,8 @@ exports.Prisma.ItemScalarFieldEnum = {
   i_price: 'i_price',
   i_photo: 'i_photo',
   no_of_items: 'no_of_items',
-  remarks: 'remarks'
+  remarks: 'remarks',
+  i_date_acquired: 'i_date_acquired'
 };
 
 exports.Prisma.RoomScalarFieldEnum = {
