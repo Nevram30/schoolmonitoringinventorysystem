@@ -47,7 +47,8 @@ const ProtectedLayout: React.FC<PropsWithChildren> = ({
         <SidebarShell>
           <FacultyAsideNavigation />
         </SidebarShell>
-        <div className="flex-1 flex flex-col">
+        {/* min-w-0: a wide table scrolls inside its own box instead of widening the whole page. */}
+        <div className="flex-1 flex flex-col min-w-0">
           <FacultyHeader />
           <main className="flex-1 p-6">{children}</main>
         </div>

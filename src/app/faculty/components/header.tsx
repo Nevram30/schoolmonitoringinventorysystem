@@ -29,7 +29,8 @@ export default function FacultyHeader() {
                         <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-blue-600 font-semibold">
                             {session?.user?.name?.charAt(0).toUpperCase() || 'F'}
                         </div>
-                        <div className="text-left">
+                        {/* Phones show just the avatar; the name is in the menu it opens. */}
+                        <div className="hidden text-left sm:block">
                             <div className="font-medium text-white">{session?.user?.name || 'Faculty'}</div>
                             <div className="text-xs text-blue-100 capitalize">{session?.user?.role || 'faculty'}</div>
                         </div>
