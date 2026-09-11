@@ -132,6 +132,39 @@ export const itemsRouter = createTRPCRouter({
       }
     }),
 
+  // The inventory scanner. Barcode labels (Reports -> Barcode Generator) encode the device ID;
+  // IDs that match no item come back in `missing` so the scanner can say which label failed.
+  byDeviceIds: protectedProcedure
+    .input(
+      z.object({
+        deviceIds: z.array(z.string().trim().min(1).max(50)).min(1).max(500),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const deviceIds = [...new Set(input.deviceIds)];
+
+      try {
+        const rows = await ctx.db.item.findMany({
+          where: { i_deviceID: { in: deviceIds } },
+        });
+        const found = new Set(rows.map((row) => row.i_deviceID));
+
+        return {
+          success: true as const,
+          data: rows.map(serialize),
+          missing: deviceIds.filter((id) => !found.has(id)),
+        };
+      } catch (error) {
+        console.error("Look up scanned items error:", error);
+        return {
+          success: false as const,
+          error: "Failed to look up scanned items",
+          data: [],
+          missing: [] as string[],
+        };
+      }
+    }),
+
   // The device ID the next created item will get, for previewing in the UI.
   nextDeviceID: protectedProcedure.query(async ({ ctx }) => {
     try {
