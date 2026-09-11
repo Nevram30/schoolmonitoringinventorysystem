@@ -4,12 +4,21 @@ import Link from 'next/link'
 import {
   ArrowRight,
   BarChart3,
+  Barcode,
+  Bell,
   Boxes,
+  Briefcase,
   Building2,
+  ChartLine,
   CheckCircle2,
   ClipboardList,
+  Coins,
   GraduationCap,
+  PackageCheck,
+  Presentation,
   RotateCcw,
+  ScanBarcode,
+  Send,
   ShieldCheck,
   Users,
 } from 'lucide-react'
@@ -19,37 +28,73 @@ const features = [
     icon: Boxes,
     title: 'Item & Inventory Records',
     description:
-      'Keep every school asset catalogued with photos, quantities, and current condition in one searchable list.',
+      'Catalogue every asset with its device ID, brand, model, category, price, MR, and photo, and track whether it is available, borrowed, under maintenance, or damaged.',
   },
   {
-    icon: ClipboardList,
-    title: 'Borrowing Transactions',
+    icon: Barcode,
+    title: 'Barcode Labels',
     description:
-      'Issue equipment to faculty and students with due dates, so you always know what is out and who has it.',
+      'Generate and print barcode labels for items so every unit can be identified with a quick scan.',
+  },
+  {
+    icon: ScanBarcode,
+    title: 'Scan-to-Count Inventory',
+    description:
+      'Count stock by scanning labels with a phone camera or a handheld scanner, then print the inventory count report.',
+  },
+  {
+    icon: Send,
+    title: 'Borrow Requests & Approval',
+    description:
+      'Faculty, staff, and students request items with a due date and purpose. The administrator approves or rejects each one with a note.',
+  },
+  {
+    icon: PackageCheck,
+    title: 'Hand-over Receipts',
+    description:
+      'Record who actually picked up the item, the ID they showed, its condition, and a photo taken at the counter.',
   },
   {
     icon: RotateCcw,
-    title: 'Returns & Overdue Tracking',
+    title: 'Returns & Condition Check',
     description:
-      'Log returns in seconds and surface overdue items before they turn into missing property.',
+      'Log returns with the item condition and notes. Stock updates automatically once the item is back.',
+  },
+  {
+    icon: Coins,
+    title: 'Overdue Tracking & Fees',
+    description:
+      'See overdue items as they come up, with late fees computed from a per-day rate, grace days, a cap, and damage or lost-item charges you configure.',
   },
   {
     icon: Building2,
     title: 'Room Assignment',
     description:
-      'Assign items to rooms and departments so each unit can be traced back to where it belongs.',
+      'Link borrowed items to rooms so each unit can be traced to where it is being used.',
   },
   {
     icon: Users,
     title: 'Borrower Profiles',
     description:
-      'Maintain borrower records with generated IDs and a full history of their past transactions.',
+      'Keep student, faculty, and staff records with generated IDs, department, year and section, and a full borrowing history.',
+  },
+  {
+    icon: ChartLine,
+    title: 'Dashboards & Analytics',
+    description:
+      'Charts of monthly borrowing and returns, the most borrowed items, and the departments that borrow most.',
   },
   {
     icon: BarChart3,
     title: 'Printable Reports',
     description:
-      'Generate inventory and transaction summaries ready for printing during audits and turnovers.',
+      'Print summaries, most-borrowed lists, and recent activity for audits and turnovers.',
+  },
+  {
+    icon: Bell,
+    title: 'Notifications & Mobile App',
+    description:
+      'The administrator is notified of pending requests right away. The system installs on a phone like an app and shows an offline page when there is no connection.',
   },
 ]
 
@@ -57,41 +102,79 @@ const roles = [
   {
     icon: ShieldCheck,
     name: 'Administrator',
-    description:
-      'Full oversight of users, items, rooms, borrowers, and system-wide reports.',
+    description: 'Runs the property office and oversees the whole system.',
+    capabilities: [
+      'Manage user accounts',
+      'Manage items, rooms, and borrowers',
+      'Approve or reject borrow requests',
+      'Record hand-overs and returns',
+      'Set overdue and damage fees',
+      'Print barcodes and scan inventory',
+      'View dashboards and print reports',
+    ],
   },
   {
-    icon: ClipboardList,
+    icon: Briefcase,
     name: 'Staff',
-    description:
-      'Handles day-to-day borrowing, returns, and the item records behind the counter.',
+    description: 'School personnel who borrow equipment for their work.',
+    capabilities: [
+      'Request equipment',
+      'Track borrowed items',
+      'View transaction history',
+      'See returned items',
+      'Personal dashboard',
+    ],
+  },
+  {
+    icon: Presentation,
+    name: 'Faculty',
+    description: 'Teachers who borrow equipment for classes and activities.',
+    capabilities: [
+      'Request equipment',
+      'Track borrowed items',
+      'View transaction history',
+      'See returned items',
+      'Personal dashboard',
+    ],
   },
   {
     icon: GraduationCap,
-    name: 'Faculty',
-    description:
-      'Requests equipment, tracks borrowed items, and reviews their own return history.',
+    name: 'Student',
+    description: 'Students who borrow equipment for class projects.',
+    capabilities: [
+      'Request equipment',
+      'Track borrowed items',
+      'View transaction history',
+      'See returned items',
+      'Personal dashboard',
+    ],
   },
 ]
 
 const steps = [
   {
     number: '01',
-    title: 'Register the asset',
+    title: 'Register & label the asset',
     description:
-      'Add the item to the inventory with its details, image, and assigned room.',
+      'The administrator adds the item with its details and photo, then prints its barcode label.',
   },
   {
     number: '02',
-    title: 'Record the borrowing',
+    title: 'Request the item',
     description:
-      'Select a borrower, choose the items, and set the expected return date.',
+      'A faculty member, staff member, or student picks the item, the return date, and the purpose.',
   },
   {
     number: '03',
-    title: 'Confirm the return',
+    title: 'Approve & hand over',
     description:
-      'Mark items returned, note the condition, and the stock updates automatically.',
+      'The administrator approves the request and records who received the item, with a photo.',
+  },
+  {
+    number: '04',
+    title: 'Return & settle',
+    description:
+      'The item comes back, its condition is noted, any late or damage fee is applied, and stock is restored.',
   },
 ]
 
@@ -132,7 +215,7 @@ export default function LandingPage() {
               href="#roles"
               className="hidden text-sm font-medium text-gray-600 transition-colors hover:text-blue-700 md:block"
             >
-              Roles
+              Users
             </a>
             <Link
               href="/login"
@@ -236,7 +319,8 @@ export default function LandingPage() {
 
               <div className="space-y-3 border-t border-gray-100 pt-4">
                 {[
-                  'Projector released to Faculty',
+                  'Borrow request approved for Faculty',
+                  'Projector handed over with receipt',
                   'Laptop set returned on time',
                   'Lab kit assigned to Room 204',
                 ].map((activity) => (
@@ -289,14 +373,14 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Three steps, start to finish
+              Four steps, start to finish
             </h2>
             <p className="mt-4 text-lg text-gray-600">
               The full borrowing cycle, from the stockroom shelf and back again.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {steps.map((step) => (
               <div
                 key={step.number}
@@ -322,28 +406,40 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              One system, three levels of access
+              One system, four types of users
             </h2>
             <p className="mt-4 text-lg text-gray-600">
               Each account only sees the screens that belong to its role.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {roles.map((role) => (
               <div
                 key={role.name}
-                className="rounded-xl border border-gray-200 bg-linear-to-b from-white to-gray-50 p-8 text-center shadow-sm"
+                className="rounded-xl border border-gray-200 bg-linear-to-b from-white to-gray-50 p-8 shadow-sm"
               >
-                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white">
-                  <role.icon className="h-7 w-7" />
+                <div className="text-center">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white">
+                    <role.icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold text-gray-900">
+                    {role.name}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">
+                    {role.description}
+                  </p>
                 </div>
-                <h3 className="mt-5 text-lg font-semibold text-gray-900">
-                  {role.name}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-600">
-                  {role.description}
-                </p>
+                <ul className="mt-5 space-y-2 border-t border-gray-100 pt-5">
+                  {role.capabilities.map((capability) => (
+                    <li key={capability} className="flex items-start gap-2">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                      <span className="text-sm text-gray-700">
+                        {capability}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
