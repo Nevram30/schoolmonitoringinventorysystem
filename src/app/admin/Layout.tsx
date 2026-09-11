@@ -3,6 +3,7 @@ import React, { PropsWithChildren } from 'react'
 
 import { withAuth, withAuthLayout } from '@/server/withAuth'
 import FullScreenLoader from '@/components/ui-components/loader.screen'
+import { SidebarProvider, SidebarShell } from '@/components/ui-components/sidebar'
 import AsideNavigation from './components/aside.navigation'
 import AdminHeader from './components/header'
 import { PendingRequestsProvider } from './components/pending-requests.context'
@@ -43,14 +44,19 @@ const ProtectedLayout: React.FC<PropsWithChildren> = ({
 
   return (
     // Wraps the nav, the header and the page so all three read one shared pending-request count.
+    // The sidebar provider lets the header's toggle show and hide the nav.
     <PendingRequestsProvider>
-      <div className="flex min-h-screen bg-gray-50">
-        <AsideNavigation />
-        <div className="flex-1 flex flex-col">
-          <AdminHeader />
-          <main className="flex-1 p-6">{children}</main>
+      <SidebarProvider>
+        <div className="flex min-h-screen bg-gray-50">
+          <SidebarShell>
+            <AsideNavigation />
+          </SidebarShell>
+          <div className="flex-1 flex flex-col">
+            <AdminHeader />
+            <main className="flex-1 p-6">{children}</main>
+          </div>
         </div>
-      </div>
+      </SidebarProvider>
     </PendingRequestsProvider>
   )
 }

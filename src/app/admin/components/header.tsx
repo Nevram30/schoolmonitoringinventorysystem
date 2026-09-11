@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { Cog6ToothIcon } from '@heroicons/react/24/outline'
 import AdminNotificationBell from './notification.bell'
+import { SidebarToggleButton } from '@/components/ui-components/sidebar'
 
 export default function AdminHeader() {
     const { data: session } = useSession()
@@ -37,9 +38,7 @@ export default function AdminHeader() {
     return (
         <header className="sticky top-0 z-30 bg-blue-600 border-b border-blue-700 shadow-sm px-6 py-3">
             <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-semibold text-white"></h1>
-                </div>
+                <SidebarToggleButton />
 
                 <div className="flex items-center space-x-2">
                     <AdminNotificationBell />

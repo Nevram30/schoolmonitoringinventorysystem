@@ -2,6 +2,7 @@
 import React, { PropsWithChildren } from 'react'
 import { withAuth, withAuthLayout } from '@/server/withAuth'
 import FullScreenLoader from '@/components/ui-components/loader.screen'
+import { SidebarProvider, SidebarShell } from '@/components/ui-components/sidebar'
 import StaffAsideNavigation from './components/staff.aside.navigation'
 import StaffHeader from './components/header'
 
@@ -40,13 +41,18 @@ const ProtectedLayout: React.FC<PropsWithChildren> = ({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <StaffAsideNavigation />
-      <div className="flex-1 flex flex-col">
-        <StaffHeader />
-        <main className="flex-1 p-6">{children}</main>
+    // The sidebar provider lets the header's toggle show and hide the nav.
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        <SidebarShell>
+          <StaffAsideNavigation />
+        </SidebarShell>
+        <div className="flex-1 flex flex-col">
+          <StaffHeader />
+          <main className="flex-1 p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
 

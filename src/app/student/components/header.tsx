@@ -2,6 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
+import { SidebarToggleButton } from '@/components/ui-components/sidebar'
 
 export default function StudentHeader() {
     const { data: session } = useSession()
@@ -18,7 +19,7 @@ export default function StudentHeader() {
     return (
         <header className="sticky top-0 z-30 bg-blue-600 shadow-sm border-b border-blue-700 px-6 py-3">
             <div className="flex justify-between items-center">
-                <div></div>
+                <SidebarToggleButton />
                 <div className="relative">
                     <button
                         onClick={toggleDropdown}

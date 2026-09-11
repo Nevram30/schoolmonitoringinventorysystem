@@ -14,6 +14,7 @@ import {
   DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
+import DashboardCharts from '@/components/ui-components/dashboard.charts';
 import { trpcClient } from '@/trpc/client';
 
 interface DashboardStats {
@@ -251,35 +252,31 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Stats Grid — compact cards, all six in one row on wide screens */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {statCards.map((card) => (
             <Link
               key={card.name}
               href={card.href}
-              className="relative block bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-shadow"
+              className="flex flex-col justify-between gap-3 bg-white p-4 shadow rounded-lg hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-shadow"
             >
-              <dt>
-                <div className={`absolute ${card.color} rounded-md p-3`}>
-                  <card.icon className="h-6 w-6 text-white" aria-hidden="true" />
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium text-gray-500">{card.name}</p>
+                <div className={`${card.color} shrink-0 rounded-md p-2`}>
+                  <card.icon className="h-5 w-5 text-white" aria-hidden="true" />
                 </div>
-                <p className="ml-16 text-sm font-medium text-gray-500 truncate">
-                  {card.name}
-                </p>
-              </dt>
-              <dd className="ml-16 pb-6 flex items-baseline sm:pb-7">
-                <p className="text-2xl font-semibold text-gray-900">
-                  {card.value}
-                </p>
+              </div>
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <p className="text-2xl font-semibold text-gray-900">{card.value}</p>
                 {card.name === 'Overdue Items' && card.value > 0 && (
-                  <span className="ml-2 text-sm font-medium text-red-600">
-                    Needs attention
-                  </span>
+                  <span className="text-xs font-medium text-red-600">Needs attention</span>
                 )}
-              </dd>
+              </div>
             </Link>
           ))}
         </div>
+
+        <DashboardCharts />
 
         {/* Recent Activity */}
         <div className="bg-white shadow rounded-lg">

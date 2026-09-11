@@ -44,6 +44,48 @@ const ITEM_STATUS_LABELS: Record<number, string> = {
   4: "Damaged",
 };
 
+/** How many items the "most borrowed per month" chart names; the rest are summed as "Other". */
+const TOP_ITEM_COUNT = 5;
+
+const isValidTimeZone = (timeZone: string) => {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Buckets a moment into its "YYYY-MM" month as seen in `timeZone`, so a borrow made just after
+ * midnight on the 1st counts toward the month the admin saw it happen in, not the server's.
+ */
+const monthKeyFormatter = (timeZone: string) => {
+  const format = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+  });
+
+  return (date: Date) => {
+    const parts = format.formatToParts(date);
+    const year = parts.find((part) => part.type === "year")?.value;
+    const month = parts.find((part) => part.type === "month")?.value;
+    return `${year}-${month}`;
+  };
+};
+
+/** The `count` month keys ending at `currentKey`, oldest first. */
+const lastMonthKeys = (currentKey: string, count: number) => {
+  const [year = 1970, month = 1] = currentKey.split("-").map(Number);
+  const current = year * 12 + (month - 1);
+
+  return Array.from({ length: count }, (_, i) => {
+    const index = current - (count - 1 - i);
+    return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, "0")}`;
+  });
+};
+
 export const reportsRouter = createTRPCRouter({
   /**
    * The figures the student / staff / faculty dashboards show: what is out on loan, what came
@@ -450,6 +492,139 @@ export const reportsRouter = createTRPCRouter({
           success: false as const,
           error: "Failed to generate report",
           data: [],
+        };
+      }
+    }),
+
+  /**
+   * Month-by-month series behind the admin dashboard charts: borrowing activity, the most
+   * borrowed items per month, and the departments that borrow the most. Counts are borrow
+   * transactions — the same unit the Reports page's "Most Borrowed Items" uses.
+   */
+  dashboardCharts: protectedProcedure
+    .input(
+      z.object({
+        months: z.number().int().min(1).max(24).default(6),
+        // The admin's browser timezone, so month boundaries match their calendar.
+        timeZone: z.string().default("UTC"),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const timeZone = isValidTimeZone(input.timeZone) ? input.timeZone : "UTC";
+        const monthKeyOf = monthKeyFormatter(timeZone);
+        const keys = lastMonthKeys(monthKeyOf(new Date()), input.months);
+        const inWindow = new Set(keys);
+
+        // Fetch from a day before the first month in UTC — no timezone is further than that
+        // from UTC — and let the month key decide what actually falls in the window.
+        const [firstYear = 1970, firstMonth = 1] = keys[0]!.split("-").map(Number);
+        const since = new Date(
+          Date.UTC(firstYear, firstMonth - 1, 1) - 24 * 60 * 60 * 1000
+        );
+
+        const [borrows, returns] = await Promise.all([
+          ctx.db.borrow.findMany({
+            where: { b_date_borrowed: { gte: since } },
+            select: {
+              b_date_borrowed: true,
+              item_id: true,
+              member_id: true,
+              Member: { select: { m_department: true } },
+            },
+          }),
+          ctx.db.return.findMany({
+            where: { r_date_returned: { gte: since } },
+            select: { r_date_returned: true },
+          }),
+        ]);
+
+        const borrowedByMonth = new Map<string, number>();
+        const returnedByMonth = new Map<string, number>();
+        const itemTotals = new Map<number, number>();
+        const itemsByMonth = new Map<string, Map<number, number>>();
+        const departments = new Map<string, { count: number; borrowers: Set<number> }>();
+
+        for (const borrow of borrows) {
+          const key = monthKeyOf(borrow.b_date_borrowed);
+          if (!inWindow.has(key)) continue;
+
+          borrowedByMonth.set(key, (borrowedByMonth.get(key) ?? 0) + 1);
+          itemTotals.set(borrow.item_id, (itemTotals.get(borrow.item_id) ?? 0) + 1);
+
+          const monthItems = itemsByMonth.get(key) ?? new Map<number, number>();
+          monthItems.set(borrow.item_id, (monthItems.get(borrow.item_id) ?? 0) + 1);
+          itemsByMonth.set(key, monthItems);
+
+          const department = borrow.Member?.m_department?.trim() || "Unspecified";
+          const entry = departments.get(department) ?? { count: 0, borrowers: new Set<number>() };
+          entry.count += 1;
+          entry.borrowers.add(borrow.member_id);
+          departments.set(department, entry);
+        }
+
+        for (const row of returns) {
+          const key = monthKeyOf(row.r_date_returned);
+          if (inWindow.has(key)) {
+            returnedByMonth.set(key, (returnedByMonth.get(key) ?? 0) + 1);
+          }
+        }
+
+        // Ties go to the older item so the ranking is stable between refreshes.
+        const topIds = [...itemTotals.entries()]
+          .sort((a, b) => b[1] - a[1] || a[0] - b[0])
+          .slice(0, TOP_ITEM_COUNT)
+          .map(([id]) => id);
+
+        const topItemRows = await ctx.db.item.findMany({
+          where: { id: { in: topIds } },
+          select: { id: true, i_model: true, i_deviceID: true },
+        });
+
+        const topItems = topIds.map((id) => {
+          const item = topItemRows.find((row) => row.id === id);
+          return {
+            id,
+            i_model: item?.i_model ?? "Unknown item",
+            i_deviceID: item?.i_deviceID ?? "",
+            total: itemTotals.get(id) ?? 0,
+          };
+        });
+
+        return {
+          success: true as const,
+          data: {
+            months: keys.map((key) => ({
+              key,
+              borrowed: borrowedByMonth.get(key) ?? 0,
+              returned: returnedByMonth.get(key) ?? 0,
+            })),
+            topItems,
+            // `counts` lines up with `topItems`; `other` is every other item that month.
+            itemsByMonth: keys.map((key) => {
+              const monthItems = itemsByMonth.get(key);
+              const counts = topIds.map((id) => monthItems?.get(id) ?? 0);
+              const total = borrowedByMonth.get(key) ?? 0;
+              return {
+                key,
+                counts,
+                other: total - counts.reduce((sum, count) => sum + count, 0),
+              };
+            }),
+            departments: [...departments.entries()]
+              .map(([department, entry]) => ({
+                department,
+                count: entry.count,
+                borrowers: entry.borrowers.size,
+              }))
+              .sort((a, b) => b.count - a.count || a.department.localeCompare(b.department)),
+          },
+        };
+      } catch (error) {
+        console.error("Dashboard charts error:", error);
+        return {
+          success: false as const,
+          error: "Failed to load dashboard charts",
         };
       }
     }),

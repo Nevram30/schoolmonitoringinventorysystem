@@ -1,11 +1,9 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { SidebarNavigation } from '@/components/ui-components/sidebar'
 import { usePendingRequests } from './pending-requests.context'
 
 export default function AdminAsidecomponent() {
-    const pathname = usePathname()
     // Same source as the header bell, so the two counts never disagree.
     const { count: pendingRequests } = usePendingRequests()
 
@@ -73,38 +71,5 @@ export default function AdminAsidecomponent() {
         }
     ]
 
-    return (
-        <aside className="w-64 h-screen sticky top-0 self-start bg-blue-50 shadow-md flex flex-col">
-            <div className="p-6 bg-blue-600 border-b border-blue-700 shrink-0">
-                <h1 className="text-xl font-bold text-white">Admin Panel</h1>
-            </div>
-
-            <nav className="mt-6 flex-1 overflow-y-auto pb-6">
-                <ul className="space-y-2 px-4">
-                    {navigationItems.map((item) => {
-                        const isActive = pathname === item.href
-                        return (
-                            <li key={item.href}>
-                                <Link
-                                    href={item.href}
-                                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${isActive
-                                        ? 'bg-blue-200 text-blue-800 border-r-4 border-blue-700'
-                                        : 'text-gray-700 hover:bg-blue-100 hover:text-blue-900'
-                                        }`}
-                                >
-                                    <span className="mr-3 text-lg">{item.icon}</span>
-                                    <span className="flex-1">{item.label}</span>
-                                    {!!item.badge && (
-                                        <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
-                                            {item.badge > 99 ? '99+' : item.badge}
-                                        </span>
-                                    )}
-                                </Link>
-                            </li>
-                        )
-                    })}
-                </ul>
-            </nav>
-        </aside>
-    )
+    return <SidebarNavigation title="Admin Panel" items={navigationItems} />
 }
