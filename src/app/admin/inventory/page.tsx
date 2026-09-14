@@ -1,11 +1,14 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 import {
     CameraIcon,
+    ClockIcon,
     DocumentArrowDownIcon,
     MagnifyingGlassIcon,
     PrinterIcon,
+    TableCellsIcon,
     TrashIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline'
@@ -19,6 +22,7 @@ import {
     photoCellHtml,
     printColorStyles,
 } from '@/lib/print-report'
+import { downloadExcel, fileDate } from '@/lib/excel-export'
 import ItemAvatar from '@/components/ui-components/item.avatar'
 import Alert from '@/components/ui-components/alert'
 import { useAlert } from '@/components/ui-components/useAlert'
@@ -581,15 +585,55 @@ export default function InventoryPage() {
 
     const handlePrint = () => openReport(false, 'Inventory count sent to the print dialog')
 
+    /** Like the reports, the file holds the rows currently shown — the active tab with the search applied. */
+    const handleExportExcel = () => {
+        if (filteredRows.length === 0) {
+            showError('Scan some items first — the file lists the scanned items shown.', 'Nothing to export')
+            return
+        }
+
+        try {
+            downloadExcel({
+                filename: `inventory_count_${fileDate()}`,
+                sheetName: `Inventory count - ${activeTabLabel}`,
+                headers: ['Device ID', 'Model', 'Category', 'Brand', 'Counted', 'Stock', 'Status', 'Price', 'Last scanned'],
+                rows: filteredRows.map(({ item, record }) => [
+                    item.i_deviceID,
+                    item.i_model,
+                    item.i_category,
+                    item.i_brand,
+                    record.count,
+                    item.item_rawstock,
+                    getStatusLabel(item.i_status),
+                    Number(item.i_price) || 0,
+                    new Date(record.lastScannedAt).toLocaleString(),
+                ]),
+            })
+            showSuccess('Inventory count saved as an Excel file', 'Success')
+        } catch (error) {
+            console.error('Error exporting inventory count:', error)
+            showError('Failed to build the Excel file', 'Something went wrong')
+        }
+    }
+
     return (
         <Layout>
             <div className="space-y-5">
                 {/* Header */}
-                <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
-                    <p className="mt-1 text-sm text-gray-600">
-                        Scan barcode labels to count the equipment. Items appear here only when scanned.
-                    </p>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-gray-900">Inventory</h1>
+                        <p className="mt-1 text-sm text-gray-600">
+                            Scan barcode labels to count the equipment. Items appear here only when scanned.
+                        </p>
+                    </div>
+                    <Link
+                        href="/admin/inventory/history"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                        <ClockIcon className="h-4 w-4" aria-hidden="true" />
+                        Monthly history
+                    </Link>
                 </div>
 
                 {/* Scan panel */}
@@ -629,6 +673,14 @@ export default function InventoryPage() {
                         {' · '}
                         <strong className="text-gray-900">{totalScans}</strong> {totalScans === 1 ? 'unit' : 'units'} counted
                     </p>
+                    <button
+                        type="button"
+                        onClick={handleExportExcel}
+                        className="inline-flex items-center rounded bg-green-600 px-3 py-2 text-sm text-white transition-opacity hover:opacity-90"
+                    >
+                        <TableCellsIcon className="mr-1.5 h-4 w-4" />
+                        Excel
+                    </button>
                     <button
                         type="button"
                         onClick={handleExportPDF}

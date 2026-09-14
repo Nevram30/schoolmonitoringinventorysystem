@@ -41,6 +41,7 @@ model User {
   reviewedBorrows  BorrowRequest[] @relation("BorrowRequestReviewer")
   releasedItems    ItemReceipt[]   @relation("ItemReceiptReleaser")
   inventoryScans   InventoryScan[]
+  inventoryScanLog InventoryScanLog[]
 
   @@map("user")
 }
@@ -89,7 +90,8 @@ model Item {
   borrows        Borrow[]
   returns        Return[]
   borrowRequests BorrowRequest[]
-  inventoryScans InventoryScan[]
+  inventoryScans   InventoryScan[]
+  inventoryScanLog InventoryScanLog[]
 
   @@map("item")
 }
@@ -111,6 +113,22 @@ model InventoryScan {
   @@unique([user_id, item_id])
   @@index([user_id, last_scanned_at])
   @@map("inventory_scan")
+}
+
+/// Every scan made on /admin/inventory, one row per scan. Unlike `InventoryScan` it is kept when
+/// the list is cleared, so the monthly history can show what was counted in any month.
+model InventoryScanLog {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  item_id    Int
+  scanned_at DateTime @default(now())
+
+  User User @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Item Item @relation(fields: [item_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  // The history asks for one user's scans within a month.
+  @@index([user_id, scanned_at])
+  @@map("inventory_scan_log")
 }
 
 model Room {

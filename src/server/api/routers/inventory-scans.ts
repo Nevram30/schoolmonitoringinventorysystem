@@ -61,22 +61,27 @@ export const inventoryScansRouter = createTRPCRouter({
           return { success: false as const, missing: true, error: "No item matches this barcode" };
         }
 
-        const upsert = () =>
-          ctx.db.inventoryScan.upsert({
-            where: { user_id_item_id: { user_id, item_id: item.id } },
-            create: { user_id, item_id: item.id },
-            // Incremented in the database, so scans from two devices at once both count.
-            update: { s_count: { increment: 1 }, last_scanned_at: new Date() },
-            include: { Item: true },
-          });
+        const now = new Date();
+        const save = () =>
+          ctx.db.$transaction([
+            ctx.db.inventoryScan.upsert({
+              where: { user_id_item_id: { user_id, item_id: item.id } },
+              create: { user_id, item_id: item.id, first_scanned_at: now, last_scanned_at: now },
+              // Incremented in the database, so scans from two devices at once both count.
+              update: { s_count: { increment: 1 }, last_scanned_at: now },
+              include: { Item: true },
+            }),
+            // The monthly history keeps every scan, even after "Clear list".
+            ctx.db.inventoryScanLog.create({ data: { user_id, item_id: item.id, scanned_at: now } }),
+          ]);
 
         let row: ScanWithItem;
         try {
-          row = await upsert();
+          [row] = await save();
         } catch (error) {
           // Another device created the row between the lookup and the insert; now it exists.
           if (!isUniqueViolation(error)) throw error;
-          row = await upsert();
+          [row] = await save();
         }
 
         return { success: true as const, data: toScan(row) };
@@ -100,7 +105,7 @@ export const inventoryScansRouter = createTRPCRouter({
       }
     }),
 
-  // "Clear list": starts a new count.
+  // "Clear list": starts a new count. The scan log behind the monthly history is kept.
   clear: protectedProcedure.mutation(async ({ ctx }) => {
     try {
       await ctx.db.inventoryScan.deleteMany({ where: { user_id: ctx.session.user.id } });
@@ -110,6 +115,58 @@ export const inventoryScansRouter = createTRPCRouter({
       return { success: false as const, error: "Failed to clear the list" };
     }
   }),
+
+  // /admin/inventory/history: what this account counted in [from, to), one row per item. The
+  // page sends the start of a month and of the next one in the user's own time zone.
+  history: protectedProcedure
+    .input(
+      z
+        .object({
+          from: z.number().int().nonnegative(),
+          to: z.number().int().nonnegative(),
+        })
+        .refine((range) => range.to > range.from, "`to` must be after `from`")
+    )
+    .query(async ({ ctx, input }) => {
+      try {
+        const groups = await ctx.db.inventoryScanLog.groupBy({
+          by: ["item_id"],
+          where: {
+            user_id: ctx.session.user.id,
+            scanned_at: { gte: new Date(input.from), lt: new Date(input.to) },
+          },
+          _count: { _all: true },
+          _min: { scanned_at: true },
+          _max: { scanned_at: true },
+        });
+
+        const items = await ctx.db.item.findMany({
+          where: { id: { in: groups.map((group) => group.item_id) } },
+        });
+        const itemsById = new Map(items.map((item) => [item.id, item]));
+
+        const data = groups
+          .flatMap((group) => {
+            const item = itemsById.get(group.item_id);
+            if (!item) return [];
+            return [
+              {
+                deviceId: item.i_deviceID,
+                count: group._count._all,
+                firstScannedAt: group._min.scanned_at?.getTime() ?? input.from,
+                lastScannedAt: group._max.scanned_at?.getTime() ?? input.from,
+                item: serialize(item),
+              },
+            ];
+          })
+          .sort((a, b) => b.lastScannedAt - a.lastScannedAt);
+
+        return { success: true as const, data };
+      } catch (error) {
+        console.error("Inventory history error:", error);
+        return { success: false as const, error: "Failed to load the inventory history" };
+      }
+    }),
 
   // Moves a count an earlier version of the page kept in the browser onto the account. Keeping
   // the larger count (rather than adding) makes a repeated upload harmless. Device IDs that no
