@@ -57,19 +57,26 @@ interface ScanRecord {
     lastScannedAt: number
 }
 
+/** A scan as the server returns it: the record plus the item's current details. */
+interface ServerScan extends ScanRecord {
+    item: InventoryItem
+}
+
 interface ScannedRow {
     record: ScanRecord
     item: InventoryItem
 }
 
 /**
- * The scan session lives in this browser, so a count survives a reload or a dropped connection
- * part-way through; "Clear list" starts a new one. Only device IDs and counts are kept — item
- * details are looked up fresh on load.
+ * The scan session is kept on the server for each account, so the same user sees the same count
+ * on every device; "Clear list" starts a new one. Earlier versions kept it in the browser under
+ * this key — a count still there is moved to the account once, on load, and then removed.
  */
-const STORAGE_KEY = 'inventory-scan-session'
-/** The most device IDs the lookup accepts in one request. */
+const LEGACY_STORAGE_KEY = 'inventory-scan-session'
+/** The most scanned items the server keeps for one account. */
 const MAX_RESTORE = 500
+/** How often an open page picks up scans made on the user's other devices. */
+const SYNC_INTERVAL_MS = 15_000
 
 const TABS = [
     { key: 'all', label: 'All Scanned', status: null },
@@ -94,14 +101,29 @@ const isScanRecord = (value: unknown): value is ScanRecord => {
     )
 }
 
-const readSavedRecords = (): ScanRecord[] => {
+const readLegacyRecords = (): ScanRecord[] => {
     try {
-        const parsed: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
+        const parsed: unknown = JSON.parse(localStorage.getItem(LEGACY_STORAGE_KEY) ?? '[]')
         return Array.isArray(parsed) ? parsed.filter(isScanRecord).slice(0, MAX_RESTORE) : []
     } catch {
         return []
     }
 }
+
+const clearLegacyRecords = () => {
+    try {
+        localStorage.removeItem(LEGACY_STORAGE_KEY)
+    } catch {
+        // Storage blocked: the import keeps the larger count, so a repeat is harmless.
+    }
+}
+
+const toRecord = ({ deviceId, count, firstScannedAt, lastScannedAt }: ScanRecord): ScanRecord => ({
+    deviceId,
+    count,
+    firstScannedAt,
+    lastScannedAt,
+})
 
 const getStatusLabel = (status: number) => {
     switch (status) {
@@ -162,6 +184,12 @@ export default function InventoryPage() {
     const recordsRef = useRef<ScanRecord[]>([])
     const itemsRef = useRef<Record<string, InventoryItem>>({})
     const pendingLookups = useRef(new Set<string>())
+    // Server writes still in flight, and a counter bumped by every local change: a background
+    // sync that overlaps either is dropped, so it never undoes a change the server has not seen.
+    const inFlight = useRef(0)
+    const localChanges = useRef(0)
+    // Set while the list could not be loaded, so the next successful sync clears the warning.
+    const loadFailed = useRef(false)
 
     const commitRecords = useCallback((next: ScanRecord[]) => {
         recordsRef.current = next
@@ -179,15 +207,44 @@ export default function InventoryPage() {
         if (deviceId) setHighlightId(deviceId)
     }, [])
 
+    /** Show the server's scans; `keepLocal` also keeps rows the server's list has not caught up with. */
+    const applyServerScans = useCallback(
+        (scans: ServerScan[], keepLocal: boolean) => {
+            commitItems({ ...itemsRef.current, ...Object.fromEntries(scans.map((scan) => [scan.deviceId, scan.item])) })
+            const serverIds = new Set(scans.map((scan) => scan.deviceId))
+            commitRecords([
+                ...(keepLocal ? recordsRef.current.filter((record) => !serverIds.has(record.deviceId)) : []),
+                ...scans.map(toRecord),
+            ])
+        },
+        [commitItems, commitRecords]
+    )
+
+    /** Replace the list with the server's copy, unless a local change overlaps the request. */
+    const syncFromServer = useCallback(async () => {
+        if (inFlight.current > 0) return
+        const changesAtStart = localChanges.current
+        const result = await trpcClient.inventoryScans.list.query()
+        if (!result.success || inFlight.current > 0 || localChanges.current !== changesAtStart) return
+
+        applyServerScans(result.data, false)
+        if (loadFailed.current) {
+            loadFailed.current = false
+            setRestoreNote(null)
+        }
+    }, [applyServerScans])
+
     const handleScan = useCallback(
         async (raw: string) => {
             const deviceId = raw.trim()
             if (!deviceId) return
             const now = Date.now()
 
-            // Already on the list: another unit of it.
+            // Already on the list: another unit of it, counted straight away so a handheld scanner
+            // never waits on the network. The server's total replaces it once the save returns.
             const known = itemsRef.current[deviceId]
             const existing = recordsRef.current.find((record) => record.deviceId === deviceId)
+            const repeat = Boolean(known && existing)
             if (known && existing) {
                 const count = existing.count + 1
                 commitRecords(
@@ -196,36 +253,65 @@ export default function InventoryPage() {
                     )
                 )
                 report({ kind: 'again', title: `${known.i_model} — counted ${count}`, detail: `Device ID ${deviceId}` }, deviceId)
-                return
+            } else {
+                if (pendingLookups.current.has(deviceId)) return
+                pendingLookups.current.add(deviceId)
             }
 
-            if (pendingLookups.current.has(deviceId)) return
-            pendingLookups.current.add(deviceId)
+            const undoRepeat = () =>
+                commitRecords(
+                    recordsRef.current.map((record) =>
+                        record.deviceId === deviceId ? { ...record, count: Math.max(1, record.count - 1) } : record
+                    )
+                )
 
+            localChanges.current += 1
+            inFlight.current += 1
             try {
-                const result = await trpcClient.items.byDeviceIds.query({ deviceIds: [deviceId] })
+                const result = await trpcClient.inventoryScans.scan.mutate({ deviceId })
                 if (!result.success) {
-                    report({ kind: 'error', title: 'Could not look up the item', detail: result.error })
+                    if (result.missing) {
+                        commitRecords(recordsRef.current.filter((record) => record.deviceId !== deviceId))
+                        report({ kind: 'missing', title: 'No item matches this barcode', detail: `Device ID ${deviceId}` })
+                    } else {
+                        if (repeat) undoRepeat()
+                        report({ kind: 'error', title: 'Could not save the scan', detail: result.error })
+                    }
                     return
                 }
 
-                const item = result.data.find((row) => row.i_deviceID === deviceId)
-                if (!item) {
-                    report({ kind: 'missing', title: 'No item matches this barcode', detail: `Device ID ${deviceId}` })
-                    return
-                }
-
-                commitItems({ ...itemsRef.current, [deviceId]: item })
+                const scan = result.data
+                const saved = toRecord(scan)
+                const current = recordsRef.current.find((record) => record.deviceId === deviceId)
+                commitItems({ ...itemsRef.current, [deviceId]: scan.item })
+                // The server's total includes scans from this user's other devices. The larger count
+                // wins because answers to quick repeat scans can arrive out of order.
                 commitRecords([
-                    { deviceId, count: 1, firstScannedAt: now, lastScannedAt: now },
+                    current
+                        ? {
+                              ...saved,
+                              count: Math.max(saved.count, current.count),
+                              lastScannedAt: Math.max(saved.lastScannedAt, current.lastScannedAt),
+                          }
+                        : saved,
                     ...recordsRef.current.filter((record) => record.deviceId !== deviceId),
                 ])
-                report({ kind: 'added', title: `${item.i_model} added`, detail: `Device ID ${deviceId}` }, deviceId)
+
+                if (!repeat) {
+                    report(
+                        saved.count > 1
+                            ? { kind: 'again', title: `${scan.item.i_model} — counted ${saved.count}`, detail: `Device ID ${deviceId}` }
+                            : { kind: 'added', title: `${scan.item.i_model} added`, detail: `Device ID ${deviceId}` },
+                        deviceId
+                    )
+                }
             } catch (error) {
-                console.error('Error looking up scanned item:', error)
-                report({ kind: 'error', title: 'Could not look up the item', detail: 'Check the connection and scan again.' })
+                console.error('Error saving scan:', error)
+                if (repeat) undoRepeat()
+                report({ kind: 'error', title: 'Could not save the scan', detail: 'Check the connection and scan again.' })
             } finally {
-                pendingLookups.current.delete(deviceId)
+                inFlight.current -= 1
+                if (!repeat) pendingLookups.current.delete(deviceId)
             }
         },
         [commitItems, commitRecords, report]
@@ -233,49 +319,39 @@ export default function InventoryPage() {
 
     useHandheldScanner(handleScan)
 
-    // Bring back an unfinished count from this browser, with fresh item details.
+    // Load this account's count from the server, first moving over any count an earlier version
+    // of the page left in this browser.
     useEffect(() => {
-        const saved = readSavedRecords()
-        if (saved.length === 0) {
-            setRestored(true)
-            return
+        let cancelled = false
+
+        const load = async () => {
+            const legacy = readLegacyRecords()
+            if (legacy.length > 0) {
+                try {
+                    const imported = await trpcClient.inventoryScans.importLocal.mutate({ records: legacy })
+                    if (!imported.success) throw new Error(imported.error)
+                    clearLegacyRecords()
+                } catch (error) {
+                    console.error('Error moving saved scans to the account:', error)
+                    if (!cancelled) {
+                        setRestoreNote('Could not move the scans saved on this device to your account. They are kept here — reload the page to try again.')
+                    }
+                }
+            }
+            if (cancelled) return
+
+            const result = await trpcClient.inventoryScans.list.query()
+            if (!result.success) throw new Error(result.error)
+            // Anything scanned while this was loading is kept alongside the loaded list.
+            if (!cancelled) applyServerScans(result.data, true)
         }
 
-        let cancelled = false
-        const savedIds = new Set(saved.map((record) => record.deviceId))
-        // Anything scanned while this was loading is kept alongside the restored list.
-        const keepNewScans = (restoredRecords: ScanRecord[]) => [
-            ...recordsRef.current.filter((record) => !savedIds.has(record.deviceId)),
-            ...restoredRecords,
-        ]
-
-        trpcClient.items.byDeviceIds
-            .query({ deviceIds: [...savedIds] })
-            .then((result) => {
-                if (cancelled) return
-                if (!result.success) {
-                    commitRecords(keepNewScans(saved))
-                    setRestoreNote('Could not load the details of earlier scans. They are kept — reload the page to try again.')
-                    return
-                }
-
-                commitItems({
-                    ...Object.fromEntries(result.data.map((item) => [item.i_deviceID, item])),
-                    ...itemsRef.current,
-                })
-                const found = new Set(result.data.map((item) => item.i_deviceID))
-                commitRecords(keepNewScans(saved.filter((record) => found.has(record.deviceId))))
-                if (result.missing.length > 0) {
-                    setRestoreNote(
-                        `${result.missing.length} earlier scanned ${result.missing.length === 1 ? 'item no longer exists and was' : 'items no longer exist and were'} removed from the list.`
-                    )
-                }
-            })
+        load()
             .catch((error) => {
-                console.error('Error restoring scanned items:', error)
+                console.error('Error loading scanned items:', error)
                 if (cancelled) return
-                commitRecords(keepNewScans(saved))
-                setRestoreNote('Could not load the details of earlier scans. They are kept — reload the page to try again.')
+                loadFailed.current = true
+                setRestoreNote('Could not load your scanned items. Scanning still works — the list fills in once the connection is back.')
             })
             .finally(() => {
                 if (!cancelled) setRestored(true)
@@ -284,16 +360,25 @@ export default function InventoryPage() {
         return () => {
             cancelled = true
         }
-    }, [commitItems, commitRecords])
+    }, [applyServerScans])
 
+    // Pick up scans made on this user's other devices while the page is open.
     useEffect(() => {
         if (!restored) return
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(records))
-        } catch {
-            // Storage blocked: the list still works until the page is reloaded.
+        const sync = () => {
+            if (document.visibilityState !== 'visible') return
+            syncFromServer().catch((error) => console.error('Error syncing scanned items:', error))
         }
-    }, [records, restored])
+
+        const timer = setInterval(sync, SYNC_INTERVAL_MS)
+        document.addEventListener('visibilitychange', sync)
+        window.addEventListener('focus', sync)
+        return () => {
+            clearInterval(timer)
+            document.removeEventListener('visibilitychange', sync)
+            window.removeEventListener('focus', sync)
+        }
+    }, [restored, syncFromServer])
 
     // The row a scan just touched glows briefly, restarting on every scan of it.
     useEffect(() => {
@@ -348,15 +433,48 @@ export default function InventoryPage() {
         setCameraOpen(true)
     }
 
-    const removeRow = (deviceId: string) => {
+    const removeRow = async (deviceId: string) => {
+        const removed = recordsRef.current.find((record) => record.deviceId === deviceId)
+        if (!removed) return
+
+        localChanges.current += 1
         commitRecords(recordsRef.current.filter((record) => record.deviceId !== deviceId))
+        inFlight.current += 1
+        try {
+            const result = await trpcClient.inventoryScans.remove.mutate({ deviceId })
+            if (!result.success) throw new Error(result.error)
+        } catch (error) {
+            console.error('Error removing scanned item:', error)
+            // Put it back, unless it was scanned again in the meantime.
+            if (!recordsRef.current.some((record) => record.deviceId === deviceId)) {
+                commitRecords([...recordsRef.current, removed])
+            }
+            showError('Check the connection and try again.', 'Could not remove the item')
+        } finally {
+            inFlight.current -= 1
+        }
     }
 
-    const clearList = () => {
+    const clearList = async () => {
         if (!window.confirm(`Clear all ${scannedRows.length} scanned items and start a new count?`)) return
+
+        const cleared = recordsRef.current
+        localChanges.current += 1
         commitRecords([])
         setFeedback(null)
         setRestoreNote(null)
+        inFlight.current += 1
+        try {
+            const result = await trpcClient.inventoryScans.clear.mutate()
+            if (!result.success) throw new Error(result.error)
+        } catch (error) {
+            console.error('Error clearing scanned items:', error)
+            const kept = new Set(recordsRef.current.map((record) => record.deviceId))
+            commitRecords([...recordsRef.current, ...cleared.filter((record) => !kept.has(record.deviceId))])
+            showError('Check the connection and try again.', 'Could not clear the list')
+        } finally {
+            inFlight.current -= 1
+        }
     }
 
     /** Both buttons print the rows currently shown — the active tab with the search applied. */

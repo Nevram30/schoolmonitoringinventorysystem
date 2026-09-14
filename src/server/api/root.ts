@@ -1,6 +1,7 @@
 import { borrowersRouter } from "~/server/api/routers/borrowers";
 import { borrowRequestsRouter } from "~/server/api/routers/borrow-requests";
 import { borrowsRouter } from "~/server/api/routers/borrows";
+import { inventoryScansRouter } from "~/server/api/routers/inventory-scans";
 import { itemsRouter } from "~/server/api/routers/items";
 import { receiptsRouter } from "~/server/api/routers/receipts";
 import { reportsRouter } from "~/server/api/routers/reports";
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
   borrowers: borrowersRouter,
   borrowRequests: borrowRequestsRouter,
   borrows: borrowsRouter,
+  inventoryScans: inventoryScansRouter,
   items: itemsRouter,
   receipts: receiptsRouter,
   reports: reportsRouter,

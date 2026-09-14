@@ -29,6 +29,12 @@ export type Borrower = $Result.DefaultSelection<Prisma.$BorrowerPayload>
  */
 export type Item = $Result.DefaultSelection<Prisma.$ItemPayload>
 /**
+ * Model InventoryScan
+ * One scanned label in a user's running inventory count (/admin/inventory). Kept on the server
+ * so the same account sees the same count on every device; "Clear list" deletes the user's rows.
+ */
+export type InventoryScan = $Result.DefaultSelection<Prisma.$InventoryScanPayload>
+/**
  * Model Room
  * 
  */
@@ -233,6 +239,16 @@ export class PrismaClient<
     * ```
     */
   get item(): Prisma.ItemDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.inventoryScan`: Exposes CRUD operations for the **InventoryScan** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more InventoryScans
+    * const inventoryScans = await prisma.inventoryScan.findMany()
+    * ```
+    */
+  get inventoryScan(): Prisma.InventoryScanDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.room`: Exposes CRUD operations for the **Room** model.
@@ -737,6 +753,7 @@ export namespace Prisma {
     User: 'User',
     Borrower: 'Borrower',
     Item: 'Item',
+    InventoryScan: 'InventoryScan',
     Room: 'Room',
     Borrow: 'Borrow',
     ItemReceipt: 'ItemReceipt',
@@ -761,7 +778,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "borrower" | "item" | "room" | "borrow" | "itemReceipt" | "borrowRequest" | "feeSetting" | "return"
+      modelProps: "user" | "borrower" | "item" | "inventoryScan" | "room" | "borrow" | "itemReceipt" | "borrowRequest" | "feeSetting" | "return"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -984,6 +1001,80 @@ export namespace Prisma {
           count: {
             args: Prisma.ItemCountArgs<ExtArgs>
             result: $Utils.Optional<ItemCountAggregateOutputType> | number
+          }
+        }
+      }
+      InventoryScan: {
+        payload: Prisma.$InventoryScanPayload<ExtArgs>
+        fields: Prisma.InventoryScanFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InventoryScanFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InventoryScanFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>
+          }
+          findFirst: {
+            args: Prisma.InventoryScanFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InventoryScanFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>
+          }
+          findMany: {
+            args: Prisma.InventoryScanFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>[]
+          }
+          create: {
+            args: Prisma.InventoryScanCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>
+          }
+          createMany: {
+            args: Prisma.InventoryScanCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InventoryScanCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>[]
+          }
+          delete: {
+            args: Prisma.InventoryScanDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>
+          }
+          update: {
+            args: Prisma.InventoryScanUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>
+          }
+          deleteMany: {
+            args: Prisma.InventoryScanDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InventoryScanUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InventoryScanUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>[]
+          }
+          upsert: {
+            args: Prisma.InventoryScanUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InventoryScanPayload>
+          }
+          aggregate: {
+            args: Prisma.InventoryScanAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInventoryScan>
+          }
+          groupBy: {
+            args: Prisma.InventoryScanGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InventoryScanGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InventoryScanCountArgs<ExtArgs>
+            result: $Utils.Optional<InventoryScanCountAggregateOutputType> | number
           }
         }
       }
@@ -1530,6 +1621,7 @@ export namespace Prisma {
     user?: UserOmit
     borrower?: BorrowerOmit
     item?: ItemOmit
+    inventoryScan?: InventoryScanOmit
     room?: RoomOmit
     borrow?: BorrowOmit
     itemReceipt?: ItemReceiptOmit
@@ -1619,12 +1711,14 @@ export namespace Prisma {
     requestedBorrows: number
     reviewedBorrows: number
     releasedItems: number
+    inventoryScans: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requestedBorrows?: boolean | UserCountOutputTypeCountRequestedBorrowsArgs
     reviewedBorrows?: boolean | UserCountOutputTypeCountReviewedBorrowsArgs
     releasedItems?: boolean | UserCountOutputTypeCountReleasedItemsArgs
+    inventoryScans?: boolean | UserCountOutputTypeCountInventoryScansArgs
   }
 
   // Custom InputTypes
@@ -1657,6 +1751,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountReleasedItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ItemReceiptWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountInventoryScansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryScanWhereInput
   }
 
 
@@ -1717,12 +1818,14 @@ export namespace Prisma {
     borrows: number
     returns: number
     borrowRequests: number
+    inventoryScans: number
   }
 
   export type ItemCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     borrows?: boolean | ItemCountOutputTypeCountBorrowsArgs
     returns?: boolean | ItemCountOutputTypeCountReturnsArgs
     borrowRequests?: boolean | ItemCountOutputTypeCountBorrowRequestsArgs
+    inventoryScans?: boolean | ItemCountOutputTypeCountInventoryScansArgs
   }
 
   // Custom InputTypes
@@ -1755,6 +1858,13 @@ export namespace Prisma {
    */
   export type ItemCountOutputTypeCountBorrowRequestsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BorrowRequestWhereInput
+  }
+
+  /**
+   * ItemCountOutputType without action
+   */
+  export type ItemCountOutputTypeCountInventoryScansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryScanWhereInput
   }
 
 
@@ -2040,6 +2150,7 @@ export namespace Prisma {
     requestedBorrows?: boolean | User$requestedBorrowsArgs<ExtArgs>
     reviewedBorrows?: boolean | User$reviewedBorrowsArgs<ExtArgs>
     releasedItems?: boolean | User$releasedItemsArgs<ExtArgs>
+    inventoryScans?: boolean | User$inventoryScansArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2081,6 +2192,7 @@ export namespace Prisma {
     requestedBorrows?: boolean | User$requestedBorrowsArgs<ExtArgs>
     reviewedBorrows?: boolean | User$reviewedBorrowsArgs<ExtArgs>
     releasedItems?: boolean | User$releasedItemsArgs<ExtArgs>
+    inventoryScans?: boolean | User$inventoryScansArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2092,6 +2204,7 @@ export namespace Prisma {
       requestedBorrows: Prisma.$BorrowRequestPayload<ExtArgs>[]
       reviewedBorrows: Prisma.$BorrowRequestPayload<ExtArgs>[]
       releasedItems: Prisma.$ItemReceiptPayload<ExtArgs>[]
+      inventoryScans: Prisma.$InventoryScanPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2508,6 +2621,7 @@ export namespace Prisma {
     requestedBorrows<T extends User$requestedBorrowsArgs<ExtArgs> = {}>(args?: Subset<T, User$requestedBorrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reviewedBorrows<T extends User$reviewedBorrowsArgs<ExtArgs> = {}>(args?: Subset<T, User$reviewedBorrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     releasedItems<T extends User$releasedItemsArgs<ExtArgs> = {}>(args?: Subset<T, User$releasedItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventoryScans<T extends User$inventoryScansArgs<ExtArgs> = {}>(args?: Subset<T, User$inventoryScansArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3002,6 +3116,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ItemReceiptScalarFieldEnum | ItemReceiptScalarFieldEnum[]
+  }
+
+  /**
+   * User.inventoryScans
+   */
+  export type User$inventoryScansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    where?: InventoryScanWhereInput
+    orderBy?: InventoryScanOrderByWithRelationInput | InventoryScanOrderByWithRelationInput[]
+    cursor?: InventoryScanWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryScanScalarFieldEnum | InventoryScanScalarFieldEnum[]
   }
 
   /**
@@ -4572,6 +4710,7 @@ export namespace Prisma {
     borrows?: boolean | Item$borrowsArgs<ExtArgs>
     returns?: boolean | Item$returnsArgs<ExtArgs>
     borrowRequests?: boolean | Item$borrowRequestsArgs<ExtArgs>
+    inventoryScans?: boolean | Item$inventoryScansArgs<ExtArgs>
     _count?: boolean | ItemCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["item"]>
 
@@ -4634,6 +4773,7 @@ export namespace Prisma {
     borrows?: boolean | Item$borrowsArgs<ExtArgs>
     returns?: boolean | Item$returnsArgs<ExtArgs>
     borrowRequests?: boolean | Item$borrowRequestsArgs<ExtArgs>
+    inventoryScans?: boolean | Item$inventoryScansArgs<ExtArgs>
     _count?: boolean | ItemCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -4645,6 +4785,7 @@ export namespace Prisma {
       borrows: Prisma.$BorrowPayload<ExtArgs>[]
       returns: Prisma.$ReturnPayload<ExtArgs>[]
       borrowRequests: Prisma.$BorrowRequestPayload<ExtArgs>[]
+      inventoryScans: Prisma.$InventoryScanPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5065,6 +5206,7 @@ export namespace Prisma {
     borrows<T extends Item$borrowsArgs<ExtArgs> = {}>(args?: Subset<T, Item$borrowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     returns<T extends Item$returnsArgs<ExtArgs> = {}>(args?: Subset<T, Item$returnsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReturnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     borrowRequests<T extends Item$borrowRequestsArgs<ExtArgs> = {}>(args?: Subset<T, Item$borrowRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BorrowRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventoryScans<T extends Item$inventoryScansArgs<ExtArgs> = {}>(args?: Subset<T, Item$inventoryScansArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5569,6 +5711,30 @@ export namespace Prisma {
   }
 
   /**
+   * Item.inventoryScans
+   */
+  export type Item$inventoryScansArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    where?: InventoryScanWhereInput
+    orderBy?: InventoryScanOrderByWithRelationInput | InventoryScanOrderByWithRelationInput[]
+    cursor?: InventoryScanWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryScanScalarFieldEnum | InventoryScanScalarFieldEnum[]
+  }
+
+  /**
    * Item without action
    */
   export type ItemDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5584,6 +5750,1134 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ItemInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model InventoryScan
+   */
+
+  export type AggregateInventoryScan = {
+    _count: InventoryScanCountAggregateOutputType | null
+    _avg: InventoryScanAvgAggregateOutputType | null
+    _sum: InventoryScanSumAggregateOutputType | null
+    _min: InventoryScanMinAggregateOutputType | null
+    _max: InventoryScanMaxAggregateOutputType | null
+  }
+
+  export type InventoryScanAvgAggregateOutputType = {
+    id: number | null
+    user_id: number | null
+    item_id: number | null
+    s_count: number | null
+  }
+
+  export type InventoryScanSumAggregateOutputType = {
+    id: number | null
+    user_id: number | null
+    item_id: number | null
+    s_count: number | null
+  }
+
+  export type InventoryScanMinAggregateOutputType = {
+    id: number | null
+    user_id: number | null
+    item_id: number | null
+    s_count: number | null
+    first_scanned_at: Date | null
+    last_scanned_at: Date | null
+  }
+
+  export type InventoryScanMaxAggregateOutputType = {
+    id: number | null
+    user_id: number | null
+    item_id: number | null
+    s_count: number | null
+    first_scanned_at: Date | null
+    last_scanned_at: Date | null
+  }
+
+  export type InventoryScanCountAggregateOutputType = {
+    id: number
+    user_id: number
+    item_id: number
+    s_count: number
+    first_scanned_at: number
+    last_scanned_at: number
+    _all: number
+  }
+
+
+  export type InventoryScanAvgAggregateInputType = {
+    id?: true
+    user_id?: true
+    item_id?: true
+    s_count?: true
+  }
+
+  export type InventoryScanSumAggregateInputType = {
+    id?: true
+    user_id?: true
+    item_id?: true
+    s_count?: true
+  }
+
+  export type InventoryScanMinAggregateInputType = {
+    id?: true
+    user_id?: true
+    item_id?: true
+    s_count?: true
+    first_scanned_at?: true
+    last_scanned_at?: true
+  }
+
+  export type InventoryScanMaxAggregateInputType = {
+    id?: true
+    user_id?: true
+    item_id?: true
+    s_count?: true
+    first_scanned_at?: true
+    last_scanned_at?: true
+  }
+
+  export type InventoryScanCountAggregateInputType = {
+    id?: true
+    user_id?: true
+    item_id?: true
+    s_count?: true
+    first_scanned_at?: true
+    last_scanned_at?: true
+    _all?: true
+  }
+
+  export type InventoryScanAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryScan to aggregate.
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryScans to fetch.
+     */
+    orderBy?: InventoryScanOrderByWithRelationInput | InventoryScanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InventoryScanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryScans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryScans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned InventoryScans
+    **/
+    _count?: true | InventoryScanCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InventoryScanAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InventoryScanSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InventoryScanMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InventoryScanMaxAggregateInputType
+  }
+
+  export type GetInventoryScanAggregateType<T extends InventoryScanAggregateArgs> = {
+        [P in keyof T & keyof AggregateInventoryScan]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInventoryScan[P]>
+      : GetScalarType<T[P], AggregateInventoryScan[P]>
+  }
+
+
+
+
+  export type InventoryScanGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryScanWhereInput
+    orderBy?: InventoryScanOrderByWithAggregationInput | InventoryScanOrderByWithAggregationInput[]
+    by: InventoryScanScalarFieldEnum[] | InventoryScanScalarFieldEnum
+    having?: InventoryScanScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InventoryScanCountAggregateInputType | true
+    _avg?: InventoryScanAvgAggregateInputType
+    _sum?: InventoryScanSumAggregateInputType
+    _min?: InventoryScanMinAggregateInputType
+    _max?: InventoryScanMaxAggregateInputType
+  }
+
+  export type InventoryScanGroupByOutputType = {
+    id: number
+    user_id: number
+    item_id: number
+    s_count: number
+    first_scanned_at: Date
+    last_scanned_at: Date
+    _count: InventoryScanCountAggregateOutputType | null
+    _avg: InventoryScanAvgAggregateOutputType | null
+    _sum: InventoryScanSumAggregateOutputType | null
+    _min: InventoryScanMinAggregateOutputType | null
+    _max: InventoryScanMaxAggregateOutputType | null
+  }
+
+  type GetInventoryScanGroupByPayload<T extends InventoryScanGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InventoryScanGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InventoryScanGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InventoryScanGroupByOutputType[P]>
+            : GetScalarType<T[P], InventoryScanGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InventoryScanSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    item_id?: boolean
+    s_count?: boolean
+    first_scanned_at?: boolean
+    last_scanned_at?: boolean
+    User?: boolean | UserDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryScan"]>
+
+  export type InventoryScanSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    item_id?: boolean
+    s_count?: boolean
+    first_scanned_at?: boolean
+    last_scanned_at?: boolean
+    User?: boolean | UserDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryScan"]>
+
+  export type InventoryScanSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    user_id?: boolean
+    item_id?: boolean
+    s_count?: boolean
+    first_scanned_at?: boolean
+    last_scanned_at?: boolean
+    User?: boolean | UserDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["inventoryScan"]>
+
+  export type InventoryScanSelectScalar = {
+    id?: boolean
+    user_id?: boolean
+    item_id?: boolean
+    s_count?: boolean
+    first_scanned_at?: boolean
+    last_scanned_at?: boolean
+  }
+
+  export type InventoryScanOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "user_id" | "item_id" | "s_count" | "first_scanned_at" | "last_scanned_at", ExtArgs["result"]["inventoryScan"]>
+  export type InventoryScanInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    User?: boolean | UserDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+  }
+  export type InventoryScanIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    User?: boolean | UserDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+  }
+  export type InventoryScanIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    User?: boolean | UserDefaultArgs<ExtArgs>
+    Item?: boolean | ItemDefaultArgs<ExtArgs>
+  }
+
+  export type $InventoryScanPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "InventoryScan"
+    objects: {
+      User: Prisma.$UserPayload<ExtArgs>
+      Item: Prisma.$ItemPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      user_id: number
+      item_id: number
+      /**
+       * Units counted — how many times the label was scanned.
+       */
+      s_count: number
+      first_scanned_at: Date
+      last_scanned_at: Date
+    }, ExtArgs["result"]["inventoryScan"]>
+    composites: {}
+  }
+
+  type InventoryScanGetPayload<S extends boolean | null | undefined | InventoryScanDefaultArgs> = $Result.GetResult<Prisma.$InventoryScanPayload, S>
+
+  type InventoryScanCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InventoryScanFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InventoryScanCountAggregateInputType | true
+    }
+
+  export interface InventoryScanDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['InventoryScan'], meta: { name: 'InventoryScan' } }
+    /**
+     * Find zero or one InventoryScan that matches the filter.
+     * @param {InventoryScanFindUniqueArgs} args - Arguments to find a InventoryScan
+     * @example
+     * // Get one InventoryScan
+     * const inventoryScan = await prisma.inventoryScan.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InventoryScanFindUniqueArgs>(args: SelectSubset<T, InventoryScanFindUniqueArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one InventoryScan that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InventoryScanFindUniqueOrThrowArgs} args - Arguments to find a InventoryScan
+     * @example
+     * // Get one InventoryScan
+     * const inventoryScan = await prisma.inventoryScan.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InventoryScanFindUniqueOrThrowArgs>(args: SelectSubset<T, InventoryScanFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryScan that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanFindFirstArgs} args - Arguments to find a InventoryScan
+     * @example
+     * // Get one InventoryScan
+     * const inventoryScan = await prisma.inventoryScan.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InventoryScanFindFirstArgs>(args?: SelectSubset<T, InventoryScanFindFirstArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first InventoryScan that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanFindFirstOrThrowArgs} args - Arguments to find a InventoryScan
+     * @example
+     * // Get one InventoryScan
+     * const inventoryScan = await prisma.inventoryScan.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InventoryScanFindFirstOrThrowArgs>(args?: SelectSubset<T, InventoryScanFindFirstOrThrowArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more InventoryScans that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all InventoryScans
+     * const inventoryScans = await prisma.inventoryScan.findMany()
+     * 
+     * // Get first 10 InventoryScans
+     * const inventoryScans = await prisma.inventoryScan.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const inventoryScanWithIdOnly = await prisma.inventoryScan.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InventoryScanFindManyArgs>(args?: SelectSubset<T, InventoryScanFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a InventoryScan.
+     * @param {InventoryScanCreateArgs} args - Arguments to create a InventoryScan.
+     * @example
+     * // Create one InventoryScan
+     * const InventoryScan = await prisma.inventoryScan.create({
+     *   data: {
+     *     // ... data to create a InventoryScan
+     *   }
+     * })
+     * 
+     */
+    create<T extends InventoryScanCreateArgs>(args: SelectSubset<T, InventoryScanCreateArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many InventoryScans.
+     * @param {InventoryScanCreateManyArgs} args - Arguments to create many InventoryScans.
+     * @example
+     * // Create many InventoryScans
+     * const inventoryScan = await prisma.inventoryScan.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InventoryScanCreateManyArgs>(args?: SelectSubset<T, InventoryScanCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many InventoryScans and returns the data saved in the database.
+     * @param {InventoryScanCreateManyAndReturnArgs} args - Arguments to create many InventoryScans.
+     * @example
+     * // Create many InventoryScans
+     * const inventoryScan = await prisma.inventoryScan.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many InventoryScans and only return the `id`
+     * const inventoryScanWithIdOnly = await prisma.inventoryScan.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InventoryScanCreateManyAndReturnArgs>(args?: SelectSubset<T, InventoryScanCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a InventoryScan.
+     * @param {InventoryScanDeleteArgs} args - Arguments to delete one InventoryScan.
+     * @example
+     * // Delete one InventoryScan
+     * const InventoryScan = await prisma.inventoryScan.delete({
+     *   where: {
+     *     // ... filter to delete one InventoryScan
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InventoryScanDeleteArgs>(args: SelectSubset<T, InventoryScanDeleteArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one InventoryScan.
+     * @param {InventoryScanUpdateArgs} args - Arguments to update one InventoryScan.
+     * @example
+     * // Update one InventoryScan
+     * const inventoryScan = await prisma.inventoryScan.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InventoryScanUpdateArgs>(args: SelectSubset<T, InventoryScanUpdateArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more InventoryScans.
+     * @param {InventoryScanDeleteManyArgs} args - Arguments to filter InventoryScans to delete.
+     * @example
+     * // Delete a few InventoryScans
+     * const { count } = await prisma.inventoryScan.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InventoryScanDeleteManyArgs>(args?: SelectSubset<T, InventoryScanDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryScans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many InventoryScans
+     * const inventoryScan = await prisma.inventoryScan.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InventoryScanUpdateManyArgs>(args: SelectSubset<T, InventoryScanUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more InventoryScans and returns the data updated in the database.
+     * @param {InventoryScanUpdateManyAndReturnArgs} args - Arguments to update many InventoryScans.
+     * @example
+     * // Update many InventoryScans
+     * const inventoryScan = await prisma.inventoryScan.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more InventoryScans and only return the `id`
+     * const inventoryScanWithIdOnly = await prisma.inventoryScan.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InventoryScanUpdateManyAndReturnArgs>(args: SelectSubset<T, InventoryScanUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one InventoryScan.
+     * @param {InventoryScanUpsertArgs} args - Arguments to update or create a InventoryScan.
+     * @example
+     * // Update or create a InventoryScan
+     * const inventoryScan = await prisma.inventoryScan.upsert({
+     *   create: {
+     *     // ... data to create a InventoryScan
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the InventoryScan we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InventoryScanUpsertArgs>(args: SelectSubset<T, InventoryScanUpsertArgs<ExtArgs>>): Prisma__InventoryScanClient<$Result.GetResult<Prisma.$InventoryScanPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of InventoryScans.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanCountArgs} args - Arguments to filter InventoryScans to count.
+     * @example
+     * // Count the number of InventoryScans
+     * const count = await prisma.inventoryScan.count({
+     *   where: {
+     *     // ... the filter for the InventoryScans we want to count
+     *   }
+     * })
+    **/
+    count<T extends InventoryScanCountArgs>(
+      args?: Subset<T, InventoryScanCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InventoryScanCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a InventoryScan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InventoryScanAggregateArgs>(args: Subset<T, InventoryScanAggregateArgs>): Prisma.PrismaPromise<GetInventoryScanAggregateType<T>>
+
+    /**
+     * Group by InventoryScan.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InventoryScanGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InventoryScanGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InventoryScanGroupByArgs['orderBy'] }
+        : { orderBy?: InventoryScanGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InventoryScanGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInventoryScanGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the InventoryScan model
+   */
+  readonly fields: InventoryScanFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for InventoryScan.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InventoryScanClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    User<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    Item<T extends ItemDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ItemDefaultArgs<ExtArgs>>): Prisma__ItemClient<$Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the InventoryScan model
+   */
+  interface InventoryScanFieldRefs {
+    readonly id: FieldRef<"InventoryScan", 'Int'>
+    readonly user_id: FieldRef<"InventoryScan", 'Int'>
+    readonly item_id: FieldRef<"InventoryScan", 'Int'>
+    readonly s_count: FieldRef<"InventoryScan", 'Int'>
+    readonly first_scanned_at: FieldRef<"InventoryScan", 'DateTime'>
+    readonly last_scanned_at: FieldRef<"InventoryScan", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * InventoryScan findUnique
+   */
+  export type InventoryScanFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryScan to fetch.
+     */
+    where: InventoryScanWhereUniqueInput
+  }
+
+  /**
+   * InventoryScan findUniqueOrThrow
+   */
+  export type InventoryScanFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryScan to fetch.
+     */
+    where: InventoryScanWhereUniqueInput
+  }
+
+  /**
+   * InventoryScan findFirst
+   */
+  export type InventoryScanFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryScan to fetch.
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryScans to fetch.
+     */
+    orderBy?: InventoryScanOrderByWithRelationInput | InventoryScanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryScans.
+     */
+    cursor?: InventoryScanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryScans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryScans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryScans.
+     */
+    distinct?: InventoryScanScalarFieldEnum | InventoryScanScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryScan findFirstOrThrow
+   */
+  export type InventoryScanFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryScan to fetch.
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryScans to fetch.
+     */
+    orderBy?: InventoryScanOrderByWithRelationInput | InventoryScanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for InventoryScans.
+     */
+    cursor?: InventoryScanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryScans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryScans.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of InventoryScans.
+     */
+    distinct?: InventoryScanScalarFieldEnum | InventoryScanScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryScan findMany
+   */
+  export type InventoryScanFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * Filter, which InventoryScans to fetch.
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of InventoryScans to fetch.
+     */
+    orderBy?: InventoryScanOrderByWithRelationInput | InventoryScanOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing InventoryScans.
+     */
+    cursor?: InventoryScanWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` InventoryScans from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` InventoryScans.
+     */
+    skip?: number
+    distinct?: InventoryScanScalarFieldEnum | InventoryScanScalarFieldEnum[]
+  }
+
+  /**
+   * InventoryScan create
+   */
+  export type InventoryScanCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * The data needed to create a InventoryScan.
+     */
+    data: XOR<InventoryScanCreateInput, InventoryScanUncheckedCreateInput>
+  }
+
+  /**
+   * InventoryScan createMany
+   */
+  export type InventoryScanCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many InventoryScans.
+     */
+    data: InventoryScanCreateManyInput | InventoryScanCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * InventoryScan createManyAndReturn
+   */
+  export type InventoryScanCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * The data used to create many InventoryScans.
+     */
+    data: InventoryScanCreateManyInput | InventoryScanCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryScan update
+   */
+  export type InventoryScanUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * The data needed to update a InventoryScan.
+     */
+    data: XOR<InventoryScanUpdateInput, InventoryScanUncheckedUpdateInput>
+    /**
+     * Choose, which InventoryScan to update.
+     */
+    where: InventoryScanWhereUniqueInput
+  }
+
+  /**
+   * InventoryScan updateMany
+   */
+  export type InventoryScanUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update InventoryScans.
+     */
+    data: XOR<InventoryScanUpdateManyMutationInput, InventoryScanUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryScans to update
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * Limit how many InventoryScans to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryScan updateManyAndReturn
+   */
+  export type InventoryScanUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * The data used to update InventoryScans.
+     */
+    data: XOR<InventoryScanUpdateManyMutationInput, InventoryScanUncheckedUpdateManyInput>
+    /**
+     * Filter which InventoryScans to update
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * Limit how many InventoryScans to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * InventoryScan upsert
+   */
+  export type InventoryScanUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * The filter to search for the InventoryScan to update in case it exists.
+     */
+    where: InventoryScanWhereUniqueInput
+    /**
+     * In case the InventoryScan found by the `where` argument doesn't exist, create a new InventoryScan with this data.
+     */
+    create: XOR<InventoryScanCreateInput, InventoryScanUncheckedCreateInput>
+    /**
+     * In case the InventoryScan was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InventoryScanUpdateInput, InventoryScanUncheckedUpdateInput>
+  }
+
+  /**
+   * InventoryScan delete
+   */
+  export type InventoryScanDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
+    /**
+     * Filter which InventoryScan to delete.
+     */
+    where: InventoryScanWhereUniqueInput
+  }
+
+  /**
+   * InventoryScan deleteMany
+   */
+  export type InventoryScanDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which InventoryScans to delete
+     */
+    where?: InventoryScanWhereInput
+    /**
+     * Limit how many InventoryScans to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * InventoryScan without action
+   */
+  export type InventoryScanDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the InventoryScan
+     */
+    select?: InventoryScanSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the InventoryScan
+     */
+    omit?: InventoryScanOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryScanInclude<ExtArgs> | null
   }
 
 
@@ -13215,6 +14509,18 @@ export namespace Prisma {
   export type ItemScalarFieldEnum = (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum]
 
 
+  export const InventoryScanScalarFieldEnum: {
+    id: 'id',
+    user_id: 'user_id',
+    item_id: 'item_id',
+    s_count: 's_count',
+    first_scanned_at: 'first_scanned_at',
+    last_scanned_at: 'last_scanned_at'
+  };
+
+  export type InventoryScanScalarFieldEnum = (typeof InventoryScanScalarFieldEnum)[keyof typeof InventoryScanScalarFieldEnum]
+
+
   export const RoomScalarFieldEnum: {
     id: 'id',
     r_name: 'r_name',
@@ -13458,6 +14764,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestListRelationFilter
     reviewedBorrows?: BorrowRequestListRelationFilter
     releasedItems?: ItemReceiptListRelationFilter
+    inventoryScans?: InventoryScanListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -13472,6 +14779,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestOrderByRelationAggregateInput
     reviewedBorrows?: BorrowRequestOrderByRelationAggregateInput
     releasedItems?: ItemReceiptOrderByRelationAggregateInput
+    inventoryScans?: InventoryScanOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -13489,6 +14797,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestListRelationFilter
     reviewedBorrows?: BorrowRequestListRelationFilter
     releasedItems?: ItemReceiptListRelationFilter
+    inventoryScans?: InventoryScanListRelationFilter
   }, "id" | "username" | "email" | "id_number">
 
   export type UserOrderByWithAggregationInput = {
@@ -13636,6 +14945,7 @@ export namespace Prisma {
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
     borrowRequests?: BorrowRequestListRelationFilter
+    inventoryScans?: InventoryScanListRelationFilter
   }
 
   export type ItemOrderByWithRelationInput = {
@@ -13657,6 +14967,7 @@ export namespace Prisma {
     borrows?: BorrowOrderByRelationAggregateInput
     returns?: ReturnOrderByRelationAggregateInput
     borrowRequests?: BorrowRequestOrderByRelationAggregateInput
+    inventoryScans?: InventoryScanOrderByRelationAggregateInput
   }
 
   export type ItemWhereUniqueInput = Prisma.AtLeast<{
@@ -13681,6 +14992,7 @@ export namespace Prisma {
     borrows?: BorrowListRelationFilter
     returns?: ReturnListRelationFilter
     borrowRequests?: BorrowRequestListRelationFilter
+    inventoryScans?: InventoryScanListRelationFilter
   }, "id" | "i_deviceID">
 
   export type ItemOrderByWithAggregationInput = {
@@ -13725,6 +15037,72 @@ export namespace Prisma {
     no_of_items?: IntNullableWithAggregatesFilter<"Item"> | number | null
     remarks?: StringNullableWithAggregatesFilter<"Item"> | string | null
     i_date_acquired?: DateTimeNullableWithAggregatesFilter<"Item"> | Date | string | null
+  }
+
+  export type InventoryScanWhereInput = {
+    AND?: InventoryScanWhereInput | InventoryScanWhereInput[]
+    OR?: InventoryScanWhereInput[]
+    NOT?: InventoryScanWhereInput | InventoryScanWhereInput[]
+    id?: IntFilter<"InventoryScan"> | number
+    user_id?: IntFilter<"InventoryScan"> | number
+    item_id?: IntFilter<"InventoryScan"> | number
+    s_count?: IntFilter<"InventoryScan"> | number
+    first_scanned_at?: DateTimeFilter<"InventoryScan"> | Date | string
+    last_scanned_at?: DateTimeFilter<"InventoryScan"> | Date | string
+    User?: XOR<UserScalarRelationFilter, UserWhereInput>
+    Item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+  }
+
+  export type InventoryScanOrderByWithRelationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+    first_scanned_at?: SortOrder
+    last_scanned_at?: SortOrder
+    User?: UserOrderByWithRelationInput
+    Item?: ItemOrderByWithRelationInput
+  }
+
+  export type InventoryScanWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    user_id_item_id?: InventoryScanUser_idItem_idCompoundUniqueInput
+    AND?: InventoryScanWhereInput | InventoryScanWhereInput[]
+    OR?: InventoryScanWhereInput[]
+    NOT?: InventoryScanWhereInput | InventoryScanWhereInput[]
+    user_id?: IntFilter<"InventoryScan"> | number
+    item_id?: IntFilter<"InventoryScan"> | number
+    s_count?: IntFilter<"InventoryScan"> | number
+    first_scanned_at?: DateTimeFilter<"InventoryScan"> | Date | string
+    last_scanned_at?: DateTimeFilter<"InventoryScan"> | Date | string
+    User?: XOR<UserScalarRelationFilter, UserWhereInput>
+    Item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+  }, "id" | "user_id_item_id">
+
+  export type InventoryScanOrderByWithAggregationInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+    first_scanned_at?: SortOrder
+    last_scanned_at?: SortOrder
+    _count?: InventoryScanCountOrderByAggregateInput
+    _avg?: InventoryScanAvgOrderByAggregateInput
+    _max?: InventoryScanMaxOrderByAggregateInput
+    _min?: InventoryScanMinOrderByAggregateInput
+    _sum?: InventoryScanSumOrderByAggregateInput
+  }
+
+  export type InventoryScanScalarWhereWithAggregatesInput = {
+    AND?: InventoryScanScalarWhereWithAggregatesInput | InventoryScanScalarWhereWithAggregatesInput[]
+    OR?: InventoryScanScalarWhereWithAggregatesInput[]
+    NOT?: InventoryScanScalarWhereWithAggregatesInput | InventoryScanScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"InventoryScan"> | number
+    user_id?: IntWithAggregatesFilter<"InventoryScan"> | number
+    item_id?: IntWithAggregatesFilter<"InventoryScan"> | number
+    s_count?: IntWithAggregatesFilter<"InventoryScan"> | number
+    first_scanned_at?: DateTimeWithAggregatesFilter<"InventoryScan"> | Date | string
+    last_scanned_at?: DateTimeWithAggregatesFilter<"InventoryScan"> | Date | string
   }
 
   export type RoomWhereInput = {
@@ -14320,6 +15698,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -14334,6 +15713,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -14347,6 +15727,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -14361,6 +15742,7 @@ export namespace Prisma {
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -14520,6 +15902,7 @@ export namespace Prisma {
     borrows?: BorrowCreateNestedManyWithoutItemInput
     returns?: ReturnCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateInput = {
@@ -14541,6 +15924,7 @@ export namespace Prisma {
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemUpdateInput = {
@@ -14561,6 +15945,7 @@ export namespace Prisma {
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     returns?: ReturnUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateInput = {
@@ -14582,6 +15967,7 @@ export namespace Prisma {
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type ItemCreateManyInput = {
@@ -14635,6 +16021,64 @@ export namespace Prisma {
     no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
     remarks?: NullableStringFieldUpdateOperationsInput | string | null
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type InventoryScanCreateInput = {
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+    User: UserCreateNestedOneWithoutInventoryScansInput
+    Item: ItemCreateNestedOneWithoutInventoryScansInput
+  }
+
+  export type InventoryScanUncheckedCreateInput = {
+    id?: number
+    user_id: number
+    item_id: number
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+  }
+
+  export type InventoryScanUpdateInput = {
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    User?: UserUpdateOneRequiredWithoutInventoryScansNestedInput
+    Item?: ItemUpdateOneRequiredWithoutInventoryScansNestedInput
+  }
+
+  export type InventoryScanUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    user_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryScanCreateManyInput = {
+    id?: number
+    user_id: number
+    item_id: number
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+  }
+
+  export type InventoryScanUpdateManyMutationInput = {
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryScanUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    user_id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RoomCreateInput = {
@@ -15300,6 +16744,12 @@ export namespace Prisma {
     none?: ItemReceiptWhereInput
   }
 
+  export type InventoryScanListRelationFilter = {
+    every?: InventoryScanWhereInput
+    some?: InventoryScanWhereInput
+    none?: InventoryScanWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -15310,6 +16760,10 @@ export namespace Prisma {
   }
 
   export type ItemReceiptOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InventoryScanOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -15652,6 +17106,76 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
+  export type ItemScalarRelationFilter = {
+    is?: ItemWhereInput
+    isNot?: ItemWhereInput
+  }
+
+  export type InventoryScanUser_idItem_idCompoundUniqueInput = {
+    user_id: number
+    item_id: number
+  }
+
+  export type InventoryScanCountOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+    first_scanned_at?: SortOrder
+    last_scanned_at?: SortOrder
+  }
+
+  export type InventoryScanAvgOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+  }
+
+  export type InventoryScanMaxOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+    first_scanned_at?: SortOrder
+    last_scanned_at?: SortOrder
+  }
+
+  export type InventoryScanMinOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+    first_scanned_at?: SortOrder
+    last_scanned_at?: SortOrder
+  }
+
+  export type InventoryScanSumOrderByAggregateInput = {
+    id?: SortOrder
+    user_id?: SortOrder
+    item_id?: SortOrder
+    s_count?: SortOrder
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
   export type RoomCountOrderByAggregateInput = {
     id?: SortOrder
     r_name?: SortOrder
@@ -15689,28 +17213,9 @@ export namespace Prisma {
     r_status?: SortOrder
   }
 
-  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedDateTimeFilter<$PrismaModel>
-    _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
   export type BorrowerScalarRelationFilter = {
     is?: BorrowerWhereInput
     isNot?: BorrowerWhereInput
-  }
-
-  export type ItemScalarRelationFilter = {
-    is?: ItemWhereInput
-    isNot?: ItemWhereInput
   }
 
   export type RoomNullableScalarRelationFilter = {
@@ -16114,6 +17619,13 @@ export namespace Prisma {
     connect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
   }
 
+  export type InventoryScanCreateNestedManyWithoutUserInput = {
+    create?: XOR<InventoryScanCreateWithoutUserInput, InventoryScanUncheckedCreateWithoutUserInput> | InventoryScanCreateWithoutUserInput[] | InventoryScanUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutUserInput | InventoryScanCreateOrConnectWithoutUserInput[]
+    createMany?: InventoryScanCreateManyUserInputEnvelope
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+  }
+
   export type BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput = {
     create?: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput> | BorrowRequestCreateWithoutRequesterInput[] | BorrowRequestUncheckedCreateWithoutRequesterInput[]
     connectOrCreate?: BorrowRequestCreateOrConnectWithoutRequesterInput | BorrowRequestCreateOrConnectWithoutRequesterInput[]
@@ -16133,6 +17645,13 @@ export namespace Prisma {
     connectOrCreate?: ItemReceiptCreateOrConnectWithoutReleaserInput | ItemReceiptCreateOrConnectWithoutReleaserInput[]
     createMany?: ItemReceiptCreateManyReleaserInputEnvelope
     connect?: ItemReceiptWhereUniqueInput | ItemReceiptWhereUniqueInput[]
+  }
+
+  export type InventoryScanUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<InventoryScanCreateWithoutUserInput, InventoryScanUncheckedCreateWithoutUserInput> | InventoryScanCreateWithoutUserInput[] | InventoryScanUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutUserInput | InventoryScanCreateOrConnectWithoutUserInput[]
+    createMany?: InventoryScanCreateManyUserInputEnvelope
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -16197,6 +17716,20 @@ export namespace Prisma {
     deleteMany?: ItemReceiptScalarWhereInput | ItemReceiptScalarWhereInput[]
   }
 
+  export type InventoryScanUpdateManyWithoutUserNestedInput = {
+    create?: XOR<InventoryScanCreateWithoutUserInput, InventoryScanUncheckedCreateWithoutUserInput> | InventoryScanCreateWithoutUserInput[] | InventoryScanUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutUserInput | InventoryScanCreateOrConnectWithoutUserInput[]
+    upsert?: InventoryScanUpsertWithWhereUniqueWithoutUserInput | InventoryScanUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: InventoryScanCreateManyUserInputEnvelope
+    set?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    disconnect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    delete?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    update?: InventoryScanUpdateWithWhereUniqueWithoutUserInput | InventoryScanUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: InventoryScanUpdateManyWithWhereWithoutUserInput | InventoryScanUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: InventoryScanScalarWhereInput | InventoryScanScalarWhereInput[]
+  }
+
   export type BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput = {
     create?: XOR<BorrowRequestCreateWithoutRequesterInput, BorrowRequestUncheckedCreateWithoutRequesterInput> | BorrowRequestCreateWithoutRequesterInput[] | BorrowRequestUncheckedCreateWithoutRequesterInput[]
     connectOrCreate?: BorrowRequestCreateOrConnectWithoutRequesterInput | BorrowRequestCreateOrConnectWithoutRequesterInput[]
@@ -16237,6 +17770,20 @@ export namespace Prisma {
     update?: ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput | ItemReceiptUpdateWithWhereUniqueWithoutReleaserInput[]
     updateMany?: ItemReceiptUpdateManyWithWhereWithoutReleaserInput | ItemReceiptUpdateManyWithWhereWithoutReleaserInput[]
     deleteMany?: ItemReceiptScalarWhereInput | ItemReceiptScalarWhereInput[]
+  }
+
+  export type InventoryScanUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<InventoryScanCreateWithoutUserInput, InventoryScanUncheckedCreateWithoutUserInput> | InventoryScanCreateWithoutUserInput[] | InventoryScanUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutUserInput | InventoryScanCreateOrConnectWithoutUserInput[]
+    upsert?: InventoryScanUpsertWithWhereUniqueWithoutUserInput | InventoryScanUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: InventoryScanCreateManyUserInputEnvelope
+    set?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    disconnect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    delete?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    update?: InventoryScanUpdateWithWhereUniqueWithoutUserInput | InventoryScanUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: InventoryScanUpdateManyWithWhereWithoutUserInput | InventoryScanUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: InventoryScanScalarWhereInput | InventoryScanScalarWhereInput[]
   }
 
   export type BorrowCreateNestedManyWithoutMemberInput = {
@@ -16386,6 +17933,13 @@ export namespace Prisma {
     connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
   }
 
+  export type InventoryScanCreateNestedManyWithoutItemInput = {
+    create?: XOR<InventoryScanCreateWithoutItemInput, InventoryScanUncheckedCreateWithoutItemInput> | InventoryScanCreateWithoutItemInput[] | InventoryScanUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutItemInput | InventoryScanCreateOrConnectWithoutItemInput[]
+    createMany?: InventoryScanCreateManyItemInputEnvelope
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+  }
+
   export type BorrowUncheckedCreateNestedManyWithoutItemInput = {
     create?: XOR<BorrowCreateWithoutItemInput, BorrowUncheckedCreateWithoutItemInput> | BorrowCreateWithoutItemInput[] | BorrowUncheckedCreateWithoutItemInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutItemInput | BorrowCreateOrConnectWithoutItemInput[]
@@ -16405,6 +17959,13 @@ export namespace Prisma {
     connectOrCreate?: BorrowRequestCreateOrConnectWithoutItemInput | BorrowRequestCreateOrConnectWithoutItemInput[]
     createMany?: BorrowRequestCreateManyItemInputEnvelope
     connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
+  }
+
+  export type InventoryScanUncheckedCreateNestedManyWithoutItemInput = {
+    create?: XOR<InventoryScanCreateWithoutItemInput, InventoryScanUncheckedCreateWithoutItemInput> | InventoryScanCreateWithoutItemInput[] | InventoryScanUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutItemInput | InventoryScanCreateOrConnectWithoutItemInput[]
+    createMany?: InventoryScanCreateManyItemInputEnvelope
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
   }
 
   export type DecimalFieldUpdateOperationsInput = {
@@ -16469,6 +18030,20 @@ export namespace Prisma {
     deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
   }
 
+  export type InventoryScanUpdateManyWithoutItemNestedInput = {
+    create?: XOR<InventoryScanCreateWithoutItemInput, InventoryScanUncheckedCreateWithoutItemInput> | InventoryScanCreateWithoutItemInput[] | InventoryScanUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutItemInput | InventoryScanCreateOrConnectWithoutItemInput[]
+    upsert?: InventoryScanUpsertWithWhereUniqueWithoutItemInput | InventoryScanUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: InventoryScanCreateManyItemInputEnvelope
+    set?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    disconnect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    delete?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    update?: InventoryScanUpdateWithWhereUniqueWithoutItemInput | InventoryScanUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: InventoryScanUpdateManyWithWhereWithoutItemInput | InventoryScanUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: InventoryScanScalarWhereInput | InventoryScanScalarWhereInput[]
+  }
+
   export type BorrowUncheckedUpdateManyWithoutItemNestedInput = {
     create?: XOR<BorrowCreateWithoutItemInput, BorrowUncheckedCreateWithoutItemInput> | BorrowCreateWithoutItemInput[] | BorrowUncheckedCreateWithoutItemInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutItemInput | BorrowCreateOrConnectWithoutItemInput[]
@@ -16511,6 +18086,52 @@ export namespace Prisma {
     deleteMany?: BorrowRequestScalarWhereInput | BorrowRequestScalarWhereInput[]
   }
 
+  export type InventoryScanUncheckedUpdateManyWithoutItemNestedInput = {
+    create?: XOR<InventoryScanCreateWithoutItemInput, InventoryScanUncheckedCreateWithoutItemInput> | InventoryScanCreateWithoutItemInput[] | InventoryScanUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: InventoryScanCreateOrConnectWithoutItemInput | InventoryScanCreateOrConnectWithoutItemInput[]
+    upsert?: InventoryScanUpsertWithWhereUniqueWithoutItemInput | InventoryScanUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: InventoryScanCreateManyItemInputEnvelope
+    set?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    disconnect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    delete?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    connect?: InventoryScanWhereUniqueInput | InventoryScanWhereUniqueInput[]
+    update?: InventoryScanUpdateWithWhereUniqueWithoutItemInput | InventoryScanUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: InventoryScanUpdateManyWithWhereWithoutItemInput | InventoryScanUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: InventoryScanScalarWhereInput | InventoryScanScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutInventoryScansInput = {
+    create?: XOR<UserCreateWithoutInventoryScansInput, UserUncheckedCreateWithoutInventoryScansInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInventoryScansInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type ItemCreateNestedOneWithoutInventoryScansInput = {
+    create?: XOR<ItemCreateWithoutInventoryScansInput, ItemUncheckedCreateWithoutInventoryScansInput>
+    connectOrCreate?: ItemCreateOrConnectWithoutInventoryScansInput
+    connect?: ItemWhereUniqueInput
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
+  export type UserUpdateOneRequiredWithoutInventoryScansNestedInput = {
+    create?: XOR<UserCreateWithoutInventoryScansInput, UserUncheckedCreateWithoutInventoryScansInput>
+    connectOrCreate?: UserCreateOrConnectWithoutInventoryScansInput
+    upsert?: UserUpsertWithoutInventoryScansInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutInventoryScansInput, UserUpdateWithoutInventoryScansInput>, UserUncheckedUpdateWithoutInventoryScansInput>
+  }
+
+  export type ItemUpdateOneRequiredWithoutInventoryScansNestedInput = {
+    create?: XOR<ItemCreateWithoutInventoryScansInput, ItemUncheckedCreateWithoutInventoryScansInput>
+    connectOrCreate?: ItemCreateOrConnectWithoutInventoryScansInput
+    upsert?: ItemUpsertWithoutInventoryScansInput
+    connect?: ItemWhereUniqueInput
+    update?: XOR<XOR<ItemUpdateToOneWithWhereWithoutInventoryScansInput, ItemUpdateWithoutInventoryScansInput>, ItemUncheckedUpdateWithoutInventoryScansInput>
+  }
+
   export type BorrowCreateNestedManyWithoutRoomInput = {
     create?: XOR<BorrowCreateWithoutRoomInput, BorrowUncheckedCreateWithoutRoomInput> | BorrowCreateWithoutRoomInput[] | BorrowUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: BorrowCreateOrConnectWithoutRoomInput | BorrowCreateOrConnectWithoutRoomInput[]
@@ -16551,10 +18172,6 @@ export namespace Prisma {
     connectOrCreate?: BorrowRequestCreateOrConnectWithoutRoomInput | BorrowRequestCreateOrConnectWithoutRoomInput[]
     createMany?: BorrowRequestCreateManyRoomInputEnvelope
     connect?: BorrowRequestWhereUniqueInput | BorrowRequestWhereUniqueInput[]
-  }
-
-  export type DateTimeFieldUpdateOperationsInput = {
-    set?: Date | string
   }
 
   export type BorrowUpdateManyWithoutRoomNestedInput = {
@@ -17339,6 +18956,31 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type InventoryScanCreateWithoutUserInput = {
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+    Item: ItemCreateNestedOneWithoutInventoryScansInput
+  }
+
+  export type InventoryScanUncheckedCreateWithoutUserInput = {
+    id?: number
+    item_id: number
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+  }
+
+  export type InventoryScanCreateOrConnectWithoutUserInput = {
+    where: InventoryScanWhereUniqueInput
+    create: XOR<InventoryScanCreateWithoutUserInput, InventoryScanUncheckedCreateWithoutUserInput>
+  }
+
+  export type InventoryScanCreateManyUserInputEnvelope = {
+    data: InventoryScanCreateManyUserInput | InventoryScanCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BorrowRequestUpsertWithWhereUniqueWithoutRequesterInput = {
     where: BorrowRequestWhereUniqueInput
     update: XOR<BorrowRequestUpdateWithoutRequesterInput, BorrowRequestUncheckedUpdateWithoutRequesterInput>
@@ -17427,6 +19069,34 @@ export namespace Prisma {
     released_by?: IntNullableFilter<"ItemReceipt"> | number | null
     createdAt?: DateTimeFilter<"ItemReceipt"> | Date | string
     updatedAt?: DateTimeFilter<"ItemReceipt"> | Date | string
+  }
+
+  export type InventoryScanUpsertWithWhereUniqueWithoutUserInput = {
+    where: InventoryScanWhereUniqueInput
+    update: XOR<InventoryScanUpdateWithoutUserInput, InventoryScanUncheckedUpdateWithoutUserInput>
+    create: XOR<InventoryScanCreateWithoutUserInput, InventoryScanUncheckedCreateWithoutUserInput>
+  }
+
+  export type InventoryScanUpdateWithWhereUniqueWithoutUserInput = {
+    where: InventoryScanWhereUniqueInput
+    data: XOR<InventoryScanUpdateWithoutUserInput, InventoryScanUncheckedUpdateWithoutUserInput>
+  }
+
+  export type InventoryScanUpdateManyWithWhereWithoutUserInput = {
+    where: InventoryScanScalarWhereInput
+    data: XOR<InventoryScanUpdateManyMutationInput, InventoryScanUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type InventoryScanScalarWhereInput = {
+    AND?: InventoryScanScalarWhereInput | InventoryScanScalarWhereInput[]
+    OR?: InventoryScanScalarWhereInput[]
+    NOT?: InventoryScanScalarWhereInput | InventoryScanScalarWhereInput[]
+    id?: IntFilter<"InventoryScan"> | number
+    user_id?: IntFilter<"InventoryScan"> | number
+    item_id?: IntFilter<"InventoryScan"> | number
+    s_count?: IntFilter<"InventoryScan"> | number
+    first_scanned_at?: DateTimeFilter<"InventoryScan"> | Date | string
+    last_scanned_at?: DateTimeFilter<"InventoryScan"> | Date | string
   }
 
   export type BorrowCreateWithoutMemberInput = {
@@ -17759,6 +19429,31 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type InventoryScanCreateWithoutItemInput = {
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+    User: UserCreateNestedOneWithoutInventoryScansInput
+  }
+
+  export type InventoryScanUncheckedCreateWithoutItemInput = {
+    id?: number
+    user_id: number
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+  }
+
+  export type InventoryScanCreateOrConnectWithoutItemInput = {
+    where: InventoryScanWhereUniqueInput
+    create: XOR<InventoryScanCreateWithoutItemInput, InventoryScanUncheckedCreateWithoutItemInput>
+  }
+
+  export type InventoryScanCreateManyItemInputEnvelope = {
+    data: InventoryScanCreateManyItemInput | InventoryScanCreateManyItemInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BorrowUpsertWithWhereUniqueWithoutItemInput = {
     where: BorrowWhereUniqueInput
     update: XOR<BorrowUpdateWithoutItemInput, BorrowUncheckedUpdateWithoutItemInput>
@@ -17805,6 +19500,190 @@ export namespace Prisma {
   export type BorrowRequestUpdateManyWithWhereWithoutItemInput = {
     where: BorrowRequestScalarWhereInput
     data: XOR<BorrowRequestUpdateManyMutationInput, BorrowRequestUncheckedUpdateManyWithoutItemInput>
+  }
+
+  export type InventoryScanUpsertWithWhereUniqueWithoutItemInput = {
+    where: InventoryScanWhereUniqueInput
+    update: XOR<InventoryScanUpdateWithoutItemInput, InventoryScanUncheckedUpdateWithoutItemInput>
+    create: XOR<InventoryScanCreateWithoutItemInput, InventoryScanUncheckedCreateWithoutItemInput>
+  }
+
+  export type InventoryScanUpdateWithWhereUniqueWithoutItemInput = {
+    where: InventoryScanWhereUniqueInput
+    data: XOR<InventoryScanUpdateWithoutItemInput, InventoryScanUncheckedUpdateWithoutItemInput>
+  }
+
+  export type InventoryScanUpdateManyWithWhereWithoutItemInput = {
+    where: InventoryScanScalarWhereInput
+    data: XOR<InventoryScanUpdateManyMutationInput, InventoryScanUncheckedUpdateManyWithoutItemInput>
+  }
+
+  export type UserCreateWithoutInventoryScansInput = {
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
+    reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
+    releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
+  }
+
+  export type UserUncheckedCreateWithoutInventoryScansInput = {
+    id?: number
+    name: string
+    username: string
+    password: string
+    email?: string | null
+    id_number?: string | null
+    role?: $Enums.Role
+    status?: number
+    requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
+    reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
+    releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
+  }
+
+  export type UserCreateOrConnectWithoutInventoryScansInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutInventoryScansInput, UserUncheckedCreateWithoutInventoryScansInput>
+  }
+
+  export type ItemCreateWithoutInventoryScansInput = {
+    i_deviceID: string
+    i_model: string
+    i_category: string
+    i_brand: string
+    i_description: string
+    i_type: string
+    item_rawstock?: number
+    i_status?: number
+    i_mr: string
+    i_price: Decimal | DecimalJsLike | number | string
+    i_photo?: string
+    no_of_items?: number | null
+    remarks?: string | null
+    i_date_acquired?: Date | string | null
+    borrows?: BorrowCreateNestedManyWithoutItemInput
+    returns?: ReturnCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
+  }
+
+  export type ItemUncheckedCreateWithoutInventoryScansInput = {
+    id?: number
+    i_deviceID: string
+    i_model: string
+    i_category: string
+    i_brand: string
+    i_description: string
+    i_type: string
+    item_rawstock?: number
+    i_status?: number
+    i_mr: string
+    i_price: Decimal | DecimalJsLike | number | string
+    i_photo?: string
+    no_of_items?: number | null
+    remarks?: string | null
+    i_date_acquired?: Date | string | null
+    borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
+    returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
+    borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
+  }
+
+  export type ItemCreateOrConnectWithoutInventoryScansInput = {
+    where: ItemWhereUniqueInput
+    create: XOR<ItemCreateWithoutInventoryScansInput, ItemUncheckedCreateWithoutInventoryScansInput>
+  }
+
+  export type UserUpsertWithoutInventoryScansInput = {
+    update: XOR<UserUpdateWithoutInventoryScansInput, UserUncheckedUpdateWithoutInventoryScansInput>
+    create: XOR<UserCreateWithoutInventoryScansInput, UserUncheckedCreateWithoutInventoryScansInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutInventoryScansInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutInventoryScansInput, UserUncheckedUpdateWithoutInventoryScansInput>
+  }
+
+  export type UserUpdateWithoutInventoryScansInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
+    reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
+    releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutInventoryScansInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    id_number?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    status?: IntFieldUpdateOperationsInput | number
+    requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
+    reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
+  }
+
+  export type ItemUpsertWithoutInventoryScansInput = {
+    update: XOR<ItemUpdateWithoutInventoryScansInput, ItemUncheckedUpdateWithoutInventoryScansInput>
+    create: XOR<ItemCreateWithoutInventoryScansInput, ItemUncheckedCreateWithoutInventoryScansInput>
+    where?: ItemWhereInput
+  }
+
+  export type ItemUpdateToOneWithWhereWithoutInventoryScansInput = {
+    where?: ItemWhereInput
+    data: XOR<ItemUpdateWithoutInventoryScansInput, ItemUncheckedUpdateWithoutInventoryScansInput>
+  }
+
+  export type ItemUpdateWithoutInventoryScansInput = {
+    i_deviceID?: StringFieldUpdateOperationsInput | string
+    i_model?: StringFieldUpdateOperationsInput | string
+    i_category?: StringFieldUpdateOperationsInput | string
+    i_brand?: StringFieldUpdateOperationsInput | string
+    i_description?: StringFieldUpdateOperationsInput | string
+    i_type?: StringFieldUpdateOperationsInput | string
+    item_rawstock?: IntFieldUpdateOperationsInput | number
+    i_status?: IntFieldUpdateOperationsInput | number
+    i_mr?: StringFieldUpdateOperationsInput | string
+    i_price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    i_photo?: StringFieldUpdateOperationsInput | string
+    no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    borrows?: BorrowUpdateManyWithoutItemNestedInput
+    returns?: ReturnUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
+  }
+
+  export type ItemUncheckedUpdateWithoutInventoryScansInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    i_deviceID?: StringFieldUpdateOperationsInput | string
+    i_model?: StringFieldUpdateOperationsInput | string
+    i_category?: StringFieldUpdateOperationsInput | string
+    i_brand?: StringFieldUpdateOperationsInput | string
+    i_description?: StringFieldUpdateOperationsInput | string
+    i_type?: StringFieldUpdateOperationsInput | string
+    item_rawstock?: IntFieldUpdateOperationsInput | number
+    i_status?: IntFieldUpdateOperationsInput | number
+    i_mr?: StringFieldUpdateOperationsInput | string
+    i_price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    i_photo?: StringFieldUpdateOperationsInput | string
+    no_of_items?: NullableIntFieldUpdateOperationsInput | number | null
+    remarks?: NullableStringFieldUpdateOperationsInput | string | null
+    i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
+    returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
+    borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type BorrowCreateWithoutRoomInput = {
@@ -18031,6 +19910,7 @@ export namespace Prisma {
     i_date_acquired?: Date | string | null
     returns?: ReturnCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateWithoutBorrowsInput = {
@@ -18051,6 +19931,7 @@ export namespace Prisma {
     i_date_acquired?: Date | string | null
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemCreateOrConnectWithoutBorrowsInput = {
@@ -18264,6 +20145,7 @@ export namespace Prisma {
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     returns?: ReturnUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateWithoutBorrowsInput = {
@@ -18284,6 +20166,7 @@ export namespace Prisma {
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type RoomUpsertWithoutBorrowsInput = {
@@ -18492,6 +20375,7 @@ export namespace Prisma {
     status?: number
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReleasedItemsInput = {
@@ -18505,6 +20389,7 @@ export namespace Prisma {
     status?: number
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReleasedItemsInput = {
@@ -18575,6 +20460,7 @@ export namespace Prisma {
     status?: IntFieldUpdateOperationsInput | number
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReleasedItemsInput = {
@@ -18588,6 +20474,7 @@ export namespace Prisma {
     status?: IntFieldUpdateOperationsInput | number
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BorrowerCreateWithoutBorrowRequestsInput = {
@@ -18643,6 +20530,7 @@ export namespace Prisma {
     i_date_acquired?: Date | string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
     returns?: ReturnCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateWithoutBorrowRequestsInput = {
@@ -18663,6 +20551,7 @@ export namespace Prisma {
     i_date_acquired?: Date | string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     returns?: ReturnUncheckedCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemCreateOrConnectWithoutBorrowRequestsInput = {
@@ -18742,6 +20631,7 @@ export namespace Prisma {
     status?: number
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRequestedBorrowsInput = {
@@ -18755,6 +20645,7 @@ export namespace Prisma {
     status?: number
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRequestedBorrowsInput = {
@@ -18772,6 +20663,7 @@ export namespace Prisma {
     status?: number
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutReviewedBorrowsInput = {
@@ -18785,6 +20677,7 @@ export namespace Prisma {
     status?: number
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutReviewedBorrowsInput = {
@@ -18862,6 +20755,7 @@ export namespace Prisma {
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     returns?: ReturnUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateWithoutBorrowRequestsInput = {
@@ -18882,6 +20776,7 @@ export namespace Prisma {
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     returns?: ReturnUncheckedUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type RoomUpsertWithoutBorrowRequestsInput = {
@@ -18979,6 +20874,7 @@ export namespace Prisma {
     status?: IntFieldUpdateOperationsInput | number
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRequestedBorrowsInput = {
@@ -18992,6 +20888,7 @@ export namespace Prisma {
     status?: IntFieldUpdateOperationsInput | number
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutReviewedBorrowsInput = {
@@ -19015,6 +20912,7 @@ export namespace Prisma {
     status?: IntFieldUpdateOperationsInput | number
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutReviewedBorrowsInput = {
@@ -19028,6 +20926,7 @@ export namespace Prisma {
     status?: IntFieldUpdateOperationsInput | number
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type BorrowCreateWithoutReturnInput = {
@@ -19119,6 +21018,7 @@ export namespace Prisma {
     i_date_acquired?: Date | string | null
     borrows?: BorrowCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanCreateNestedManyWithoutItemInput
   }
 
   export type ItemUncheckedCreateWithoutReturnsInput = {
@@ -19139,6 +21039,7 @@ export namespace Prisma {
     i_date_acquired?: Date | string | null
     borrows?: BorrowUncheckedCreateNestedManyWithoutItemInput
     borrowRequests?: BorrowRequestUncheckedCreateNestedManyWithoutItemInput
+    inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type ItemCreateOrConnectWithoutReturnsInput = {
@@ -19284,6 +21185,7 @@ export namespace Prisma {
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUpdateManyWithoutItemNestedInput
   }
 
   export type ItemUncheckedUpdateWithoutReturnsInput = {
@@ -19304,6 +21206,7 @@ export namespace Prisma {
     i_date_acquired?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     borrows?: BorrowUncheckedUpdateManyWithoutItemNestedInput
     borrowRequests?: BorrowRequestUncheckedUpdateManyWithoutItemNestedInput
+    inventoryScans?: InventoryScanUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type RoomUpsertWithoutReturnsInput = {
@@ -19387,6 +21290,14 @@ export namespace Prisma {
     rc_received_at?: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type InventoryScanCreateManyUserInput = {
+    id?: number
+    item_id: number
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
   }
 
   export type BorrowRequestUpdateWithoutRequesterInput = {
@@ -19537,6 +21448,29 @@ export namespace Prisma {
     rc_received_at?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryScanUpdateWithoutUserInput = {
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    Item?: ItemUpdateOneRequiredWithoutInventoryScansNestedInput
+  }
+
+  export type InventoryScanUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryScanUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    item_id?: IntFieldUpdateOperationsInput | number
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BorrowCreateManyMemberInput = {
@@ -19767,6 +21701,14 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type InventoryScanCreateManyItemInput = {
+    id?: number
+    user_id: number
+    s_count?: number
+    first_scanned_at?: Date | string
+    last_scanned_at?: Date | string
+  }
+
   export type BorrowUpdateWithoutItemInput = {
     b_date_borrowed?: DateTimeFieldUpdateOperationsInput | Date | string
     b_date_returned?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -19903,6 +21845,29 @@ export namespace Prisma {
     borrow_id?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryScanUpdateWithoutItemInput = {
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    User?: UserUpdateOneRequiredWithoutInventoryScansNestedInput
+  }
+
+  export type InventoryScanUncheckedUpdateWithoutItemInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    user_id?: IntFieldUpdateOperationsInput | number
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InventoryScanUncheckedUpdateManyWithoutItemInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    user_id?: IntFieldUpdateOperationsInput | number
+    s_count?: IntFieldUpdateOperationsInput | number
+    first_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_scanned_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BorrowCreateManyRoomInput = {

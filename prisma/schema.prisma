@@ -40,6 +40,7 @@ model User {
   requestedBorrows BorrowRequest[] @relation("BorrowRequestRequester")
   reviewedBorrows  BorrowRequest[] @relation("BorrowRequestReviewer")
   releasedItems    ItemReceipt[]   @relation("ItemReceiptReleaser")
+  inventoryScans   InventoryScan[]
 
   @@map("user")
 }
@@ -88,8 +89,28 @@ model Item {
   borrows        Borrow[]
   returns        Return[]
   borrowRequests BorrowRequest[]
+  inventoryScans InventoryScan[]
 
   @@map("item")
+}
+
+/// One scanned label in a user's running inventory count (/admin/inventory). Kept on the server
+/// so the same account sees the same count on every device; "Clear list" deletes the user's rows.
+model InventoryScan {
+  id               Int      @id @default(autoincrement())
+  user_id          Int
+  item_id          Int
+  /// Units counted — how many times the label was scanned.
+  s_count          Int      @default(1)
+  first_scanned_at DateTime @default(now())
+  last_scanned_at  DateTime @default(now())
+
+  User User @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  Item Item @relation(fields: [item_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([user_id, item_id])
+  @@index([user_id, last_scanned_at])
+  @@map("inventory_scan")
 }
 
 model Room {

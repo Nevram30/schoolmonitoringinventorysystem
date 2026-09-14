@@ -2,33 +2,9 @@
 import React from 'react'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import {
-  ArrowLeft,
-  BarChart3,
-  Boxes,
-  ClipboardList,
-  RotateCcw,
-  ShieldCheck,
-} from 'lucide-react'
+import { ArrowLeft, Boxes, ShieldCheck } from 'lucide-react'
 import MainLogin from './main.login'
-
-const highlights = [
-  {
-    icon: ClipboardList,
-    title: 'Track every borrowing',
-    description: 'Know which items are out and who is accountable for them.',
-  },
-  {
-    icon: RotateCcw,
-    title: 'Confirm every return',
-    description: 'Record returns and flag overdue equipment before it is lost.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Report with confidence',
-    description: 'Printable summaries ready for audits and property turnovers.',
-  },
-]
+import { features, roles } from '../app.overview'
 
 const SignIn = () => {
   const session = useSession()
@@ -37,7 +13,7 @@ const SignIn = () => {
   return (
     <div className="min-h-screen bg-gray-50 lg:grid lg:grid-cols-2">
       {/* Branding panel */}
-      <aside className="relative hidden overflow-hidden bg-linear-to-br from-blue-700 via-blue-600 to-indigo-700 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+      <aside className="relative hidden overflow-hidden bg-linear-to-br from-blue-700 via-blue-600 to-indigo-700 p-12 text-white lg:flex lg:flex-col lg:justify-between lg:gap-10">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/10 blur-3xl"
@@ -58,26 +34,46 @@ const SignIn = () => {
           </Link>
         </div>
 
-        <div className="relative max-w-md">
-          <h1 className="text-4xl font-bold leading-tight">
+        <div className="relative max-w-xl">
+          <h1 className="text-3xl font-bold leading-tight xl:text-4xl">
             Simplified Asset Borrowing and Management System
           </h1>
-          <p className="mt-5 text-lg leading-relaxed text-blue-100">
+          <p className="mt-4 text-base leading-relaxed text-blue-100">
             Sign in to manage school equipment, borrowing transactions, and
             inventory records in one place.
           </p>
 
-          <div className="mt-10 space-y-6">
-            {highlights.map((item) => (
-              <div key={item.title} className="flex gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/15 backdrop-blur">
-                  <item.icon className="h-5 w-5" />
+          <p className="mt-8 text-xs font-semibold uppercase tracking-wider text-blue-200">
+            Features
+          </p>
+          <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-3">
+            {features.map((feature) => (
+              <li
+                key={feature.title}
+                title={feature.description}
+                className="flex items-center gap-3"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-white/15 backdrop-blur">
+                  <feature.icon className="h-4 w-4" />
                 </div>
-                <div>
-                  <p className="font-semibold">{item.title}</p>
-                  <p className="text-sm text-blue-100">{item.description}</p>
-                </div>
-              </div>
+                <span className="text-sm font-medium">{feature.title}</span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-8 text-xs font-semibold uppercase tracking-wider text-blue-200">
+            Who can sign in
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {roles.map((role) => (
+              <span
+                key={role.name}
+                title={role.description}
+                className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium backdrop-blur"
+              >
+                <role.icon className="h-4 w-4" />
+                {role.name}
+              </span>
             ))}
           </div>
         </div>
@@ -130,6 +126,40 @@ const SignIn = () => {
               Accounts are issued by the school administrator. Contact your
               administrator if you cannot sign in.
             </p>
+          </div>
+
+          {/* Features and users for small screens, where the branding panel is hidden */}
+          <div className="mt-10 lg:hidden">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Who can sign in
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {roles.map((role) => (
+                <span
+                  key={role.name}
+                  className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800"
+                >
+                  <role.icon className="h-4 w-4" />
+                  {role.name}
+                </span>
+              ))}
+            </div>
+
+            <p className="mt-8 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              Features
+            </p>
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+              {features.map((feature) => (
+                <li key={feature.title} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                    <feature.icon className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {feature.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </main>

@@ -164,6 +164,15 @@ exports.Prisma.ItemScalarFieldEnum = {
   i_date_acquired: 'i_date_acquired'
 };
 
+exports.Prisma.InventoryScanScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  item_id: 'item_id',
+  s_count: 's_count',
+  first_scanned_at: 'first_scanned_at',
+  last_scanned_at: 'last_scanned_at'
+};
+
 exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   r_name: 'r_name',
@@ -276,6 +285,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   Borrower: 'Borrower',
   Item: 'Item',
+  InventoryScan: 'InventoryScan',
   Room: 'Room',
   Borrow: 'Borrow',
   ItemReceipt: 'ItemReceipt',
