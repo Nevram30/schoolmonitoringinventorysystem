@@ -213,7 +213,7 @@ export default function FacultyTransactionPage() {
                 <div className="sm:flex-auto">
                     <h1 className="text-2xl font-semibold text-gray-900">Borrowing</h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        Request items to borrow and track returns. Requests need admin approval.
+                        Request items to borrow and track your returns. Requests need admin approval.
                     </p>
                 </div>
                 <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -371,7 +371,7 @@ export default function FacultyTransactionPage() {
 
                             {borrows.length === 0 && (
                                 <div className="text-center py-12">
-                                    <p className="text-sm text-gray-500">No borrowing records found.</p>
+                                    <p className="text-sm text-gray-500">You have no borrowing records yet.</p>
                                 </div>
                             )}
                         </div>

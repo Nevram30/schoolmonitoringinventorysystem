@@ -6,6 +6,11 @@ import {
   protectedProcedure,
 } from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
+import {
+  borrowerScopeFor,
+  findBorrowerForUser,
+  requesterFilter,
+} from "@/server/api/scope";
 import { generateBorrowerIdByType } from "@/server/db/utils/borrowerIdGenerator";
 import { isKnownDepartment } from "@/lib/departments";
 import type { PrismaClient } from "../../../../generated/prisma";
@@ -59,11 +64,13 @@ const borrowerTypeForRole = (role: string) => {
 };
 
 /**
- * The `Borrower` row a request from this account belongs to. Faculty / staff / students request
- * for themselves — they no longer pick a borrower — so the requester's own account is the
- * borrower, matched to an existing row by school ID and created from the account's own details
- * the first time they borrow. Defaults mirror `borrowers.create`, which fills the columns its
- * form does not collect the same way.
+ * The `Borrower` row a request from this account belongs to, creating it when this is the account's
+ * first borrow. Faculty / staff / students request for themselves — they no longer pick a borrower
+ * — so the requester's own account is the borrower. Defaults mirror `borrowers.create`, which fills
+ * the columns its form does not collect the same way.
+ *
+ * The creating half is here because only this router needs it; `findBorrowerForUser` does the same
+ * lookup without writing, for the screens that only read.
  *
  * `department` is the program picked on the request form — used for a borrower row created here,
  * which would otherwise be stuck with the "General" placeholder. An existing row is updated by the
@@ -74,24 +81,13 @@ async function resolveRequesterBorrower(
   userId: number,
   department?: string
 ) {
+  // The lookup itself lives in `scope.ts`, where the portal screens read it from, so that what an
+  // account sees and what its requests are filed under can never drift apart.
+  const existing = await findBorrowerForUser(db, userId);
+  if (existing) return existing;
+
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return null;
-
-  if (user.id_number) {
-    const existing = await db.borrower.findUnique({
-      where: { m_school_id: user.id_number },
-    });
-    if (existing) return existing;
-  }
-
-  // An account with no ID number has nothing stable to match on, so reuse the borrower its last
-  // request was filed under instead of creating a second row for the same person.
-  const previous = await db.borrowRequest.findFirst({
-    where: { requested_by: userId },
-    orderBy: { id: "desc" },
-    select: { Member: true },
-  });
-  if (previous?.Member) return previous.Member;
 
   // `user.name` is one field; everything after the first word is the surname.
   const [first, ...rest] = user.name.trim().split(/\s+/);
@@ -220,8 +216,8 @@ export const borrowRequestsRouter = createTRPCRouter({
 
   /**
    * Requests for the admin approval screen and for the request tables on the faculty / staff /
-   * student pages. Those pages already list every borrow rather than only the signed-in user's,
-   * so this matches: it lists every request, newest first.
+   * student pages, newest first. The admin screen lists every request; a portal lists only the
+   * ones the signed-in account sent or is named on, matching what its other screens show.
    */
   list: protectedProcedure
     .input(
@@ -236,7 +232,13 @@ export const borrowRequestsRouter = createTRPCRouter({
       const { page, limit, search, status } = input;
 
       try {
-        const where: any = {};
+        const scope = await borrowerScopeFor(ctx);
+        const scoped = requesterFilter(scope);
+        // Under `AND`, not spread: the search below owns `where.OR` and would otherwise overwrite
+        // the scope, handing back every request in the school the moment someone typed a letter.
+        const base: any = Object.keys(scoped).length ? { AND: [scoped] } : {};
+
+        const where: any = { ...base };
 
         if (status) {
           where.br_status = REQUEST_STATUS[status];
@@ -261,8 +263,10 @@ export const borrowRequestsRouter = createTRPCRouter({
             orderBy: { id: "desc" },
           }),
           ctx.db.borrowRequest.count({ where }),
+          // Scoped like the list above it, or a portal would show one row under a badge counting
+          // the whole school's backlog.
           ctx.db.borrowRequest.count({
-            where: { br_status: REQUEST_STATUS.pending },
+            where: { ...base, br_status: REQUEST_STATUS.pending },
           }),
         ]);
 

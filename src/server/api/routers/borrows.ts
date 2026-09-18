@@ -4,9 +4,9 @@ import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
 } from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
+import { borrowerScopeFor, memberFilter } from "@/server/api/scope";
 import { loadFeeSettings } from "@/server/api/fee-settings";
 import { calculateOverdueFee, DEFAULT_FEE_SETTINGS } from "@/lib/fees";
 import { isKnownDepartment } from "@/lib/departments";
@@ -24,7 +24,10 @@ const startOfToday = () => {
 
 export const borrowsRouter = createTRPCRouter({
   // GET /api/borrows
-  list: publicProcedure
+  //
+  // Backs the transaction and borrowed-items screens in every portal. An admin gets every borrow
+  // in the school; everyone else gets only their own, so the same screens serve both.
+  list: protectedProcedure
     .input(
       z.object({
         page: z.number().default(1),
@@ -38,7 +41,9 @@ export const borrowsRouter = createTRPCRouter({
         const { page, limit, search, status } = input;
         const offset = (page - 1) * limit;
 
-        const where: any = {};
+        const scope = await borrowerScopeFor(ctx);
+        // Empty for an admin, so their query is exactly what it was before scoping.
+        const where: any = { ...memberFilter(scope) };
 
         if (search) {
           // Search in related models

@@ -149,9 +149,12 @@ interface PortalDashboardProps {
 }
 
 /**
- * Borrowing report shared by the student, staff and faculty dashboards. All three portals list
- * every borrow and return rather than only the signed-in account's, so these totals are
- * portal-wide too and match what their Borrowed Items / Returned Items screens show.
+ * Borrowing report shared by the student, staff and faculty dashboards. All three portals list the
+ * signed-in account's own borrows and returns, so these totals are scoped the same way and match
+ * what their Borrowed Items / Returned Items screens show.
+ *
+ * The inventory condition breakdown lower down is the exception — it describes the school's stock,
+ * which every portal can browse in full.
  */
 export default function PortalDashboard({
   basePath,
@@ -216,7 +219,7 @@ export default function PortalDashboard({
           href: `${basePath}/returned-items`,
         },
         {
-          name: 'Total Fines & Fees',
+          name: 'Fines & Fees You Owe',
           value: peso(data.fees.total),
           note: `${peso(data.fees.lateFees)} late · ${peso(
             data.fees.damageFees

@@ -244,7 +244,7 @@ export default function FacultyReturnedItemsPage() {
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Returned Items Report - ${new Date().toLocaleDateString()}</title>
+                        <title>My Returned Items Report - ${new Date().toLocaleDateString()}</title>
                         <style>
                             body { font-family: Arial, sans-serif; margin: 20px; }
                             h1 { color: #333; text-align: center; margin-bottom: 20px; }
@@ -258,7 +258,7 @@ export default function FacultyReturnedItemsPage() {
                         </style>
                     </head>
                     <body>
-                        <h1>Returned Items Report</h1>
+                        <h1>My Returned Items Report</h1>
                         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
                         <p><strong>Total Items:</strong> ${returnedItems.length}</p>
                         <table>
@@ -320,7 +320,7 @@ export default function FacultyReturnedItemsPage() {
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Returned Items Report - ${new Date().toLocaleDateString()}</title>
+                        <title>My Returned Items Report - ${new Date().toLocaleDateString()}</title>
                         <style>
                             body { font-family: Arial, sans-serif; margin: 20px; }
                             h1 { color: #333; text-align: center; margin-bottom: 20px; }
@@ -336,7 +336,7 @@ export default function FacultyReturnedItemsPage() {
                         </style>
                     </head>
                     <body>
-                        <h1>Returned Items Report</h1>
+                        <h1>My Returned Items Report</h1>
                         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
                         <p><strong>Total Items:</strong> ${returnedItems.length}</p>
                         <table>
@@ -400,7 +400,7 @@ export default function FacultyReturnedItemsPage() {
                 <div className="sm:flex-auto">
                     <h1 className="text-2xl font-semibold text-gray-900">Returned Items</h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        View and manage all returned items from the school inventory.
+                        Items you have returned.
                     </p>
                 </div>
             </div>
@@ -581,7 +581,7 @@ export default function FacultyReturnedItemsPage() {
 
                             {returnedItems.length === 0 && (
                                 <div className="text-center py-12">
-                                    <p className="text-sm text-gray-500">No returned items found.</p>
+                                    <p className="text-sm text-gray-500">You have not returned any items yet.</p>
                                 </div>
                             )}
                         </div>

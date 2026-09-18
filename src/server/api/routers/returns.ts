@@ -4,15 +4,18 @@ import {
   adminProcedure,
   createTRPCRouter,
   protectedProcedure,
-  publicProcedure,
 } from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
+import { borrowerScopeFor, memberFilter } from "@/server/api/scope";
 
 const insensitive = { mode: "insensitive" } as const;
 
 export const returnsRouter = createTRPCRouter({
   // GET /api/returns
-  list: publicProcedure
+  //
+  // An admin sees every return; everyone else sees only their own. The rows carry school IDs and
+  // fee amounts, so this must never be readable without a session.
+  list: protectedProcedure
     .input(
       z.object({
         page: z.number().default(1),
@@ -25,7 +28,8 @@ export const returnsRouter = createTRPCRouter({
         const { page, limit, search } = input;
         const offset = (page - 1) * limit;
 
-        const where: any = {};
+        const scope = await borrowerScopeFor(ctx);
+        const where: any = { ...memberFilter(scope) };
 
         if (search) {
           // Search in related models
@@ -118,6 +122,20 @@ export const returnsRouter = createTRPCRouter({
         });
         if (!borrow) {
           return { success: false as const, error: "Borrow record not found" };
+        }
+
+        // `borrow_id` comes straight from the caller, so a non-admin could otherwise close out
+        // anyone's loan by guessing an id — the scoped lists only stop them finding one.
+        // An account with no borrower record of its own owns no borrow, so it fails this too.
+        const scope = await borrowerScopeFor(ctx);
+        const mayReturn =
+          scope.kind === "all" ||
+          (scope.kind === "borrower" && borrow.member_id === scope.borrowerId);
+        if (!mayReturn) {
+          return {
+            success: false as const,
+            error: "That borrow record is not yours to return",
+          };
         }
 
         if (borrow.b_date_returned) {

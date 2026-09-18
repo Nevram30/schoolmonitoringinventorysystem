@@ -6,7 +6,7 @@ export default function StudentDashboard() {
   return (
     <PortalDashboard
       basePath="/student"
-      subtitle="Borrowing, returns and fees at a glance"
+      subtitle="Your borrowing, returns and fees at a glance"
     />
   )
 }

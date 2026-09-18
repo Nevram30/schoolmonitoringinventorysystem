@@ -1,7 +1,16 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+  adminProcedure,
+  createTRPCRouter,
+  protectedProcedure,
+} from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
+import {
+  borrowerScopeFor,
+  memberFilter,
+  requesterFilter,
+} from "@/server/api/scope";
 
 const dateRange = z.object({
   startDate: z.string().nullish(),
@@ -91,16 +100,23 @@ export const reportsRouter = createTRPCRouter({
    * The figures the student / staff / faculty dashboards show: what is out on loan, what came
    * back and in what condition, and what the returns added up to in late and damage fees.
    *
-   * Scoped exactly like the other pages in those portals — every borrow and return, not only the
-   * signed-in account's — so the totals here agree with what their Borrowed Items and Returned
-   * Items screens list.
+   * Scoped exactly like the other pages in those portals — the signed-in account's own borrows and
+   * returns — so the totals here agree with what their Borrowed Items and Returned Items screens
+   * list. An admin loading it sees the school-wide figures instead.
+   *
+   * The one exception is the inventory condition breakdown, which stays school-wide: item status
+   * describes the stock on the shelf, not anybody's borrowing.
    */
   portalDashboard: protectedProcedure
     .input(dateRange.default({}))
     .query(async ({ ctx, input }) => {
       try {
-        const borrowWhere = buildWhere(input);
-        const returnWhere = buildReturnWhere(input);
+        const scope = await borrowerScopeFor(ctx);
+        // Empty for an admin, so every figure below stays school-wide for them.
+        const mine = memberFilter(scope);
+        const borrowWhere = { ...buildWhere(input), ...mine };
+        const returnWhere = { ...buildReturnWhere(input), ...mine };
+        const requestWhere = { ...requesterFilter(scope), br_status: 1 };
         const now = new Date();
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -130,7 +146,7 @@ export const reportsRouter = createTRPCRouter({
             where: { ...borrowWhere, b_status: 1 },
             _sum: { b_quantity: true },
           }),
-          ctx.db.borrowRequest.count({ where: { br_status: 1 } }),
+          ctx.db.borrowRequest.count({ where: requestWhere }),
           ctx.db.return.count({ where: returnWhere }),
           ctx.db.return.count({
             where: { ...returnWhere, r_date_returned: { gte: monthStart } },
@@ -149,6 +165,8 @@ export const reportsRouter = createTRPCRouter({
             _count: { _all: true },
             _sum: { r_damage_fee: true, r_quantity: true },
           }),
+          // Deliberately unscoped: the condition of the school's stock, which the portals already
+          // browse in full, not a breakdown of what this account happens to have borrowed.
           ctx.db.item.groupBy({
             by: ["i_status"],
             _count: { _all: true },
@@ -237,7 +255,10 @@ export const reportsRouter = createTRPCRouter({
     }),
 
   // GET /api/reports?type=summary
-  summary: protectedProcedure
+  //
+  // Admin-only, like the three reports below it: these are school-wide by design, so leaving them
+  // open to any signed-in account would hand back everything the portal scoping withholds.
+  summary: adminProcedure
     .input(dateRange)
     .query(async ({ ctx, input }) => {
       try {
@@ -431,7 +452,7 @@ export const reportsRouter = createTRPCRouter({
     }),
 
   // GET /api/reports?type=detailed
-  detailed: protectedProcedure
+  detailed: adminProcedure
     .input(dateRange)
     .query(async ({ ctx, input }) => {
       try {
@@ -461,7 +482,7 @@ export const reportsRouter = createTRPCRouter({
     }),
 
   // GET /api/reports?type=overdue
-  overdue: protectedProcedure
+  overdue: adminProcedure
     .input(dateRange)
     .query(async ({ ctx, input }) => {
       try {
@@ -501,7 +522,7 @@ export const reportsRouter = createTRPCRouter({
    * borrowed items per month, and the departments that borrow the most. Counts are borrow
    * transactions — the same unit the Reports page's "Most Borrowed Items" uses.
    */
-  dashboardCharts: protectedProcedure
+  dashboardCharts: adminProcedure
     .input(
       z.object({
         months: z.number().int().min(1).max(24).default(6),

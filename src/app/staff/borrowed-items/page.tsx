@@ -288,7 +288,7 @@ export default function BorrowedItemsPage() {
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Borrowed Items Report - ${new Date().toLocaleDateString()}</title>
+                        <title>My Borrowed Items Report - ${new Date().toLocaleDateString()}</title>
                         <style>
                             body { font-family: Arial, sans-serif; margin: 20px; }
                             h1 { color: #333; text-align: center; margin-bottom: 20px; }
@@ -302,7 +302,7 @@ export default function BorrowedItemsPage() {
                         </style>
                     </head>
                     <body>
-                        <h1>Borrowed Items Report</h1>
+                        <h1>My Borrowed Items Report</h1>
                         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
                         <p><strong>Total Items:</strong> ${borrowedItems.length}</p>
                         <table>
@@ -362,7 +362,7 @@ export default function BorrowedItemsPage() {
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Borrowed Items Report - ${new Date().toLocaleDateString()}</title>
+                        <title>My Borrowed Items Report - ${new Date().toLocaleDateString()}</title>
                         <style>
                             body { font-family: Arial, sans-serif; margin: 20px; }
                             h1 { color: #333; text-align: center; margin-bottom: 20px; }
@@ -378,7 +378,7 @@ export default function BorrowedItemsPage() {
                         </style>
                     </head>
                     <body>
-                        <h1>Borrowed Items Report</h1>
+                        <h1>My Borrowed Items Report</h1>
                         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
                         <p><strong>Total Items:</strong> ${borrowedItems.length}</p>
                         <table>
@@ -426,7 +426,7 @@ export default function BorrowedItemsPage() {
                 <div className="sm:flex-auto">
                     <h1 className="text-2xl font-semibold text-gray-900">Borrowed Items</h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        Track and manage currently borrowed items from the school inventory.
+                        Items you currently have on loan.
                     </p>
                 </div>
             </div>
@@ -600,7 +600,7 @@ export default function BorrowedItemsPage() {
 
                             {borrowedItems.length === 0 && (
                                 <div className="text-center py-12">
-                                    <p className="text-sm text-gray-500">No borrowed items found.</p>
+                                    <p className="text-sm text-gray-500">You have no items on loan. Approved requests appear here.</p>
                                 </div>
                             )}
                         </div>

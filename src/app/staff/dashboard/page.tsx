@@ -6,7 +6,7 @@ export default function StaffDashboard() {
   return (
     <PortalDashboard
       basePath="/staff"
-      subtitle="Borrowing, returns and fees at a glance"
+      subtitle="Your borrowing, returns and fees at a glance"
     />
   )
 }

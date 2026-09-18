@@ -170,6 +170,8 @@ model Borrow {
   /// Set once the item was physically handed over and the admin logged who took it.
   receipt ItemReceipt?
 
+  // Every portal screen filters to the signed-in account's own borrows.
+  @@index([member_id])
   @@map("borrow")
 }
 
@@ -259,6 +261,9 @@ model BorrowRequest {
   // The admin bell counts pending requests on every poll, and the list is newest-first.
   @@index([br_status])
   @@index([createdAt])
+  // A portal's request list matches on either side of "this account's request".
+  @@index([member_id])
+  @@index([requested_by])
   @@map("borrow_request")
 }
 
