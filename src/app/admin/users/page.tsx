@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon, XCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon, XCircleIcon, ExclamationTriangleIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
+import ImportUsersModal from './ImportUsersModal';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
@@ -101,6 +102,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
   const [pagination, setPagination] = useState<Pagination>({
@@ -396,7 +398,15 @@ export default function UsersPage() {
               Manage system users and their access levels.
             </p>
           </div>
-          <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+          <div className="mt-4 flex gap-3 sm:mt-0 sm:ml-16 sm:flex-none">
+            <button
+              type="button"
+              onClick={() => setShowImportModal(true)}
+              className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
+            >
+              <ArrowUpTrayIcon className="-ml-1 mr-2 h-5 w-5" />
+              Upload Excel
+            </button>
             <button
               type="button"
               onClick={() => setShowAddModal(true)}
@@ -769,6 +779,17 @@ export default function UsersPage() {
               </form>
             </div>
           </div>
+        )}
+
+        {/* Upload Users from Excel */}
+        {showImportModal && (
+          <ImportUsersModal
+            onClose={() => setShowImportModal(false)}
+            onImported={(created) => {
+              fetchUsers(); // Refresh the list
+              showSuccess(`${created} user${created === 1 ? '' : 's'} imported from Excel.`, 'Users imported');
+            }}
+          />
         )}
 
         {/* Edit User Modal */}

@@ -176,6 +176,125 @@ export const usersRouter = createTRPCRouter({
       }
     }),
 
+  // Bulk import from the Excel upload on /admin/users. Each row is checked on
+  // its own, so one bad row doesn't stop the rest of the sheet from importing.
+  bulkCreate: protectedProcedure
+    .input(
+      z.object({
+        rows: z
+          .array(
+            z.object({
+              // Spreadsheet row number, echoed back so errors point at the sheet.
+              row: z.number(),
+              name: z.string(),
+              username: z.string(),
+              password: z.string(),
+              email: z.string(),
+              id_number: z.string(),
+              role: z.enum(["admin", "faculty", "staff", "student"]),
+              status: z.union([z.literal(1), z.literal(2)]).default(1),
+            })
+          )
+          .min(1)
+          .max(1000),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user?.role !== "admin") {
+        return { success: false as const, error: "Forbidden - Admin access required" };
+      }
+
+      const rowSchema = z.object({
+        name: z.string().trim().min(1, "Name is required").max(50, "Name is over 50 characters"),
+        username: z.string().trim().min(1, "Username is required").max(50, "Username is over 50 characters"),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        email: z.string().trim().email("Email address is invalid").max(100, "Email is over 100 characters"),
+        id_number: z.string().trim().min(1, "ID number is required").max(50, "ID number is over 50 characters"),
+      });
+
+      const failed: { row: number; username: string; error: string }[] = [];
+      const valid: (typeof input.rows)[number][] = [];
+      const seen = { username: new Set<string>(), email: new Set<string>(), id_number: new Set<string>() };
+
+      for (const r of input.rows) {
+        const parsed = rowSchema.safeParse(r);
+        if (!parsed.success) {
+          failed.push({ row: r.row, username: r.username, error: parsed.error.issues[0]?.message ?? "Invalid row" });
+          continue;
+        }
+
+        const row = { ...r, ...parsed.data };
+        const dup =
+          seen.username.has(row.username.toLowerCase()) ? "Username"
+          : seen.email.has(row.email.toLowerCase()) ? "Email address"
+          : seen.id_number.has(row.id_number) ? "ID number"
+          : null;
+        if (dup) {
+          failed.push({ row: row.row, username: row.username, error: `${dup} appears more than once in the file` });
+          continue;
+        }
+
+        seen.username.add(row.username.toLowerCase());
+        seen.email.add(row.email.toLowerCase());
+        seen.id_number.add(row.id_number);
+        valid.push(row);
+      }
+
+      // One query for everything already in the database.
+      const existing = valid.length
+        ? await ctx.db.user.findMany({
+            where: {
+              OR: [
+                { username: { in: valid.map((r) => r.username) } },
+                { email: { in: valid.map((r) => r.email) } },
+                { id_number: { in: valid.map((r) => r.id_number) } },
+              ],
+            },
+            select: { username: true, email: true, id_number: true },
+          })
+        : [];
+      const taken = {
+        username: new Set(existing.map((u) => u.username)),
+        email: new Set(existing.map((u) => u.email)),
+        id_number: new Set(existing.map((u) => u.id_number)),
+      };
+
+      let created = 0;
+      for (const row of valid) {
+        const clash =
+          taken.username.has(row.username) ? "Username"
+          : taken.email.has(row.email) ? "Email address"
+          : taken.id_number.has(row.id_number) ? "ID number"
+          : null;
+        if (clash) {
+          failed.push({ row: row.row, username: row.username, error: `${clash} already exists` });
+          continue;
+        }
+
+        try {
+          await ctx.db.user.create({
+            data: {
+              name: row.name,
+              username: row.username,
+              password: await bcrypt.hash(row.password, 10),
+              email: row.email,
+              id_number: row.id_number,
+              role: row.role,
+              status: row.status,
+            },
+          });
+          created++;
+        } catch (error) {
+          console.error("Bulk create user error:", error);
+          failed.push({ row: row.row, username: row.username, error: "Failed to create user" });
+        }
+      }
+
+      failed.sort((a, b) => a.row - b.row);
+
+      return { success: true as const, created, failed };
+    }),
+
   // PATCH /api/users/[id]
   update: protectedProcedure
     .input(
