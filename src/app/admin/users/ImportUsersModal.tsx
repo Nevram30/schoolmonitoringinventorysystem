@@ -10,6 +10,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { trpcClient } from '@/trpc/client';
+import { PASSWORD_HINT, passwordIssues } from '@/lib/password-policy';
 
 type Role = 'admin' | 'staff' | 'faculty' | 'student';
 
@@ -31,7 +32,6 @@ interface ImportResult {
   failed: { row: number; username: string; error: string }[];
 }
 
-const MIN_PASSWORD_LENGTH = 8;
 const MAX_ROWS = 1000;
 
 const TEMPLATE_HEADERS = ['Name', 'Username', 'Email', 'ID Number', 'Role', 'Password', 'Status'];
@@ -135,8 +135,7 @@ const parseWorkbook = (buffer: ArrayBuffer): { rows: ImportRow[]; missing: strin
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.email)) item.errors.push('Email is invalid');
       if (!item.id_number) item.errors.push('ID number is required');
       if (!item.role) item.errors.push('Role must be admin, faculty, staff or student');
-      if (item.password.length < MIN_PASSWORD_LENGTH)
-        item.errors.push(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
+      item.errors.push(...passwordIssues(item.password));
       if (!item.status) item.errors.push('Status must be Active or Inactive');
 
       const username = item.username.toLowerCase();
@@ -157,8 +156,8 @@ const parseWorkbook = (buffer: ArrayBuffer): { rows: ImportRow[]; missing: strin
 const downloadTemplate = () => {
   const sheet = XLSX.utils.aoa_to_sheet([
     TEMPLATE_HEADERS,
-    ['Juan Dela Cruz', 'jdelacruz', 'juan.delacruz@school.edu', '2024-0001', 'student', 'ChangeMe123', 'Active'],
-    ['Maria Santos', 'msantos', 'maria.santos@school.edu', 'FAC-0001', 'faculty', 'ChangeMe123', 'Active']
+    ['Juan Dela Cruz', 'jdelacruz', 'juan.delacruz@school.edu', '2024-0001', 'student', 'ChangeMe@123', 'Active'],
+    ['Maria Santos', 'msantos', 'maria.santos@school.edu', 'FAC-0001', 'faculty', 'ChangeMe@123', 'Active']
   ]);
   sheet['!cols'] = TEMPLATE_HEADERS.map(() => ({ wch: 24 }));
   const workbook = XLSX.utils.book_new();
@@ -266,8 +265,8 @@ export default function ImportUsersModal({ onClose, onImported }: ImportUsersMod
             <p>
               The first sheet needs a header row with the columns{' '}
               <span className="font-medium">{TEMPLATE_HEADERS.join(', ')}</span>. Role is admin,
-              faculty, staff or student; Status is Active or Inactive (blank means Active). Passwords
-              must be at least {MIN_PASSWORD_LENGTH} characters.
+              faculty, staff or student; Status is Active or Inactive (blank means Active). Passwords:{' '}
+              {PASSWORD_HINT}
             </p>
             <button
               type="button"

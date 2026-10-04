@@ -108,7 +108,9 @@ const ADMIN = {
   username: "admin",
   id_number: "ADMIN-001",
   email: "admin@school.com",
-  password: "admin",
+  // Must satisfy the password policy in src/lib/password-policy.ts, or the
+  // login form will refuse it.
+  password: "Admin@2026",
 };
 
 async function seedAdmin() {

@@ -10,6 +10,7 @@ import ImportUsersModal from './ImportUsersModal';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
+import { MIN_PASSWORD_LENGTH, PASSWORD_HINT, passwordIssues } from '@/lib/password-policy';
 
 interface User {
   id: number;
@@ -28,13 +29,11 @@ interface Pagination {
   totalPages: number;
 }
 
-const MIN_PASSWORD_LENGTH = 8;
-
 /**
  * Rough password strength, scored out of 4: one point each for a decent
  * length, a long length, mixed case, a digit and a symbol (capped at 4).
- * Guidance for whoever is filling the form — the only hard rules are the
- * minimum length and the confirmation matching.
+ * Guidance for whoever is filling the form — the hard rules are the shared
+ * password policy and the confirmation matching.
  */
 const scorePassword = (password: string) => {
   if (!password) return null;
@@ -140,17 +139,16 @@ export default function UsersPage() {
   });
 
   const passwordStrength = scorePassword(formData.password);
-  const passwordTooShort =
-    formData.password.length > 0 && formData.password.length < MIN_PASSWORD_LENGTH;
+  const [passwordIssue] = formData.password ? passwordIssues(formData.password) : [];
   const passwordsMismatch =
     formData.confirmPassword.length > 0 &&
     formData.password !== formData.confirmPassword;
 
   // The edit form's password is optional, so it is only checked once typed in.
   const editPasswordStrength = scorePassword(editFormData.password);
-  const editPasswordTooShort =
-    editFormData.password.length > 0 &&
-    editFormData.password.length < MIN_PASSWORD_LENGTH;
+  const [editPasswordIssue] = editFormData.password
+    ? passwordIssues(editFormData.password)
+    : [];
   const editPasswordsMismatch =
     editFormData.password !== editFormData.confirmPassword;
 
@@ -208,8 +206,9 @@ export default function UsersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.password.length < MIN_PASSWORD_LENGTH) {
-      alert(`Password must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
+    const [issue] = passwordIssues(formData.password);
+    if (issue) {
+      alert(`${issue}.`);
       return;
     }
 
@@ -283,11 +282,8 @@ export default function UsersPage() {
     e.preventDefault();
     if (!editingUser) return;
 
-    if (editFormData.password && editFormData.password.length < MIN_PASSWORD_LENGTH) {
-      setEditNotice({
-        type: 'warning',
-        message: `The new password must be at least ${MIN_PASSWORD_LENGTH} characters long.`
-      });
+    if (editPasswordIssue) {
+      setEditNotice({ type: 'warning', message: `${editPasswordIssue}.` });
       return;
     }
 
@@ -734,10 +730,8 @@ export default function UsersPage() {
                       </div>
                     )}
 
-                    <p className={`mt-1 text-xs ${passwordTooShort ? 'text-red-600' : 'text-gray-500'}`}>
-                      {passwordTooShort
-                        ? `At least ${MIN_PASSWORD_LENGTH} characters required.`
-                        : `Use ${MIN_PASSWORD_LENGTH}+ characters with upper and lower case, a number and a symbol.`}
+                    <p className={`mt-1 text-xs ${passwordIssue ? 'text-red-600' : 'text-gray-500'}`}>
+                      {passwordIssue ? `${passwordIssue}.` : PASSWORD_HINT}
                     </p>
                   </div>
 
@@ -770,7 +764,7 @@ export default function UsersPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting || passwordTooShort || passwordsMismatch}
+                    disabled={submitting || !!passwordIssue || passwordsMismatch}
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                   >
                     {submitting ? 'Creating...' : 'Create User'}
@@ -956,10 +950,10 @@ export default function UsersPage() {
                       </div>
                     )}
 
-                    {editPasswordTooShort && (
-                      <p className="mt-1 text-xs text-red-600">
-                        At least {MIN_PASSWORD_LENGTH} characters required.
-                      </p>
+                    {editPasswordIssue ? (
+                      <p className="mt-1 text-xs text-red-600">{editPasswordIssue}.</p>
+                    ) : editFormData.password ? null : (
+                      <p className="mt-1 text-xs text-gray-500">{PASSWORD_HINT}</p>
                     )}
                   </div>
 
@@ -992,7 +986,7 @@ export default function UsersPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting || editPasswordTooShort || editPasswordsMismatch}
+                    disabled={submitting || !!editPasswordIssue || editPasswordsMismatch}
                     className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                   >
                     {submitting ? 'Saving...' : 'Update User'}

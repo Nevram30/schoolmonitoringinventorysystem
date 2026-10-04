@@ -2,6 +2,9 @@
 import React, { useId, useState } from 'react'
 import { IdCard, Lock, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react'
 import { signIn } from 'next-auth/react'
+import * as yup from 'yup'
+
+import authschema from '@/schema/auth.schema'
 
 // Faculty, staff, students and the admin all sign in with their school ID
 // number — the account's username is never typed here.
@@ -76,6 +79,23 @@ const SignInForm: React.FC = () => {
 
     if (isSubmitting) {
       return
+    }
+
+    // Same schema `authorize` runs, checked here first so the field messages
+    // show without a round trip.
+    try {
+      authschema.validateSync(formData, { abortEarly: false })
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        const errors: Partial<SignInFormData> = {}
+        error.inner.forEach((result) => {
+          const field = result.path as keyof SignInFormData
+          errors[field] ??= result.message
+        })
+        setFormError(errors)
+        setLoginError(false)
+        return
+      }
     }
 
     setIsSubmitting(true)

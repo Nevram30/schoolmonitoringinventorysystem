@@ -1,9 +1,16 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
+import { passwordIssues } from "@/lib/password-policy";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 const insensitive = { mode: "insensitive" } as const;
+
+// Same rules the login form enforces, so every saved password can sign in.
+const passwordSchema = z.string().superRefine((password, ctx) => {
+  const [issue] = passwordIssues(password);
+  if (issue) ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue });
+});
 
 // Map type number to role string
 const getRole = (type: number): "admin" | "faculty" | "staff" | "student" => {
@@ -99,7 +106,7 @@ export const usersRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         username: z.string(),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        password: passwordSchema,
         email: z.string().email(),
         id_number: z.string().min(1),
         role: z.enum(["admin", "faculty", "staff", "student"]).optional(),
@@ -207,7 +214,7 @@ export const usersRouter = createTRPCRouter({
       const rowSchema = z.object({
         name: z.string().trim().min(1, "Name is required").max(50, "Name is over 50 characters"),
         username: z.string().trim().min(1, "Username is required").max(50, "Username is over 50 characters"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
+        password: passwordSchema,
         email: z.string().trim().email("Email address is invalid").max(100, "Email is over 100 characters"),
         id_number: z.string().trim().min(1, "ID number is required").max(50, "ID number is over 50 characters"),
       });
@@ -307,10 +314,7 @@ export const usersRouter = createTRPCRouter({
         role: z.enum(["admin", "faculty", "staff", "student"]),
         status: z.number(),
         // Omitted (or empty) leaves the existing password alone.
-        password: z
-          .string()
-          .min(8, "Password must be at least 8 characters")
-          .optional(),
+        password: passwordSchema.optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
