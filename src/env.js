@@ -24,7 +24,17 @@ export const env = createEnv({
     EMAIL_REPLY_TO: z.string().email().optional(),
     // Public address used for links in e-mails (falls back to NEXTAUTH_URL). Mail filters treat a
     // localhost link, or one on a different domain from the sender, as a phishing sign.
-    APP_URL: z.string().url().optional(),
+    // Forgiving about how it is typed into a hosting dashboard: surrounding quotes are dropped and
+    // a bare domain ("sabms.online") gets "https://" in front.
+    APP_URL: z.preprocess(
+      (value) => {
+        if (typeof value !== "string") return value;
+        const trimmed = value.trim().replace(/^["']|["']$/g, "");
+        if (!trimmed) return undefined;
+        return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+      },
+      z.string().url().optional()
+    ),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
