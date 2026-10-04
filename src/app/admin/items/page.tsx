@@ -14,6 +14,18 @@ import Layout from '../Layout';
 import ItemAvatar from '@/components/ui-components/item.avatar';
 import { trpcClient } from '@/trpc/client';
 import { useUploadThing } from '@/lib/uploadthing';
+import {
+  DEFAULT_ITEM_CONDITION,
+  DEFAULT_STOCK_UNIT,
+  ITEM_CATEGORIES,
+  ITEM_CONDITIONS,
+  STOCK_UNITS,
+  formatStock,
+  replacementDate,
+  unitNoun,
+  type ItemCondition,
+  type StockUnit,
+} from '@/lib/item-options';
 
 interface Item {
   id: number;
@@ -32,6 +44,10 @@ interface Item {
   remarks?: string | null;
   // A Date from the server; the `YYYY-MM-DD` string from the form after a local edit.
   i_date_acquired?: Date | string | null;
+  i_unit: string;
+  i_condition: string;
+  /// Years, counted from `i_date_acquired`.
+  i_lifespan?: number | null;
 }
 
 interface Pagination {
@@ -40,9 +56,6 @@ interface Pagination {
   total: number;
   totalPages: number;
 }
-
-/** The categories an item can be filed under; stored as-is in `i_category`. */
-const ITEM_CATEGORIES = ['School Supplies', 'Electronic Devices'];
 
 // `i_date_acquired` is a date-only column stored as UTC midnight, so it is read in UTC
 // to keep it from shifting a day in the viewer's timezone.
@@ -64,6 +77,67 @@ const todayInputValue = () => {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 };
+
+const CONDITION_CLASSES: Record<string, string> = {
+  New: 'bg-green-100 text-green-800',
+  Existing: 'bg-blue-100 text-blue-800',
+  Old: 'bg-gray-200 text-gray-800',
+};
+
+/** When the item should be replaced, and whether that day has come. Null if not tracked. */
+const replacementStatus = (
+  acquired: Date | string | null | undefined,
+  lifespan: number | string | null | undefined
+) => {
+  const date = replacementDate(acquired, lifespan ? Number(lifespan) : null);
+  if (!date) return null;
+  return { date, due: toDateInputValue(date) <= todayInputValue() };
+};
+
+/** The form's lifespan field is a string; empty means "not tracked". */
+const parseLifespan = (value: string) => (value ? parseInt(value) : null);
+
+const emptyItemForm = {
+  i_model: '',
+  i_category: '',
+  i_brand: '',
+  i_description: '',
+  i_type: '',
+  item_rawstock: '',
+  i_mr: '',
+  i_price: '',
+  i_condition: DEFAULT_ITEM_CONDITION as ItemCondition,
+  i_unit: DEFAULT_STOCK_UNIT as StockUnit,
+  i_lifespan: '',
+  i_date_acquired: ''
+};
+
+/** Hint under the lifespan field: when the item will be due, or what is missing to know it. */
+function LifespanHint({ acquired, lifespan }: { acquired: string; lifespan: string }) {
+  if (!lifespan) {
+    return <p className="mt-1 text-xs text-gray-500">Years the item is expected to last.</p>;
+  }
+  const status = replacementStatus(acquired, lifespan);
+  if (!status) {
+    return <p className="mt-1 text-xs text-amber-600">Set the Date Acquired to track replacement.</p>;
+  }
+  return (
+    <p className={`mt-1 text-xs ${status.due ? 'text-red-600 font-medium' : 'text-gray-500'}`}>
+      {status.due ? 'Needs replacement — was due' : 'Replace by'} {formatDateAcquired(status.date)}
+    </p>
+  );
+}
+
+/** Red "Needs replacement" badge once an item's lifespan has run out; nothing otherwise. */
+function ReplacementBadge({ item }: { item: Item }) {
+  const status = replacementStatus(item.i_date_acquired, item.i_lifespan);
+  if (!status?.due) return null;
+  return (
+    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+      Needs replacement
+    </span>
+  );
+}
 
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
@@ -92,18 +166,7 @@ export default function ItemsPage() {
   });
   // Preview of the device ID the server will assign to the next item.
   const [nextDeviceId, setNextDeviceId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    i_model: '',
-    i_category: '',
-    i_brand: '',
-    i_description: '',
-    i_type: '',
-    item_rawstock: '',
-    i_mr: '',
-    i_price: '',
-    i_status: '1',
-    i_date_acquired: ''
-  });
+  const [formData, setFormData] = useState(emptyItemForm);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   // Uploads go straight to UploadThing from the browser; `itemImage` is the
@@ -118,19 +181,7 @@ export default function ItemsPage() {
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [quantityToAdd, setQuantityToAdd] = useState('');
-  const [editFormData, setEditFormData] = useState({
-    i_deviceID: '',
-    i_model: '',
-    i_category: '',
-    i_brand: '',
-    i_description: '',
-    i_type: '',
-    item_rawstock: '',
-    i_mr: '',
-    i_price: '',
-    i_status: '1',
-    i_date_acquired: ''
-  });
+  const [editFormData, setEditFormData] = useState({ ...emptyItemForm, i_deviceID: '' });
   const [statusFormData, setStatusFormData] = useState({
     i_status: '1',
     no_of_items: '',
@@ -282,25 +333,14 @@ export default function ItemsPage() {
         ...formData,
         item_rawstock: parseInt(formData.item_rawstock),
         i_price: parseFloat(formData.i_price),
-        i_status: parseInt(formData.i_status),
+        i_lifespan: parseLifespan(formData.i_lifespan),
         i_photo: photo,
         i_date_acquired: formData.i_date_acquired || null
       });
 
       if (data.success) {
         setShowAddModal(false);
-        setFormData({
-          i_model: '',
-          i_category: '',
-          i_brand: '',
-          i_description: '',
-          i_type: '',
-          item_rawstock: '',
-          i_mr: '',
-          i_price: '',
-          i_status: '1',
-          i_date_acquired: ''
-        });
+        setFormData(emptyItemForm);
         setSelectedPhoto(null);
         setPhotoPreview(null);
         fetchItems(); // Refresh the list
@@ -333,7 +373,7 @@ export default function ItemsPage() {
         setSelectedItem(prev => prev ? { ...prev, item_rawstock: newStock } : null);
         setShowQuantityModal(false);
         setQuantityToAdd('');
-        showNotification('success', 'Quantity Added', `Added ${quantityToAdd} units to inventory`);
+        showNotification('success', 'Quantity Added', `Added ${formatStock(parseInt(quantityToAdd), selectedItem.i_unit)} to inventory`);
       } else {
         showNotification('error', 'Error', data.error || 'Failed to add quantity');
       }
@@ -356,7 +396,9 @@ export default function ItemsPage() {
       item_rawstock: item.item_rawstock.toString(),
       i_mr: item.i_mr,
       i_price: item.i_price.toString(),
-      i_status: item.i_status.toString(),
+      i_condition: (item.i_condition || DEFAULT_ITEM_CONDITION) as ItemCondition,
+      i_unit: (item.i_unit || DEFAULT_STOCK_UNIT) as StockUnit,
+      i_lifespan: item.i_lifespan ? item.i_lifespan.toString() : '',
       i_date_acquired: toDateInputValue(item.i_date_acquired)
     });
     setShowEditModal(true);
@@ -406,7 +448,7 @@ export default function ItemsPage() {
           ...editFormData,
           item_rawstock: parseInt(editFormData.item_rawstock),
           i_price: parseFloat(editFormData.i_price),
-          i_status: parseInt(editFormData.i_status),
+          i_lifespan: parseLifespan(editFormData.i_lifespan),
           i_date_acquired: editFormData.i_date_acquired || null
         }
       });
@@ -417,7 +459,7 @@ export default function ItemsPage() {
           ...editFormData,
           item_rawstock: parseInt(editFormData.item_rawstock),
           i_price: parseFloat(editFormData.i_price),
-          i_status: parseInt(editFormData.i_status),
+          i_lifespan: parseLifespan(editFormData.i_lifespan),
           i_date_acquired: editFormData.i_date_acquired || null
         };
 
@@ -506,9 +548,9 @@ export default function ItemsPage() {
           <td>${escapeHtml(item.i_category)}</td>
           <td>${escapeHtml(item.i_brand)}</td>
           <td>${escapeHtml(item.i_type)}</td>
-          <td>${escapeHtml(item.item_rawstock)}</td>
+          <td>${escapeHtml(formatStock(item.item_rawstock, item.i_unit))}</td>
           <td>${escapeHtml(peso(Number(item.i_price) || 0))}</td>
-          <td>${escapeHtml(item.i_status === 1 ? 'New' : 'Old')}</td>
+          <td>${escapeHtml(item.i_condition)}${replacementStatus(item.i_date_acquired, item.i_lifespan)?.due ? ' (needs replacement)' : ''}</td>
         </tr>`
       )
       .join('');
@@ -743,18 +785,18 @@ export default function ItemsPage() {
                           {item.i_category}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.item_rawstock}
+                          {formatStock(item.item_rawstock, item.i_unit)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           ₱{item.i_price}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${item.i_status === 1
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                            }`}>
-                            {item.i_status === 1 ? 'New' : 'Old'}
-                          </span>
+                          <div className="flex flex-col items-start gap-1">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${CONDITION_CLASSES[item.i_condition] ?? CONDITION_CLASSES.Old}`}>
+                              {item.i_condition}
+                            </span>
+                            <ReplacementBadge item={item} />
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button
@@ -927,7 +969,26 @@ export default function ItemsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Stock Quantity</label>
+                      <label className="block text-sm font-medium text-gray-700">Unit</label>
+                      <select
+                        name="i_unit"
+                        value={formData.i_unit}
+                        onChange={handleInputChange}
+                        required
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {STOCK_UNITS.map((unit) => (
+                          <option key={unit} value={unit}>
+                            {unit}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Stock Quantity <span className="text-gray-500 font-normal">({unitNoun(formData.i_unit)})</span>
+                      </label>
                       <input
                         type="number"
                         name="item_rawstock"
@@ -935,12 +996,15 @@ export default function ItemsPage() {
                         onChange={handleInputChange}
                         required
                         min="0"
+                        placeholder={`Number of ${unitNoun(formData.i_unit)}`}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Price</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Price <span className="text-gray-500 font-normal">({formData.i_unit.toLowerCase()})</span>
+                      </label>
                       <input
                         type="number"
                         name="i_price"
@@ -956,14 +1020,17 @@ export default function ItemsPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
                       <select
-                        name="i_status"
-                        value={formData.i_status}
+                        name="i_condition"
+                        value={formData.i_condition}
                         onChange={handleInputChange}
                         required
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       >
-                        <option value="1">New</option>
-                        <option value="0">Old</option>
+                        {ITEM_CONDITIONS.map((condition) => (
+                          <option key={condition} value={condition}>
+                            {condition}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -975,8 +1042,25 @@ export default function ItemsPage() {
                         value={formData.i_date_acquired}
                         onChange={handleInputChange}
                         max={todayInputValue()}
+                        // Replacement is counted from this date, so it is needed once a lifespan is set.
+                        required={!!formData.i_lifespan}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Lifespan (years)</label>
+                      <input
+                        type="number"
+                        name="i_lifespan"
+                        value={formData.i_lifespan}
+                        onChange={handleInputChange}
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 5"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <LifespanHint acquired={formData.i_date_acquired} lifespan={formData.i_lifespan} />
                     </div>
                   </div>
 
@@ -1094,7 +1178,10 @@ export default function ItemsPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Stock Quantity</label>
-                      <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{selectedItem.item_rawstock}</p>
+                      <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">
+                        {formatStock(selectedItem.item_rawstock, selectedItem.i_unit)}{' '}
+                        <span className="text-gray-500">({selectedItem.i_unit})</span>
+                      </p>
                     </div>
 
                     <div>
@@ -1104,19 +1191,39 @@ export default function ItemsPage() {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
-                      <div className="mt-1">
-                        <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${selectedItem.i_status === 1
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                          }`}>
-                          {selectedItem.i_status === 1 ? 'New' : 'Old'}
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${CONDITION_CLASSES[selectedItem.i_condition] ?? CONDITION_CLASSES.Old}`}>
+                          {selectedItem.i_condition}
                         </span>
+                        <ReplacementBadge item={selectedItem} />
                       </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Date Acquired</label>
                       <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{formatDateAcquired(selectedItem.i_date_acquired)}</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Lifespan</label>
+                      <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">
+                        {selectedItem.i_lifespan
+                          ? `${selectedItem.i_lifespan} ${selectedItem.i_lifespan === 1 ? 'year' : 'years'}`
+                          : 'Not tracked'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Replacement Due</label>
+                      {(() => {
+                        const replacement = replacementStatus(selectedItem.i_date_acquired, selectedItem.i_lifespan);
+                        return (
+                          <p className={`mt-1 text-sm p-2 rounded-md ${replacement?.due ? 'bg-red-50 text-red-700 font-medium' : 'bg-gray-50 text-gray-900'}`}>
+                            {replacement ? formatDateAcquired(replacement.date) : 'Not tracked'}
+                            {replacement?.due && ' — needs replacement'}
+                          </p>
+                        );
+                      })()}
                     </div>
 
                     <div>
@@ -1172,7 +1279,7 @@ export default function ItemsPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Current Stock</label>
-                    <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{selectedItem.item_rawstock} units</p>
+                    <p className="mt-1 text-sm text-gray-900 bg-gray-50 p-2 rounded-md">{formatStock(selectedItem.item_rawstock, selectedItem.i_unit)}</p>
                   </div>
 
                   <div>
@@ -1290,7 +1397,26 @@ export default function ItemsPage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Stock Quantity</label>
+                      <label className="block text-sm font-medium text-gray-700">Unit</label>
+                      <select
+                        name="i_unit"
+                        value={editFormData.i_unit}
+                        onChange={handleEditInputChange}
+                        required
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {STOCK_UNITS.map((unit) => (
+                          <option key={unit} value={unit}>
+                            {unit}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Stock Quantity <span className="text-gray-500 font-normal">({unitNoun(editFormData.i_unit)})</span>
+                      </label>
                       <input
                         type="number"
                         name="item_rawstock"
@@ -1298,12 +1424,15 @@ export default function ItemsPage() {
                         onChange={handleEditInputChange}
                         required
                         min="0"
+                        placeholder={`Number of ${unitNoun(editFormData.i_unit)}`}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Price</label>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Price <span className="text-gray-500 font-normal">({editFormData.i_unit.toLowerCase()})</span>
+                      </label>
                       <input
                         type="number"
                         name="i_price"
@@ -1319,14 +1448,17 @@ export default function ItemsPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
                       <select
-                        name="i_status"
-                        value={editFormData.i_status}
+                        name="i_condition"
+                        value={editFormData.i_condition}
                         onChange={handleEditInputChange}
                         required
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       >
-                        <option value="1">New</option>
-                        <option value="0">Old</option>
+                        {ITEM_CONDITIONS.map((condition) => (
+                          <option key={condition} value={condition}>
+                            {condition}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
@@ -1340,6 +1472,21 @@ export default function ItemsPage() {
                         max={todayInputValue()}
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Lifespan (years)</label>
+                      <input
+                        type="number"
+                        name="i_lifespan"
+                        value={editFormData.i_lifespan}
+                        onChange={handleEditInputChange}
+                        min="1"
+                        step="1"
+                        placeholder="e.g. 5"
+                        className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <LifespanHint acquired={editFormData.i_date_acquired} lifespan={editFormData.i_lifespan} />
                     </div>
                   </div>
 

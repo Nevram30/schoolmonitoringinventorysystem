@@ -6,6 +6,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { serialize } from "@/server/api/serialize";
+import { ITEM_CONDITIONS, STOCK_UNITS } from "@/lib/item-options";
 
 const insensitive = { mode: "insensitive" } as const;
 
@@ -192,11 +193,15 @@ export const itemsRouter = createTRPCRouter({
         i_description: z.string(),
         i_type: z.string(),
         item_rawstock: z.number(),
-        i_status: z.number(),
+        // Availability; new items default to 1 (available).
+        i_status: z.number().optional(),
         i_mr: z.string(),
         i_price: z.number(),
         i_photo: z.string().nullish(),
         i_date_acquired: dateOnly.nullish(),
+        i_unit: z.enum(STOCK_UNITS),
+        i_condition: z.enum(ITEM_CONDITIONS),
+        i_lifespan: z.number().int().positive().nullish(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -230,6 +235,9 @@ export const itemsRouter = createTRPCRouter({
               i_price: input.i_price,
               i_photo: input.i_photo || "default.jpg",
               i_date_acquired: input.i_date_acquired ?? null,
+              i_unit: input.i_unit,
+              i_condition: input.i_condition,
+              i_lifespan: input.i_lifespan ?? null,
             },
           });
 
@@ -272,6 +280,9 @@ export const itemsRouter = createTRPCRouter({
           no_of_items: z.number().nullish(),
           remarks: z.string().nullish(),
           i_date_acquired: dateOnly.nullish(),
+          i_unit: z.enum(STOCK_UNITS).optional(),
+          i_condition: z.enum(ITEM_CONDITIONS).optional(),
+          i_lifespan: z.number().int().positive().nullish(),
         }),
       })
     )

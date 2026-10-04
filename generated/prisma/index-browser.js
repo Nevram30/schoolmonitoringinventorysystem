@@ -161,7 +161,10 @@ exports.Prisma.ItemScalarFieldEnum = {
   i_photo: 'i_photo',
   no_of_items: 'no_of_items',
   remarks: 'remarks',
-  i_date_acquired: 'i_date_acquired'
+  i_date_acquired: 'i_date_acquired',
+  i_unit: 'i_unit',
+  i_condition: 'i_condition',
+  i_lifespan: 'i_lifespan'
 };
 
 exports.Prisma.InventoryScanScalarFieldEnum = {

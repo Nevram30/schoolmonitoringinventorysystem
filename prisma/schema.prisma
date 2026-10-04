@@ -86,8 +86,15 @@ model Item {
   remarks       String? @db.Text
   /// Day the school acquired the item. Nullable because items added before this column have none.
   i_date_acquired DateTime? @db.Date
+  /// How `item_rawstock` is counted: "Per Pieces", "Per Item" or "Per Bundle".
+  i_unit          String    @default("Per Item") @db.VarChar(20)
+  /// Age status: "Existing", "New" or "Old". Kept apart from `i_status`, which is availability.
+  i_condition     String    @default("New") @db.VarChar(20)
+  /// Expected service life in years, counted from `i_date_acquired`; once it has passed the
+  /// item is due for replacement. Null when not tracked.
+  i_lifespan      Int?
 
-  borrows        Borrow[]
+  borrows       Borrow[]
   returns        Return[]
   borrowRequests BorrowRequest[]
   inventoryScans   InventoryScan[]
