@@ -33,3 +33,38 @@ export const PASSWORD_HINT = `Use ${MIN_PASSWORD_LENGTH}+ characters with an upp
 /** Every rule the password breaks, in rule order — empty when it is valid. */
 export const passwordIssues = (password: string): string[] =>
   PASSWORD_RULES.filter((rule) => !rule.test(password)).map((rule) => rule.message)
+
+// Look-alike characters (0/O, 1/l/I) are left out — the temporary password is
+// read from an e-mail and typed in by hand.
+const TEMP_CHARSETS = [
+  'abcdefghijkmnopqrstuvwxyz',
+  'ABCDEFGHJKLMNPQRSTUVWXYZ',
+  '23456789',
+  '!@#$%&*?',
+]
+
+/**
+ * A random temporary password that always satisfies the policy above. Uses the
+ * Web Crypto API, available both in the browser and in Node.
+ */
+export const generateTemporaryPassword = (length = 12): string => {
+  const random = (max: number) => {
+    const buf = new Uint32Array(1)
+    crypto.getRandomValues(buf)
+    return buf[0]! % max
+  }
+  const pick = (chars: string) => chars[random(chars.length)]!
+  const all = TEMP_CHARSETS.join('')
+
+  // One from each set guarantees every rule passes; the rest are from any set.
+  const chars = TEMP_CHARSETS.map(pick)
+  while (chars.length < length) chars.push(pick(all))
+
+  // Fisher–Yates, so the guaranteed characters are not always up front.
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = random(i + 1)
+    ;[chars[i], chars[j]] = [chars[j]!, chars[i]!]
+  }
+
+  return chars.join('')
+}

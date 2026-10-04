@@ -15,6 +15,16 @@ export const env = createEnv({
     JWT_SECRET_KEY: z.string(),
     DATABASE_URL: z.string().url(),
     UPLOADTHING_TOKEN: z.string(),
+    // Resend account that sends new users their temporary password. Optional so the app still
+    // runs without it; account creation then reports that the e-mail was not sent.
+    RESEND_API_KEY: z.string().optional(),
+    EMAIL_FROM: z.string().optional(),
+    // A monitored mailbox replies go to. Mail from a bare "no-reply" sender is more likely to be
+    // filed as spam.
+    EMAIL_REPLY_TO: z.string().email().optional(),
+    // Public address used for links in e-mails (falls back to NEXTAUTH_URL). Mail filters treat a
+    // localhost link, or one on a different domain from the sender, as a phishing sign.
+    APP_URL: z.string().url().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -39,6 +49,10 @@ export const env = createEnv({
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
     UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,
+    APP_URL: process.env.APP_URL,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**

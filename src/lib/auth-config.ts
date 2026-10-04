@@ -136,7 +136,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         // Store user data in token
         token.user = {
@@ -144,9 +144,25 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           username: user.username,
           role: user.role,
-          status: Number(user.status)
+          status: Number(user.status),
+          mustChangePassword: Boolean(user.must_change_password)
         }
       }
+
+      // The change-password prompt calls `update()` once the new password is
+      // saved. The flag is re-read from the database rather than taken from the
+      // client, so a user cannot clear it without actually changing the password.
+      if (trigger === 'update' && token.user) {
+        const current = await db.user.findUnique({
+          where: { id: token.user.id },
+          select: { must_change_password: true },
+        })
+        token.user = {
+          ...token.user,
+          mustChangePassword: Boolean(current?.must_change_password),
+        }
+      }
+
       return token
     },
     async session({ session, token }) {

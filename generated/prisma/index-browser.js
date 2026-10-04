@@ -129,7 +129,8 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   id_number: 'id_number',
   role: 'role',
-  status: 'status'
+  status: 'status',
+  must_change_password: 'must_change_password'
 };
 
 exports.Prisma.BorrowerScalarFieldEnum = {

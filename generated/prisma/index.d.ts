@@ -2062,6 +2062,7 @@ export namespace Prisma {
     id_number: string | null
     role: $Enums.Role | null
     status: number | null
+    must_change_password: boolean | null
   }
 
   export type UserMaxAggregateOutputType = {
@@ -2073,6 +2074,7 @@ export namespace Prisma {
     id_number: string | null
     role: $Enums.Role | null
     status: number | null
+    must_change_password: boolean | null
   }
 
   export type UserCountAggregateOutputType = {
@@ -2084,6 +2086,7 @@ export namespace Prisma {
     id_number: number
     role: number
     status: number
+    must_change_password: number
     _all: number
   }
 
@@ -2107,6 +2110,7 @@ export namespace Prisma {
     id_number?: true
     role?: true
     status?: true
+    must_change_password?: true
   }
 
   export type UserMaxAggregateInputType = {
@@ -2118,6 +2122,7 @@ export namespace Prisma {
     id_number?: true
     role?: true
     status?: true
+    must_change_password?: true
   }
 
   export type UserCountAggregateInputType = {
@@ -2129,6 +2134,7 @@ export namespace Prisma {
     id_number?: true
     role?: true
     status?: true
+    must_change_password?: true
     _all?: true
   }
 
@@ -2227,6 +2233,7 @@ export namespace Prisma {
     id_number: string | null
     role: $Enums.Role
     status: number
+    must_change_password: boolean
     _count: UserCountAggregateOutputType | null
     _avg: UserAvgAggregateOutputType | null
     _sum: UserSumAggregateOutputType | null
@@ -2257,6 +2264,7 @@ export namespace Prisma {
     id_number?: boolean
     role?: boolean
     status?: boolean
+    must_change_password?: boolean
     requestedBorrows?: boolean | User$requestedBorrowsArgs<ExtArgs>
     reviewedBorrows?: boolean | User$reviewedBorrowsArgs<ExtArgs>
     releasedItems?: boolean | User$releasedItemsArgs<ExtArgs>
@@ -2274,6 +2282,7 @@ export namespace Prisma {
     id_number?: boolean
     role?: boolean
     status?: boolean
+    must_change_password?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2285,6 +2294,7 @@ export namespace Prisma {
     id_number?: boolean
     role?: boolean
     status?: boolean
+    must_change_password?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
@@ -2296,9 +2306,10 @@ export namespace Prisma {
     id_number?: boolean
     role?: boolean
     status?: boolean
+    must_change_password?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "username" | "password" | "email" | "id_number" | "role" | "status", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "username" | "password" | "email" | "id_number" | "role" | "status" | "must_change_password", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requestedBorrows?: boolean | User$requestedBorrowsArgs<ExtArgs>
     reviewedBorrows?: boolean | User$reviewedBorrowsArgs<ExtArgs>
@@ -2337,6 +2348,11 @@ export namespace Prisma {
        * 1=active, 2=inactive
        */
       status: number
+      /**
+       * True while the account still has the temporary password e-mailed by an admin; the user is
+       * asked to pick their own after signing in.
+       */
+      must_change_password: boolean
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2773,6 +2789,7 @@ export namespace Prisma {
     readonly id_number: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'Role'>
     readonly status: FieldRef<"User", 'Int'>
+    readonly must_change_password: FieldRef<"User", 'Boolean'>
   }
     
 
@@ -15779,7 +15796,8 @@ export namespace Prisma {
     email: 'email',
     id_number: 'id_number',
     role: 'role',
-    status: 'status'
+    status: 'status',
+    must_change_password: 'must_change_password'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -16025,6 +16043,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Decimal'
    */
   export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
@@ -16049,13 +16074,6 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -16088,6 +16106,7 @@ export namespace Prisma {
     id_number?: StringNullableFilter<"User"> | string | null
     role?: EnumRoleFilter<"User"> | $Enums.Role
     status?: IntFilter<"User"> | number
+    must_change_password?: BoolFilter<"User"> | boolean
     requestedBorrows?: BorrowRequestListRelationFilter
     reviewedBorrows?: BorrowRequestListRelationFilter
     releasedItems?: ItemReceiptListRelationFilter
@@ -16104,6 +16123,7 @@ export namespace Prisma {
     id_number?: SortOrderInput | SortOrder
     role?: SortOrder
     status?: SortOrder
+    must_change_password?: SortOrder
     requestedBorrows?: BorrowRequestOrderByRelationAggregateInput
     reviewedBorrows?: BorrowRequestOrderByRelationAggregateInput
     releasedItems?: ItemReceiptOrderByRelationAggregateInput
@@ -16123,6 +16143,7 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     role?: EnumRoleFilter<"User"> | $Enums.Role
     status?: IntFilter<"User"> | number
+    must_change_password?: BoolFilter<"User"> | boolean
     requestedBorrows?: BorrowRequestListRelationFilter
     reviewedBorrows?: BorrowRequestListRelationFilter
     releasedItems?: ItemReceiptListRelationFilter
@@ -16139,6 +16160,7 @@ export namespace Prisma {
     id_number?: SortOrderInput | SortOrder
     role?: SortOrder
     status?: SortOrder
+    must_change_password?: SortOrder
     _count?: UserCountOrderByAggregateInput
     _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
@@ -16158,6 +16180,7 @@ export namespace Prisma {
     id_number?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
     status?: IntWithAggregatesFilter<"User"> | number
+    must_change_password?: BoolWithAggregatesFilter<"User"> | boolean
   }
 
   export type BorrowerWhereInput = {
@@ -17098,6 +17121,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
@@ -17114,6 +17138,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
@@ -17129,6 +17154,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
@@ -17145,6 +17171,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
@@ -17161,6 +17188,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
   }
 
   export type UserUpdateManyMutationInput = {
@@ -17171,6 +17199,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UserUncheckedUpdateManyInput = {
@@ -17182,6 +17211,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type BorrowerCreateInput = {
@@ -18208,6 +18238,11 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type BorrowRequestListRelationFilter = {
     every?: BorrowRequestWhereInput
     some?: BorrowRequestWhereInput
@@ -18262,6 +18297,7 @@ export namespace Prisma {
     id_number?: SortOrder
     role?: SortOrder
     status?: SortOrder
+    must_change_password?: SortOrder
   }
 
   export type UserAvgOrderByAggregateInput = {
@@ -18278,6 +18314,7 @@ export namespace Prisma {
     id_number?: SortOrder
     role?: SortOrder
     status?: SortOrder
+    must_change_password?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
@@ -18289,6 +18326,7 @@ export namespace Prisma {
     id_number?: SortOrder
     role?: SortOrder
     status?: SortOrder
+    must_change_password?: SortOrder
   }
 
   export type UserSumOrderByAggregateInput = {
@@ -18356,6 +18394,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type BorrowListRelationFilter = {
@@ -18989,11 +19035,6 @@ export namespace Prisma {
     borrow_id?: SortOrder
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type FeeSettingCountOrderByAggregateInput = {
     id?: SortOrder
     f_overdue_fee_per_day?: SortOrder
@@ -19048,14 +19089,6 @@ export namespace Prisma {
     f_damage_fee_fair?: SortOrder
     f_damage_fee_damaged?: SortOrder
     f_damage_fee_lost?: SortOrder
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type ReturnCountOrderByAggregateInput = {
@@ -19216,6 +19249,10 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type BorrowRequestUpdateManyWithoutRequesterNestedInput = {
@@ -20162,10 +20199,6 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutReviewedBorrowsInput, UserUpdateWithoutReviewedBorrowsInput>, UserUncheckedUpdateWithoutReviewedBorrowsInput>
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type BorrowCreateNestedOneWithoutReturnInput = {
     create?: XOR<BorrowCreateWithoutReturnInput, BorrowUncheckedCreateWithoutReturnInput>
     connectOrCreate?: BorrowCreateOrConnectWithoutReturnInput
@@ -20270,6 +20303,11 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -20350,6 +20388,14 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRoleFilter<$PrismaModel>
     _max?: NestedEnumRoleFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedDecimalFilter<$PrismaModel = never> = {
@@ -20454,19 +20500,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
-  }
-
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type BorrowRequestCreateWithoutRequesterInput = {
@@ -21252,6 +21285,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
@@ -21267,6 +21301,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
@@ -21351,6 +21386,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
@@ -21366,6 +21402,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
@@ -21440,6 +21477,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
@@ -21455,6 +21493,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
@@ -21539,6 +21578,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
@@ -21554,6 +21594,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
@@ -22323,6 +22364,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
@@ -22338,6 +22380,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
@@ -22410,6 +22453,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
@@ -22425,6 +22469,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput
@@ -22591,6 +22636,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     reviewedBorrows?: BorrowRequestCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
     inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
@@ -22606,6 +22652,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     reviewedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutReviewerInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
     inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
@@ -22625,6 +22672,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestCreateNestedManyWithoutRequesterInput
     releasedItems?: ItemReceiptCreateNestedManyWithoutReleaserInput
     inventoryScans?: InventoryScanCreateNestedManyWithoutUserInput
@@ -22640,6 +22688,7 @@ export namespace Prisma {
     id_number?: string | null
     role?: $Enums.Role
     status?: number
+    must_change_password?: boolean
     requestedBorrows?: BorrowRequestUncheckedCreateNestedManyWithoutRequesterInput
     releasedItems?: ItemReceiptUncheckedCreateNestedManyWithoutReleaserInput
     inventoryScans?: InventoryScanUncheckedCreateNestedManyWithoutUserInput
@@ -22846,6 +22895,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     reviewedBorrows?: BorrowRequestUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
     inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
@@ -22861,6 +22911,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     reviewedBorrows?: BorrowRequestUncheckedUpdateManyWithoutReviewerNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
     inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput
@@ -22886,6 +22937,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUpdateManyWithoutRequesterNestedInput
     releasedItems?: ItemReceiptUpdateManyWithoutReleaserNestedInput
     inventoryScans?: InventoryScanUpdateManyWithoutUserNestedInput
@@ -22901,6 +22953,7 @@ export namespace Prisma {
     id_number?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     status?: IntFieldUpdateOperationsInput | number
+    must_change_password?: BoolFieldUpdateOperationsInput | boolean
     requestedBorrows?: BorrowRequestUncheckedUpdateManyWithoutRequesterNestedInput
     releasedItems?: ItemReceiptUncheckedUpdateManyWithoutReleaserNestedInput
     inventoryScans?: InventoryScanUncheckedUpdateManyWithoutUserNestedInput

@@ -36,6 +36,9 @@ model User {
   role      Role    @default(admin)
   /// 1=active, 2=inactive
   status    Int     @default(1)
+  /// True while the account still has the temporary password e-mailed by an admin; the user is
+  /// asked to pick their own after signing in.
+  must_change_password Boolean @default(false)
 
   requestedBorrows BorrowRequest[] @relation("BorrowRequestRequester")
   reviewedBorrows  BorrowRequest[] @relation("BorrowRequestReviewer")

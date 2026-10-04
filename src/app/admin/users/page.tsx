@@ -4,13 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon, XCircleIcon, ExclamationTriangleIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, NoSymbolIcon, CheckCircleIcon, XMarkIcon, XCircleIcon, ExclamationTriangleIcon, ArrowUpTrayIcon, ArrowPathIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
 import ImportUsersModal from './ImportUsersModal';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
 import { trpcClient } from '@/trpc/client';
-import { MIN_PASSWORD_LENGTH, PASSWORD_HINT, passwordIssues } from '@/lib/password-policy';
+import { MIN_PASSWORD_LENGTH, PASSWORD_HINT, generateTemporaryPassword, passwordIssues } from '@/lib/password-policy';
 
 interface User {
   id: number;
@@ -101,6 +101,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddPassword, setShowAddPassword] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<number | null>(null);
@@ -203,6 +204,19 @@ export default function UsersPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  /** Fills both password fields with a fresh temporary password. */
+  const fillTemporaryPassword = () => {
+    const temporaryPassword = generateTemporaryPassword();
+    setFormData(prev => ({ ...prev, password: temporaryPassword, confirmPassword: temporaryPassword }));
+  };
+
+  const openAddModal = () => {
+    // Starts with a temporary password ready; the admin can regenerate or type one.
+    if (!formData.password) fillTemporaryPassword();
+    setShowAddPassword(true);
+    setShowAddModal(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -236,7 +250,15 @@ export default function UsersPage() {
           role: 'staff'
         });
         fetchUsers(); // Refresh the list
-        alert('User created successfully!');
+        if (data.emailSent) {
+          alert(`User created successfully! The login link and temporary password were sent to ${payload.email}.`);
+        } else {
+          // The account exists either way; give the admin the password to pass on.
+          alert(
+            `User created, but the e-mail could not be sent (${data.emailError}).\n\n` +
+            `Please give the user their temporary password yourself: ${payload.password}`
+          );
+        }
       } else {
         alert('Error creating user: ' + data.error);
       }
@@ -405,7 +427,7 @@ export default function UsersPage() {
             </button>
             <button
               type="button"
-              onClick={() => setShowAddModal(true)}
+              onClick={openAddModal}
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
             >
               <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
@@ -699,17 +721,41 @@ export default function UsersPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Password</label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      required
-                      minLength={MIN_PASSWORD_LENGTH}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter password"
-                    />
+                    <div className="flex items-center justify-between">
+                      <label className="block text-sm font-medium text-gray-700">Password</label>
+                      <button
+                        type="button"
+                        onClick={fillTemporaryPassword}
+                        className="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800"
+                      >
+                        <ArrowPathIcon className="mr-1 h-4 w-4" />
+                        Generate temporary password
+                      </button>
+                    </div>
+                    <div className="relative mt-1">
+                      <input
+                        type={showAddPassword ? 'text' : 'password'}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        required
+                        minLength={MIN_PASSWORD_LENGTH}
+                        autoComplete="new-password"
+                        className="block w-full border border-gray-300 rounded-md px-3 py-2 pr-10 font-mono focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter password"
+                      />
+                      <button
+                        type="button"
+                        aria-label={showAddPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowAddPassword(v => !v)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        {showAddPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                      </button>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      This temporary password is e-mailed to the user with a login link. They will be asked to change it after signing in.
+                    </p>
 
                     {passwordStrength && (
                       <div className="mt-2">
@@ -738,12 +784,13 @@ export default function UsersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
                     <input
-                      type="password"
+                      type={showAddPassword ? 'text' : 'password'}
                       name="confirmPassword"
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       required
-                      className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${passwordsMismatch ? 'border-red-400' : 'border-gray-300'
+                      autoComplete="new-password"
+                      className={`mt-1 block w-full border rounded-md px-3 py-2 font-mono focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${passwordsMismatch ? 'border-red-400' : 'border-gray-300'
                         }`}
                       placeholder="Re-enter password"
                     />

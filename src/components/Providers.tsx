@@ -3,6 +3,8 @@
 import { SessionProvider } from 'next-auth/react'
 import { ReactNode } from 'react'
 
+import ChangePasswordPrompt from './change.password.prompt'
+
 interface ProvidersProps {
   children: ReactNode
 }
@@ -11,6 +13,7 @@ export default function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
       {children}
+      <ChangePasswordPrompt />
     </SessionProvider>
   )
 }

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 import { passwordIssues } from "@/lib/password-policy";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { sendTemporaryPasswordEmail } from "@/server/mailer";
 
 const insensitive = { mode: "insensitive" } as const;
 
@@ -157,15 +158,34 @@ export const usersRouter = createTRPCRouter({
             id_number: input.id_number,
             role: input.role ?? getRole(userType),
             status: 1, // Active by default
+            // The password set here is a temporary one e-mailed to the user.
+            must_change_password: true,
           },
         });
 
         // Return user without password
         const { password, ...userResponse } = newUser;
 
+        // The account is already saved, so a failed e-mail is reported rather
+        // than undoing the create — the admin can pass the password on by hand.
+        let emailError: string | null = null;
+        try {
+          await sendTemporaryPasswordEmail({
+            to: input.email,
+            name: input.name,
+            idNumber: input.id_number,
+            temporaryPassword: input.password,
+          });
+        } catch (error) {
+          console.error("Send temporary password email error:", error);
+          emailError = error instanceof Error ? error.message : "Unknown error";
+        }
+
         return {
           success: true as const,
           data: userResponse,
+          emailSent: emailError === null,
+          emailError,
           message: "User created successfully",
         };
       } catch (error) {
@@ -373,6 +393,45 @@ export const usersRouter = createTRPCRouter({
       } catch (error) {
         console.error("Update user error:", error);
         return { success: false as const, error: "Failed to update user" };
+      }
+    }),
+
+  // The signed-in user replacing their password — used by the prompt shown
+  // after signing in with the temporary password from the welcome e-mail.
+  changePassword: protectedProcedure
+    .input(z.object({ password: passwordSchema }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const id = Number(ctx.session.user.id);
+        const user = await ctx.db.user.findUnique({ where: { id } });
+
+        if (!user) {
+          return { success: false as const, error: "User not found" };
+        }
+
+        // bcrypt throws on the legacy MD5 hashes some seeded accounts still have.
+        const unchanged = await bcrypt
+          .compare(input.password, user.password)
+          .catch(() => false);
+        if (unchanged) {
+          return {
+            success: false as const,
+            error: "Choose a password different from your temporary password",
+          };
+        }
+
+        await ctx.db.user.update({
+          where: { id },
+          data: {
+            password: await bcrypt.hash(input.password, 10),
+            must_change_password: false,
+          },
+        });
+
+        return { success: true as const, message: "Password updated successfully" };
+      } catch (error) {
+        console.error("Change password error:", error);
+        return { success: false as const, error: "Failed to update password" };
       }
     }),
 
