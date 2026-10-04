@@ -12,9 +12,13 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-/** Where the e-mail's login button points: the app's public address. */
+/**
+ * Where the e-mail's login button points: the app's public address. Resolving the
+ * absolute "/login" path keeps only the origin, so a base URL that already has a
+ * path (e.g. "https://site/login") does not turn into "/login/login".
+ */
 export const loginUrl = () =>
-  `${(env.APP_URL ?? env.NEXTAUTH_URL ?? "http://localhost:3000").replace(/\/+$/, "")}/login`;
+  new URL("/login", env.APP_URL ?? env.NEXTAUTH_URL ?? "http://localhost:3000").toString();
 
 export const isMailConfigured = () => Boolean(env.RESEND_API_KEY);
 
