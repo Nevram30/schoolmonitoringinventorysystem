@@ -499,7 +499,7 @@ export default function BorrowingPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Select Room</label>
+                                        <label className="block text-sm font-medium text-gray-700">Select Office</label>
                                         <select
                                             name="b_roomid"
                                             value={formData.b_roomid}
@@ -507,7 +507,7 @@ export default function BorrowingPage() {
                                             required
                                             className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                         >
-                                            <option value="">Choose a room...</option>
+                                            <option value="">Choose an office...</option>
                                             {rooms.map((room) => (
                                                 <option key={room.id} value={room.id}>
                                                     {room.r_name}

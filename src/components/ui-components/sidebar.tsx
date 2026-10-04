@@ -158,20 +158,142 @@ export function SidebarToggleButton() {
 }
 
 export interface SidebarNavItem {
-    href: string
+    /** Omit on a group that is only a heading for its children. */
+    href?: string
     label: string
     icon: string
     /** Count shown beside the label (e.g. pending requests); hidden when 0. */
     badge?: number
+    /** Links nested under this one, shown in a collapsible group. */
+    children?: SidebarNavItem[]
 }
 
+const formatBadge = (count?: number) => (count ? (count > 99 ? '99+' : String(count)) : null)
+
+const sumBadges = (items: SidebarNavItem[]): number =>
+    items.reduce((total, item) => total + (item.badge ?? 0) + sumBadges(item.children ?? []), 0)
+
+const containsPath = (item: SidebarNavItem, pathname: string): boolean =>
+    item.href === pathname || (item.children ?? []).some((child) => containsPath(child, pathname))
+
+function Badge({ value, compact }: { value: string | null; compact: boolean }) {
+    if (!value) return null
+    return compact ? (
+        <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
+            {value}
+        </span>
+    ) : (
+        <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
+            {value}
+        </span>
+    )
+}
+
+function NavLink({ item, compact, nested = false }: { item: SidebarNavItem & { href: string }; compact: boolean; nested?: boolean }) {
+    const pathname = usePathname()
+    const isActive = pathname === item.href
+
+    return (
+        <Link
+            href={item.href}
+            title={compact ? item.label : undefined}
+            aria-current={isActive ? 'page' : undefined}
+            className={`relative flex items-center text-sm font-medium rounded-lg transition-colors duration-200 ${nested ? 'py-2' : 'py-3'} ${compact ? 'justify-center' : 'px-4'} ${isActive
+                ? 'bg-blue-200 text-blue-800 border-r-4 border-blue-700'
+                : 'text-gray-700 hover:bg-blue-100 hover:text-blue-900'
+                }`}
+        >
+            <span className={`${nested ? 'text-base' : 'text-lg'} ${compact ? '' : 'mr-3'}`} aria-hidden="true">
+                {item.icon}
+            </span>
+            <span className={compact ? 'sr-only' : 'flex-1 whitespace-nowrap'}>{item.label}</span>
+            <Badge value={formatBadge(item.badge)} compact={compact} />
+        </Link>
+    )
+}
+
+/** A heading (optionally a link itself) whose children fold away under a chevron. */
+function NavGroup({ item }: { item: SidebarNavItem & { children: SidebarNavItem[] } }) {
+    const pathname = usePathname()
+    const containsActive = containsPath(item, pathname)
+    const [expanded, setExpanded] = useState(containsActive)
+    const groupId = `nav-group-${item.label.toLowerCase().replace(/\s+/g, '-')}`
+
+    // Navigating into a group (e.g. from the dashboard) opens it so the current page is visible.
+    useEffect(() => {
+        if (containsActive) setExpanded(true)
+    }, [containsActive])
+
+    // While folded, the group heading carries its children's counts so nothing pending is hidden.
+    const hiddenBadge = expanded ? null : formatBadge(sumBadges(item.children))
+    const chevron = (
+        <span className={`ml-2 text-xs transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`} aria-hidden="true">
+            ▶
+        </span>
+    )
+
+    return (
+        <li>
+            {item.href ? (
+                <div className="flex items-center">
+                    <div className="flex-1 min-w-0">
+                        <NavLink item={{ ...item, href: item.href, badge: undefined }} compact={false} />
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setExpanded((prev) => !prev)}
+                        aria-expanded={expanded}
+                        aria-controls={groupId}
+                        aria-label={`${expanded ? 'Collapse' : 'Expand'} ${item.label}`}
+                        className="ml-1 flex items-center rounded-lg p-3 text-gray-600 hover:bg-blue-100 hover:text-blue-900"
+                    >
+                        {hiddenBadge && <Badge value={hiddenBadge} compact={false} />}
+                        {chevron}
+                    </button>
+                </div>
+            ) : (
+                <button
+                    type="button"
+                    onClick={() => setExpanded((prev) => !prev)}
+                    aria-expanded={expanded}
+                    aria-controls={groupId}
+                    className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${containsActive ? 'text-blue-900' : 'text-gray-700'} hover:bg-blue-100 hover:text-blue-900`}
+                >
+                    <span className="text-lg mr-3" aria-hidden="true">
+                        {item.icon}
+                    </span>
+                    <span className="flex-1 whitespace-nowrap text-left">{item.label}</span>
+                    <Badge value={hiddenBadge} compact={false} />
+                    {chevron}
+                </button>
+            )}
+
+            {expanded && (
+                <ul id={groupId} className="mt-1 ml-5 space-y-1 border-l border-blue-200 pl-2">
+                    {item.children.map((child) => (
+                        <li key={child.href ?? child.label}>
+                            {child.href && <NavLink item={{ ...child, href: child.href }} compact={false} nested />}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </li>
+    )
+}
+
+/** In the icon-only rail, groups unfold into their own links so every page stays one click away. */
+const flattenForRail = (items: SidebarNavItem[]): (SidebarNavItem & { href: string })[] =>
+    items.flatMap((item) => [
+        ...(item.href ? [{ ...item, href: item.href }] : []),
+        ...flattenForRail(item.children ?? []),
+    ])
+
 /**
- * A role's sidebar: title and links. When the desktop sidebar is collapsed it shows only the
- * icons — each link keeps its name for screen readers and as a hover tooltip — and the title
- * shrinks to its first letter. The phone slide-over always shows the full labels.
+ * A role's sidebar: title and links, optionally grouped. When the desktop sidebar is collapsed it
+ * shows only the icons — each link keeps its name for screen readers and as a hover tooltip — and
+ * the title shrinks to its first letter. The phone slide-over always shows the full labels.
  */
 export function SidebarNavigation({ title, items }: { title: string; items: SidebarNavItem[] }) {
-    const pathname = usePathname()
     const { open, isDesktop } = useSidebar()
     const compact = isDesktop && !open
 
@@ -185,39 +307,21 @@ export function SidebarNavigation({ title, items }: { title: string; items: Side
 
             <nav className="mt-6 flex-1 overflow-y-auto overflow-x-hidden pb-6" aria-label={title}>
                 <ul className={`space-y-2 ${compact ? 'px-2' : 'px-4'}`}>
-                    {items.map((item) => {
-                        const isActive = pathname === item.href
-                        const badge = item.badge ? (item.badge > 99 ? '99+' : String(item.badge)) : null
-
-                        return (
-                            <li key={item.href}>
-                                <Link
-                                    href={item.href}
-                                    title={compact ? item.label : undefined}
-                                    aria-current={isActive ? 'page' : undefined}
-                                    className={`relative flex items-center py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${compact ? 'justify-center' : 'px-4'} ${isActive
-                                        ? 'bg-blue-200 text-blue-800 border-r-4 border-blue-700'
-                                        : 'text-gray-700 hover:bg-blue-100 hover:text-blue-900'
-                                        }`}
-                                >
-                                    <span className={`text-lg ${compact ? '' : 'mr-3'}`} aria-hidden="true">
-                                        {item.icon}
-                                    </span>
-                                    <span className={compact ? 'sr-only' : 'flex-1 whitespace-nowrap'}>{item.label}</span>
-                                    {badge &&
-                                        (compact ? (
-                                            <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white">
-                                                {badge}
-                                            </span>
-                                        ) : (
-                                            <span className="ml-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-bold text-white">
-                                                {badge}
-                                            </span>
-                                        ))}
-                                </Link>
-                            </li>
-                        )
-                    })}
+                    {compact
+                        ? flattenForRail(items).map((item) => (
+                              <li key={item.href}>
+                                  <NavLink item={item} compact />
+                              </li>
+                          ))
+                        : items.map((item) =>
+                              item.children?.length ? (
+                                  <NavGroup key={item.href ?? item.label} item={{ ...item, children: item.children }} />
+                              ) : item.href ? (
+                                  <li key={item.href}>
+                                      <NavLink item={{ ...item, href: item.href }} compact={false} />
+                                  </li>
+                              ) : null
+                          )}
                 </ul>
             </nav>
         </aside>

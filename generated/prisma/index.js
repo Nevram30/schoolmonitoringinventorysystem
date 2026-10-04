@@ -285,7 +285,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/nevram/Desktop/schoolmonitoringinventorysystem/generated/prisma",
+      "value": "C:\\Users\\teptep\\Desktop\\schoolmonitoringinventorysystem\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -294,12 +294,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin-arm64",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/nevram/Desktop/schoolmonitoringinventorysystem/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\teptep\\Desktop\\schoolmonitoringinventorysystem\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -361,8 +361,8 @@ exports.PrismaClient = PrismaClient
 Object.assign(exports, Prisma)
 
 // file annotations for bundling tools to include these files
-path.join(__dirname, "libquery_engine-darwin-arm64.dylib.node");
-path.join(process.cwd(), "generated/prisma/libquery_engine-darwin-arm64.dylib.node")
+path.join(__dirname, "query_engine-windows.dll.node");
+path.join(process.cwd(), "generated/prisma/query_engine-windows.dll.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "generated/prisma/schema.prisma")
