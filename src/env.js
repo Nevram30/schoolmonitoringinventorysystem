@@ -14,7 +14,11 @@ export const env = createEnv({
     NEXTAUTH_URL: z.string().url().optional(),
     JWT_SECRET_KEY: z.string(),
     DATABASE_URL: z.string().url(),
-    UPLOADTHING_TOKEN: z.string(),
+    // Neon Object Storage (item and receipt photos), reached through its S3-compatible API.
+    AWS_ENDPOINT_URL_S3: z.string().url(),
+    AWS_ACCESS_KEY_ID: z.string(),
+    AWS_SECRET_ACCESS_KEY: z.string(),
+    AWS_REGION: z.string(),
     // Resend account that sends new users their temporary password. Optional so the app still
     // runs without it; account creation then reports that the e-mail was not sent.
     RESEND_API_KEY: z.string().optional(),
@@ -58,7 +62,10 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
-    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
+    AWS_ENDPOINT_URL_S3: process.env.AWS_ENDPOINT_URL_S3,
+    AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+    AWS_REGION: process.env.AWS_REGION,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     EMAIL_REPLY_TO: process.env.EMAIL_REPLY_TO,

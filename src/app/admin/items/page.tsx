@@ -13,7 +13,7 @@ import {
 import Layout from '../Layout';
 import ItemAvatar from '@/components/ui-components/item.avatar';
 import { trpcClient } from '@/trpc/client';
-import { useUploadThing } from '@/lib/uploadthing';
+import { usePhotoUpload } from '@/lib/use-photo-upload';
 import {
   DEFAULT_ITEM_CONDITION,
   DEFAULT_STOCK_UNIT,
@@ -169,9 +169,8 @@ export default function ItemsPage() {
   const [formData, setFormData] = useState(emptyItemForm);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  // Uploads go straight to UploadThing from the browser; `itemImage` is the
-  // route defined in src/app/api/uploadthing/core.ts.
-  const { startUpload, isUploading: uploadingPhoto } = useUploadThing('itemImage');
+  // Uploads go through src/app/api/uploads/[folder]/route.ts to Neon Object Storage.
+  const { startUpload, isUploading: uploadingPhoto } = usePhotoUpload('items');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
@@ -270,7 +269,7 @@ export default function ItemsPage() {
         return;
       }
 
-      // Validate file size (must match the limit on the UploadThing route)
+      // Validate file size (must match MAX_PHOTO_SIZE in src/lib/storage.ts)
       const maxSize = 4 * 1024 * 1024; // 4MB
       if (file.size > maxSize) {
         showNotification('error', 'File too large', 'Please select an image smaller than 4MB.');
@@ -288,20 +287,12 @@ export default function ItemsPage() {
     }
   };
 
-  /** Returns the public UploadThing URL of the photo, or null if the upload failed. */
+  /** Returns the URL of the stored photo, or null if the upload failed. */
   const uploadPhoto = async (): Promise<string | null> => {
     if (!selectedPhoto) return null;
 
     try {
-      const uploaded = await startUpload([selectedPhoto]);
-      const url = uploaded?.[0]?.ufsUrl;
-
-      if (!url) {
-        showNotification('error', 'Upload failed', 'Failed to upload photo');
-        return null;
-      }
-
-      return url;
+      return await startUpload(selectedPhoto);
     } catch (error) {
       console.error('Photo upload error:', error);
       const message = error instanceof Error ? error.message : 'An error occurred while uploading the photo';
@@ -316,7 +307,7 @@ export default function ItemsPage() {
 
     try {
       // Upload photo first if selected. `default.jpg` is the "no photo" sentinel
-      // the schema defaults to; anything else is now an UploadThing URL.
+      // the schema defaults to; anything else is now the stored photo's URL.
       let photo = 'default.jpg';
       if (selectedPhoto) {
         const uploadedUrl = await uploadPhoto();

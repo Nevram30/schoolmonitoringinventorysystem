@@ -15,8 +15,8 @@ export const peso = (value: number) =>
   })}`
 
 /**
- * A report opens in a blank window, which has no base URL, so the legacy `/uploads/items/...`
- * form has to be made absolute or the image silently 404s.
+ * A report opens in a blank window, which has no base URL, so a relative `/api/files/...` or
+ * legacy `/uploads/items/...` path has to be made absolute or the image silently 404s.
  */
 const absolutePhotoSrc = (photo: string) => {
   const src = photoSrc(photo)

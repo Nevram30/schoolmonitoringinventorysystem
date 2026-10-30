@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { MagnifyingGlassIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Layout from '../Layout';
 import { trpcClient } from '@/trpc/client';
-import { useUploadThing } from '@/lib/uploadthing';
+import { usePhotoUpload } from '@/lib/use-photo-upload';
 import ItemAvatar from '@/components/ui-components/item.avatar';
 import Alert from '@/components/ui-components/alert';
 import { useAlert } from '@/components/ui-components/useAlert';
@@ -193,7 +193,7 @@ function ReceivedItemsScreen() {
     const [existingPhoto, setExistingPhoto] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const { startUpload, isUploading } = useUploadThing('receiptPhoto');
+    const { startUpload, isUploading } = usePhotoUpload('receipts');
     const { alert, showSuccess, showError, hideAlert } = useAlert();
 
     const fetchData = useCallback(async () => {
@@ -356,15 +356,14 @@ function ReceivedItemsScreen() {
             let photoUrl: string | null = existingPhoto;
 
             if (photoFile) {
-                const uploaded = await startUpload([photoFile]);
-                const url = uploaded?.[0]?.ufsUrl;
-
-                if (!url) {
-                    showError('The photo could not be uploaded. Nothing was saved.', 'Upload failed');
-                    setSubmitting(false);
+                try {
+                    photoUrl = await startUpload(photoFile);
+                } catch (error) {
+                    console.error('Photo upload error:', error);
+                    const reason = error instanceof Error ? error.message : 'The photo could not be uploaded.';
+                    showError(`${reason} Nothing was saved.`, 'Upload failed');
                     return;
                 }
-                photoUrl = url;
             }
 
             const details = {

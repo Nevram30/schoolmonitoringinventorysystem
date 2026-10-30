@@ -289,7 +289,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\teptep\\Desktop\\schoolmonitoringinventorysystem\\generated\\prisma",
+      "value": "C:\\Users\\Administrator\\Desktop\\schoolmonitoringinventorysystem\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -303,7 +303,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\teptep\\Desktop\\schoolmonitoringinventorysystem\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\Administrator\\Desktop\\schoolmonitoringinventorysystem\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

@@ -4,9 +4,9 @@ import { useState } from 'react'
 
 interface ItemAvatarProps {
   /**
-   * Stored photo. New items hold an UploadThing URL; older rows still hold a
-   * filename served from `/uploads/items`. `default.jpg` (or empty) means
-   * "no photo was uploaded".
+   * Stored photo. New items hold an `/api/files` path; older rows still hold
+   * an UploadThing URL or a filename served from `/uploads/items`. `default.jpg`
+   * (or empty) means "no photo was uploaded".
    */
   photo?: string | null
   /** The letter shown when there is no photo comes from the first character of this. */
@@ -30,9 +30,9 @@ const PALETTE = [
   'bg-teal-600',
 ]
 
-/** UploadThing gives back a full URL; legacy rows only stored the filename. */
+/** Uploads are stored as a path or full URL; legacy rows only stored the filename. */
 export const photoSrc = (photo: string) =>
-  /^https?:\/\//.test(photo) ? photo : `/uploads/items/${photo}`
+  /^(https?:\/\/|\/)/.test(photo) ? photo : `/uploads/items/${photo}`
 
 const letterFor = (brand?: string | null) => {
   const first = (brand ?? '').trim().charAt(0)

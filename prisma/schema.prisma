@@ -205,7 +205,7 @@ model ItemReceipt {
   rc_relationship   String  @default("self") @db.VarChar(50)
   /// Kind of ID shown at the counter (School ID, Driver's License, ...).
   rc_id_presented   String? @db.VarChar(50)
-  /// UploadThing URL of the photo taken as the item was handed over. Nullable because a receipt
+  /// URL of the photo taken as the item was handed over. Nullable because a receipt
   /// with the details filled in is still better than no record when the camera is unavailable.
   rc_receiver_photo String? @db.VarChar(255)
 
